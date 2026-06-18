@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=430, initial-scale=1">
+<title>RFID Writer – Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #2a2a2a;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  .phone-frame {
+    background: #1a1a1a;
+    border-radius: 40px;
+    padding: 14px;
+    box-shadow: 0 0 0 2px #444, 0 20px 60px rgba(0,0,0,.7);
+    width: 390px;
+  }
+
+  .phone-screen {
+    background: #121212;
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .status-bar {
+    background: #000;
+    color: #ccc;
+    font-size: 11px;
+    padding: 6px 16px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .app-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-height: 720px;
+  }
+
+  .app-title {
+    color: #E0E0E0;
+    font-size: 22px;
+    font-weight: bold;
+    padding-bottom: 2px;
+  }
+
+  .app-status {
+    font-size: 13px;
+    padding-bottom: 16px;
+    padding-top: 2px;
+  }
+
+  .btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: opacity .15s, transform .1s;
+    margin-bottom: 16px;
+    letter-spacing: .3px;
+  }
+  .btn:active { opacity: .8; transform: scale(.98); }
+
+  .btn-scan  { background: #00BCD4; color: #121212; }
+  .btn-scan.scanning { background: #F44336; }
+  .btn-write { background: #4CAF50; color: #121212; }
+  .btn-write:disabled { background: #2a4a2c; color: #555; cursor: default; }
+
+  .card {
+    background: #1E1E1E;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .card-label {
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .card-value {
+    color: #00BCD4;
+    font-size: 17px;
+    font-family: 'Consolas', monospace;
+    word-break: break-all;
+    margin-bottom: 2px;
+  }
+
+  .card-value.muted { color: #888; font-size: 13px; }
+
+  .card-sublabel {
+    color: #888;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    margin-bottom: 2px;
+  }
+
+  .input-field {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #333;
+    color: #E0E0E0;
+    font-size: 14px;
+    font-family: 'Consolas', monospace;
+    width: 100%;
+    padding: 6px 0;
+    outline: none;
+    margin-top: 6px;
+  }
+  .input-field::placeholder { color: #555; }
+  .input-field:focus { border-bottom-color: #00BCD4; }
+
+  .lock-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-lock {
+    flex: 1;
+    height: 44px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-lock:disabled { opacity: .35; cursor: default; }
+  .btn-lock-epc  { background: #FF9800; color: #121212; }
+  .btn-lock-all  { background: #F44336; color: #fff; }
+
+  .log-container {
+    flex: 1;
+    background: #0D0D0D;
+    border-radius: 6px;
+    padding: 8px;
+    overflow-y: auto;
+    min-height: 130px;
+    max-height: 160px;
+    margin-top: 4px;
+  }
+
+  .log-line {
+    color: #00FF88;
+    font-size: 11px;
+    font-family: 'Consolas', monospace;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* demo badge */
+  .demo-badge {
+    position: fixed;
+    top: 12px;
+    right: 16px;
+    background: #FF9800;
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: .5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-badge">UI PREVIEW</div>
+
+<div class="phone-frame">
+  <div class="phone-screen">
+
+    <div class="status-bar">
+      <span>09:41</span>
+      <span>▲ ● ■  100%</span>
+    </div>
+
+    <div class="app-content">
+
+      <div class="app-title">RFID Writer</div>
+      <div class="app-status" id="statusText" style="color:#FF9800">● Inicializace...</div>
+
+      <!-- Scan button -->
+      <button class="btn btn-scan" id="btnScan" onclick="toggleScan()">📡&nbsp; SKENOVAT TAG</button>
+
+      <!-- Current EPC card -->
+      <div class="card">
+        <div class="card-label">Aktuální EPC</div>
+        <div class="card-value" id="tvEpc">—</div>
+        <div class="card-sublabel">TID</div>
+        <div class="card-value muted" id="tvTid">—</div>
+      </div>
+
+      <!-- New EPC input -->
+      <div class="card">
+        <div class="card-label">Nový EPC (hex, bez mezer)</div>
+        <input class="input-field" id="etNewEpc" placeholder="např. E28011700000020F33A81001" maxlength="64" oninput="checkWrite()">
+        <button class="btn btn-write" id="btnWrite" disabled onclick="doWrite()" style="margin-top:10px;margin-bottom:0">✏️&nbsp; ZAPSAT EPC</button>
+      </div>
+
+      <!-- Password / Lock card -->
+      <div class="card">
+        <div class="card-label">Zaheslování tagu</div>
+        <input class="input-field" id="etPwd" placeholder="Access password (8 hex znaků, prázdné = 00000000)" maxlength="8">
+        <div class="lock-row">
+          <button class="btn-lock btn-lock-epc" id="btnLockEpc" disabled onclick="doLock(false)">🔒 Lock EPC</button>
+          <button class="btn-lock btn-lock-all" id="btnLockAll" disabled onclick="doLock(true)">🔐 Lock ALL</button>
+        </div>
+      </div>
+
+      <!-- Log -->
+      <div class="log-container" id="logBox">
+        <div class="log-line" id="logContent"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let scanning = false;
+  let tagFound = false;
+  let logLines = [];
+
+  function ts() {
+    return new Date().toTimeString().slice(0,8);
+  }
+
+  function log(msg) {
+    logLines.push('[' + ts() + '] ' + msg);
+    document.getElementById('logContent').textContent = logLines.join('\n');
+    const box = document.getElementById('logBox');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function setStatus(text, color) {
+    const el = document.getElementById('statusText');
+    el.textContent = text;
+    el.style.color = color;
+  }
+
+  function checkWrite() {
+    const val = document.getElementById('etNewEpc').value.trim();
+    document.getElementById('btnWrite').disabled = !(tagFound && val.length > 0);
+  }
+
+  function enableActionButtons(enabled) {
+    document.getElementById('btnLockEpc').disabled = !enabled;
+    document.getElementById('btnLockAll').disabled = !enabled;
+    checkWrite();
+  }
+
+  // Simulate init
+  window.onload = () => {
+    setTimeout(() => {
+      setStatus('● Připojeno — Chainway C5', '#4CAF50');
+      log('SDK inicializováno OK');
+    }, 1200);
+  };
+
+  function toggleScan() {
+    if (scanning) {
+      stopScan();
+    } else {
+      startScan();
+    }
+  }
+
+  function startScan() {
+    scanning = true;
+    const btn = document.getElementById('btnScan');
+    btn.textContent = '⏹  ZASTAVIT';
+    btn.className = 'btn btn-scan scanning';
+    setStatus('● Skenování...', '#00BCD4');
+    log('Zahájeno skenování...');
+
+    // Simulate finding a tag after 1.5s
+    setTimeout(() => {
+      if (!scanning) return;
+      const fakeEpc = 'E28011700000020F33A8' + Math.floor(Math.random()*9000+1000);
+      const fakeTid = 'E2003412012345' + Math.floor(Math.random()*9000+1000);
+      onTagFound(fakeEpc, fakeTid);
+    }, 1500);
+  }
+
+  function stopScan() {
+    scanning = false;
+    const btn = document.getElementById('btnScan');
+    btn.textContent = '📡\u00A0 SKENOVAT TAG';
+    btn.className = 'btn btn-scan';
+    setStatus('● Připojeno — Chainway C5', '#4CAF50');
+  }
+
+  function onTagFound(epc, tid) {
+    stopScan();
+    tagFound = true;
+    document.getElementById('tvEpc').textContent = epc;
+    document.getElementById('tvTid').textContent = tid;
+    enableActionButtons(true);
+    log('TAG nalezen — EPC: ' + epc);
+    log('              TID: ' + tid);
+  }
+
+  function doWrite() {
+    const newEpc = document.getElementById('etNewEpc').value.trim().toUpperCase().replace(/\s/g,'');
+    if (!newEpc) return;
+    if (newEpc.length % 4 !== 0) { log('✗ EPC musí mít délku dělitelnou 4'); return; }
+    if (!/^[0-9A-F]+$/.test(newEpc)) { log('✗ EPC smí obsahovat pouze hex znaky'); return; }
+
+    setStatus('● Zapisuji...', '#FF9800');
+    log('Zapisuji EPC: ' + newEpc);
+    document.getElementById('btnWrite').disabled = true;
+
+    setTimeout(() => {
+      document.getElementById('tvEpc').textContent = newEpc;
+      document.getElementById('btnWrite').disabled = false;
+      setStatus('● EPC zapsáno OK', '#4CAF50');
+      log('✓ EPC úspěšně zapsáno: ' + newEpc);
+    }, 900);
+  }
+
+  function doLock(all) {
+    const label = all ? '(kompletní lock)' : '(jen EPC)';
+    setStatus('● Zamykám...', '#FF9800');
+    log('Zamykám tag ' + label + '...');
+    document.getElementById('btnLockEpc').disabled = true;
+    document.getElementById('btnLockAll').disabled = true;
+
+    setTimeout(() => {
+      enableActionButtons(true);
+      setStatus('● Tag zamčen', '#4CAF50');
+      log('✓ Tag úspěšně zamčen ' + label);
+    }, 900);
+  }
+</script>
+</body>
+</html>
