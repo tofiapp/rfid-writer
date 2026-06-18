@@ -18,6 +18,7 @@ import com.rscja.deviceapi.entity.UHFTAGInfo;
 import com.rscja.deviceapi.interfaces.IUHFInventoryCallback;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -75,7 +76,7 @@ public class MainActivity extends Activity {
         new Thread(() -> {
             try {
                 mReader = RFIDWithUHFUART.getInstance();
-                boolean ok = mReader.init();
+                boolean ok = mReader.init(MainActivity.this);
                 mHandler.post(() -> {
                     if (ok) {
                         setStatus("● Připojeno — Chainway C5", "#4CAF50");
@@ -227,13 +228,16 @@ public class MainActivity extends Activity {
             boolean ok;
             if (lockAll) {
                 // Lock EPC bank + USER bank
-                String lockCodeEpc  = mReader.generateLockCode(1, 1); // EPC lock
-                String lockCodeUser = mReader.generateLockCode(3, 1); // USER lock
+                ArrayList<Integer> banksEpc  = new ArrayList<>(); banksEpc.add(1);
+                ArrayList<Integer> banksUser = new ArrayList<>(); banksUser.add(3);
+                String lockCodeEpc  = mReader.generateLockCode(banksEpc,  1);
+                String lockCodeUser = mReader.generateLockCode(banksUser, 1);
                 boolean r1 = mReader.lockMem(accessPwd, lockCodeEpc);
                 boolean r2 = mReader.lockMem(accessPwd, lockCodeUser);
                 ok = r1 && r2;
             } else {
-                String lockCode = mReader.generateLockCode(1, 1); // EPC lock only
+                ArrayList<Integer> banks = new ArrayList<>(); banks.add(1);
+                String lockCode = mReader.generateLockCode(banks, 1);
                 ok = mReader.lockMem(accessPwd, lockCode);
             }
 
