@@ -1,207 +1,1136 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#121212"
-    android:padding="16dp">
+    android:background="#121212">
 
-    <!-- Header -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="RFID Writer"
-        android:textColor="#E0E0E0"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:paddingBottom="4dp"/>
-
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="● Inicializace..."
-        android:textColor="#FF9800"
-        android:textSize="13sp"
-        android:paddingBottom="16dp"/>
-
-    <!-- Scan button -->
-    <Button
-        android:id="@+id/btnScan"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="📡  SKENOVAT TAG"
-        android:textSize="16sp"
-        android:textColor="#121212"
-        android:backgroundTint="#00BCD4"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- Current EPC card -->
+    <!-- ── Global header ─────────────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#1E1E1E"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+        android:orientation="horizontal"
+        android:background="#1A1A1A"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="10dp"
+        android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="AKTUÁLNÍ EPC"
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"/>
-
-        <TextView
-            android:id="@+id/tvCurrentEpc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="—"
-            android:textColor="#00BCD4"
+            android:layout_weight="1"
+            android:text="RFID Writer"
+            android:textColor="#E0E0E0"
             android:textSize="18sp"
-            android:fontFamily="monospace"
-            android:paddingTop="4dp"/>
+            android:textStyle="bold"/>
 
         <TextView
+            android:id="@+id/tvStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TID"
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"
-            android:paddingTop="8dp"/>
+            android:text="● Inicializace..."
+            android:textColor="#FF9800"
+            android:textSize="12sp"/>
 
-        <TextView
-            android:id="@+id/tvTid"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="—"
-            android:textColor="#888888"
-            android:textSize="13sp"
-            android:fontFamily="monospace"
-            android:paddingTop="2dp"/>
     </LinearLayout>
 
-    <!-- New EPC input -->
-    <LinearLayout
+    <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#1E1E1E"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
+        android:background="#1A1A1A"
+        app:tabTextColor="#888888"
+        app:tabSelectedTextColor="#00BCD4"
+        app:tabIndicatorColor="#00BCD4"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabTextAppearance="@android:style/TextAppearance.Small">
 
-        <TextView
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="NOVÝ EPC (hex, bez mezer)"
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"/>
+            android:text="TAGY"/>
 
-        <EditText
-            android:id="@+id/etNewEpc"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="např. E28011700000020F33A81001"
-            android:textColorHint="#555555"
-            android:textColor="#E0E0E0"
-            android:textSize="15sp"
-            android:fontFamily="monospace"
-            android:inputType="textNoSuggestions"
-            android:background="@null"
-            android:paddingTop="8dp"
-            android:maxLines="2"/>
-
-        <Button
-            android:id="@+id/btnWrite"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="✏️  ZAPSAT EPC"
-            android:textColor="#121212"
-            android:backgroundTint="#4CAF50"
-            android:layout_marginTop="10dp"
-            android:enabled="false"/>
-    </LinearLayout>
-
-    <!-- Password / Lock card -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#1E1E1E"
-        android:padding="12dp"
-        android:layout_marginBottom="12dp">
-
-        <TextView
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ZAHESLOVÁNÍ TAGU"
-            android:textColor="#888888"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"/>
+            android:text="ZÁPIS EPC"/>
 
-        <EditText
-            android:id="@+id/etPassword"
-            android:layout_width="match_parent"
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Access password (8 hex znaků, prázdné = 00000000)"
-            android:textColorHint="#555555"
-            android:textColor="#E0E0E0"
-            android:textSize="14sp"
-            android:fontFamily="monospace"
-            android:inputType="textNoSuggestions"
-            android:background="@null"
-            android:paddingTop="8dp"
-            android:maxLength="8"/>
+            android:text="SKUPINOVÝ"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="10dp">
+            android:text="ZAMČENÍ"/>
 
-            <Button
-                android:id="@+id/btnLockEpc"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="🔒 Lock EPC"
-                android:textColor="#121212"
-                android:backgroundTint="#FF9800"
-                android:layout_marginEnd="6dp"
-                android:enabled="false"/>
+    </com.google.android.material.tabs.TabLayout>
 
-            <Button
-                android:id="@+id/btnLockAll"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="🔐 Lock ALL"
-                android:textColor="#121212"
-                android:backgroundTint="#F44336"
-                android:layout_marginStart="6dp"
-                android:enabled="false"/>
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Log output -->
-    <ScrollView
+    <!-- ── Tab content ────────────────────────────────────────────────────── -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#0D0D0D">
+        android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/tvLog"
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 0 — Načítání tagů
+             ══════════════════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/pageTag"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#00FF88"
-            android:textSize="12sp"
-            android:fontFamily="monospace"
-            android:padding="8dp"/>
-    </ScrollView>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- ── Chip bar + mode toggle ────────────────────────────────── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="#0d1117"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical">
+
+                <!-- ID_RFID bordered input box -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:background="@drawable/chip_bar_bg"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ID_RFID:"
+                        android:textColor="#d2a8ff"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:letterSpacing="0.03"
+                        android:layout_marginEnd="6dp"/>
+
+                    <EditText
+                        android:id="@+id/etChipNum"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="405"
+                        android:textColorHint="#666666"
+                        android:textColor="#d2a8ff"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:fontFamily="monospace"
+                        android:inputType="number"
+                        android:background="@null"
+                        android:textAlignment="center"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="↑ auto +1"
+                        android:textColor="#8b949e"
+                        android:textSize="10sp"
+                        android:layout_marginStart="6dp"/>
+
+                </LinearLayout>
+
+                <!-- Mode buttons -->
+                <Button
+                    android:id="@+id/btnModeRecord"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:text="📝"
+                    android:textSize="16sp"
+                    android:backgroundTint="#00BCD4"
+                    android:layout_marginStart="8dp"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"/>
+
+                <Button
+                    android:id="@+id/btnModeRead"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:text="🔍"
+                    android:textSize="16sp"
+                    android:backgroundTint="#2E2E2E"
+                    android:layout_marginStart="5dp"
+                    android:padding="0dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"/>
+
+            </LinearLayout>
+
+            <!-- ── Scan preview card ──────────────────────────────────────── -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="7dp"
+                app:cardBackgroundColor="#161b22"
+                app:cardCornerRadius="10dp"
+                app:strokeColor="#00BCD4"
+                app:strokeWidth="2dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <!-- EPC + TID preview -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EPC"
+                                android:textColor="#8b949e"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08"/>
+
+                            <TextView
+                                android:id="@+id/tvScanEpc"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="— čekám —"
+                                android:textColor="#58a6ff"
+                                android:textSize="13sp"
+                                android:fontFamily="monospace"
+                                android:paddingTop="3dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="10dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="TID"
+                                android:textColor="#8b949e"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.08"/>
+
+                            <TextView
+                                android:id="@+id/tvScanTid"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="— čekám —"
+                                android:textColor="#3fb950"
+                                android:textSize="13sp"
+                                android:fontFamily="monospace"
+                                android:paddingTop="3dp"
+                                android:maxLines="2"
+                                android:ellipsize="end"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Scan / Skip buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="8dp"
+                        android:gravity="center_vertical">
+
+                        <Button
+                            android:id="@+id/btnScan"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:text="📡  SKENOVAT TAG"
+                            android:textSize="14sp"
+                            android:textColor="#121212"
+                            android:backgroundTint="#00BCD4"
+                            android:enabled="false"/>
+
+                        <Button
+                            android:id="@+id/btnSkip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="48dp"
+                            android:text="Přeskočit"
+                            android:textSize="12sp"
+                            android:textColor="#8b949e"
+                            android:backgroundTint="#21262d"
+                            android:layout_marginStart="6dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Stats bar (record mode) ───────────────────────────────── -->
+            <LinearLayout
+                android:id="@+id/llStats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="2dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#161b22"
+                    android:padding="8dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tvStatPairs"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#58a6ff"
+                        android:textSize="22sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PÁRŮ"
+                        android:textColor="#8b949e"
+                        android:textSize="9sp"
+                        android:letterSpacing="0.05"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#161b22"
+                    android:padding="8dp"
+                    android:gravity="center"
+                    android:layout_marginStart="4dp">
+
+                    <TextView
+                        android:id="@+id/tvStatOk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#3fb950"
+                        android:textSize="22sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="KOMPLETNÍ"
+                        android:textColor="#8b949e"
+                        android:textSize="9sp"
+                        android:letterSpacing="0.05"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#161b22"
+                    android:padding="8dp"
+                    android:gravity="center"
+                    android:layout_marginStart="4dp">
+
+                    <TextView
+                        android:id="@+id/tvStatBad"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#e3b341"
+                        android:textSize="22sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NEÚPLNÉ"
+                        android:textColor="#8b949e"
+                        android:textSize="9sp"
+                        android:letterSpacing="0.05"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- ── List header (record mode) ─────────────────────────────── -->
+            <LinearLayout
+                android:id="@+id/llListHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="3dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ZÁZNAMY"
+                    android:textColor="#8b949e"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.07"/>
+
+                <Button
+                    android:id="@+id/btnCopyRecords"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="📋 Kopírovat"
+                    android:textSize="11sp"
+                    android:textColor="#E0E0E0"
+                    android:backgroundTint="#21262d"
+                    android:layout_marginStart="4dp"
+                    android:padding="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+
+                <Button
+                    android:id="@+id/btnExportCsv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="📊 CSV"
+                    android:textSize="11sp"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#1f6feb"
+                    android:layout_marginStart="4dp"
+                    android:padding="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+
+                <Button
+                    android:id="@+id/btnClearAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:text="🗑 Smazat"
+                    android:textSize="11sp"
+                    android:textColor="#f85149"
+                    android:backgroundTint="#3d1a1a"
+                    android:layout_marginStart="4dp"
+                    android:padding="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"/>
+
+            </LinearLayout>
+
+            <!-- ── Records scroll list (record mode) ─────────────────────── -->
+            <ScrollView
+                android:id="@+id/svRecords"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="#0d1117">
+
+                <LinearLayout
+                    android:id="@+id/llRecords"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Empty state -->
+                    <LinearLayout
+                        android:id="@+id/llEmptyState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="24dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📡"
+                            android:textSize="28sp"
+                            android:layout_marginBottom="8dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Žádné záznamy.\nZadejte ID_RFID a skenujte."
+                            android:textColor="#8b949e"
+                            android:textSize="12sp"
+                            android:gravity="center"
+                            android:lineSpacingMultiplier="1.4"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+            <!-- ── Read mode result (gone by default) ────────────────────── -->
+            <LinearLayout
+                android:id="@+id/llReadResult"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:visibility="gone">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardBackgroundColor="#161b22"
+                    app:cardCornerRadius="10dp"
+                    app:strokeColor="#58a6ff"
+                    app:strokeWidth="2dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EPC"
+                            android:textColor="#58a6ff"
+                            android:textSize="9sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"/>
+
+                        <TextView
+                            android:id="@+id/tvReadEpc"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="—"
+                            android:textColor="#58a6ff"
+                            android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:paddingTop="5dp"/>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="#161b22"
+                    app:cardCornerRadius="10dp"
+                    app:strokeColor="#3fb950"
+                    app:strokeWidth="2dp"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TID"
+                            android:textColor="#3fb950"
+                            android:textSize="9sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08"/>
+
+                        <TextView
+                            android:id="@+id/tvReadTid"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="—"
+                            android:textColor="#3fb950"
+                            android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:paddingTop="5dp"/>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 1 — Zápis EPC
+             ══════════════════════════════════════════════════════════════ -->
+        <ScrollView
+            android:id="@+id/pageWriteEpc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Bank / Prt / Len -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PARAMETRY"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"
+                        android:paddingBottom="10dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Bank"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="EPC"
+                                android:textColor="#00BCD4"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:fontFamily="monospace"
+                                android:paddingTop="6dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Prt"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <EditText
+                                android:id="@+id/etWritePrt"
+                                android:layout_width="56dp"
+                                android:layout_height="wrap_content"
+                                android:text="2"
+                                android:textColor="#E0E0E0"
+                                android:textSize="18sp"
+                                android:fontFamily="monospace"
+                                android:inputType="number"
+                                android:background="@null"
+                                android:paddingTop="4dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Len"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <EditText
+                                android:id="@+id/etWriteLen"
+                                android:layout_width="56dp"
+                                android:layout_height="wrap_content"
+                                android:text="6"
+                                android:textColor="#E0E0E0"
+                                android:textSize="18sp"
+                                android:fontFamily="monospace"
+                                android:inputType="number"
+                                android:background="@null"
+                                android:paddingTop="4dp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Access Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACCESS PWD"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etWriteAccessPwd"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="00000000"
+                        android:textColorHint="#555555"
+                        android:textColor="#E0E0E0"
+                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLength="8"/>
+
+                </LinearLayout>
+
+                <!-- New EPC -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NEW EPC"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etNewEpc"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="např. E28011700000020F33A81001"
+                        android:textColorHint="#555555"
+                        android:textColor="#E0E0E0"
+                        android:textSize="16sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLines="2"/>
+
+                </LinearLayout>
+
+                <!-- Write button -->
+                <Button
+                    android:id="@+id/btnWrite"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="✏️  WRITE"
+                    android:textSize="16sp"
+                    android:textColor="#121212"
+                    android:backgroundTint="#4CAF50"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 2 — Skupinový zápis (placeholder)
+             ══════════════════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/pageGroupWrite"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Připravuje se…"
+                android:textColor="#555555"
+                android:textSize="16sp"/>
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 3 — Uzamčení
+             ══════════════════════════════════════════════════════════════ -->
+        <ScrollView
+            android:id="@+id/pageLock"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- ── Section: Zápis hesla ──────────────────────────────── -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ZÁPIS HESLA"
+                    android:textColor="#00BCD4"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.15"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Bank / Prt / Len (Reserved, 2, 2) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PARAMETRY"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"
+                        android:paddingBottom="10dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Bank"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Reserved"
+                                android:textColor="#00BCD4"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:fontFamily="monospace"
+                                android:paddingTop="6dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Prt"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2"
+                                android:textColor="#E0E0E0"
+                                android:textSize="18sp"
+                                android:fontFamily="monospace"
+                                android:paddingTop="4dp"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingStart="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Len"
+                                android:textColor="#888888"
+                                android:textSize="11sp"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2"
+                                android:textColor="#E0E0E0"
+                                android:textSize="18sp"
+                                android:fontFamily="monospace"
+                                android:paddingTop="4dp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Access Pwd (stávající) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACCESS PWD"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etPwdCurrentPwd"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="00000000"
+                        android:textColorHint="#555555"
+                        android:textColor="#E0E0E0"
+                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLength="8"/>
+
+                </LinearLayout>
+
+                <!-- New Pwd -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NEW PWD"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etPwdNewPwd"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint=""
+                        android:textColorHint="#555555"
+                        android:textColor="#E0E0E0"
+                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLength="8"/>
+
+                </LinearLayout>
+
+                <!-- Write password button -->
+                <Button
+                    android:id="@+id/btnWritePwd"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="✏️  WRITE"
+                    android:textSize="16sp"
+                    android:textColor="#121212"
+                    android:backgroundTint="#4CAF50"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2E2E"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- ── Section: Zamčení ───────────────────────────────────── -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ZAMČENÍ"
+                    android:textColor="#00BCD4"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.15"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Access Pwd (nové) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACCESS PWD"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etLockAccessPwd"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="00000000"
+                        android:textColorHint="#555555"
+                        android:textColor="#E0E0E0"
+                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLength="8"/>
+
+                </LinearLayout>
+
+                <!-- Lock kód -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LOCK KÓD"
+                        android:textColor="#888888"
+                        android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+
+                    <EditText
+                        android:id="@+id/etLockCode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="008020"
+                        android:textColor="#E0E0E0"
+                        android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null"
+                        android:paddingTop="8dp"
+                        android:maxLength="8"/>
+
+                </LinearLayout>
+
+                <!-- Lock button -->
+                <Button
+                    android:id="@+id/btnLock"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:text="🔒  LOCK"
+                    android:textSize="16sp"
+                    android:textColor="#121212"
+                    android:backgroundTint="#FF9800"
+                    android:layout_marginBottom="16dp"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </FrameLayout>
 
 </LinearLayout>
