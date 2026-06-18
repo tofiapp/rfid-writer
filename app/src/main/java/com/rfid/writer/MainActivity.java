@@ -1,13 +1,21 @@
 package com.rfid.writer;
 
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,14 +27,24 @@ import com.rscja.deviceapi.RFIDWithUHFUART;
 import com.rscja.deviceapi.entity.UHFTAGInfo;
 import com.rscja.deviceapi.interfaces.IUHFInventoryCallback;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "RFIDWriter";
     // Chainway C5 physical scan trigger keycode
     private static final int TRIGGER_KEYCODE = 293;
+    private static final String PREFS_NAME = "rfid_records";
+    private static final String KEY_RECORDS = "records";
 
     // ── SDK ───────────────────────────────────────────────────────────────
     private RFIDWithUHFUART mReader;
@@ -39,9 +57,15 @@ public class MainActivity extends AppCompatActivity {
     private View pageTag, pageWriteEpc, pageGroupWrite, pageLock;
 
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
-    private Button btnScan;
-    private TextView tvCurrentEpc, tvTid, tvLog;
-    private ScrollView scrollLog;
+    private EditText etChipNum;
+    private Button btnScan, btnSkip, btnModeRecord, btnModeRead;
+    private Button btnCopyRecords, btnExportCsv, btnClearAll;
+    private TextView tvScanEpc, tvScanTid;
+    private TextView tvStatPairs, tvStatOk, tvStatBad;
+    private LinearLayout llRecords;
+    private ScrollView svRecords;
+    private View llStats, llListHeader, llEmptyState, llReadResult;
+    private TextView tvReadEpc, tvReadTid;
 
     // ── Page 1: Zápis EPC ─────────────────────────────────────────────────
     private EditText etWritePrt, etWriteLen, etWriteAccessPwd, etNewEpc;
@@ -55,7 +79,17 @@ public class MainActivity extends AppCompatActivity {
 
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying = false;
+    private boolean mRecordMode = true;
+    private final List<ScanRecord> mRecords = new ArrayList<>();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
+
+    // ── Data model ────────────────────────────────────────────────────────
+
+    static class ScanRecord {
+        int seq;
+        String num, epc, tid, time;
+        boolean complete, dup;
+    }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -66,6 +100,9 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
         setupTabs();
         bindButtons();
+        loadRecords();
+        renderRecordList();
+        updateStats();
         initReader();
     }
 
@@ -101,16 +138,14 @@ public class MainActivity extends AppCompatActivity {
                 writeEpc();
                 break;
             case 2:
-                // skupinový zápis — zatím prázdné
                 break;
             case 3:
-                // fyzické tlačítko na záložce Zamčení spustí Lock
                 lockTag();
                 break;
         }
     }
 
-    // ── Binding ───────────────────────────────────────────────────────────
+    // ── View binding ──────────────────────────────────────────────────────
 
     private void bindViews() {
         tvStatus = findViewById(R.id.tvStatus);
@@ -122,11 +157,27 @@ public class MainActivity extends AppCompatActivity {
         pageLock       = findViewById(R.id.pageLock);
 
         // Page 0
-        btnScan      = findViewById(R.id.btnScan);
-        tvCurrentEpc = findViewById(R.id.tvCurrentEpc);
-        tvTid        = findViewById(R.id.tvTid);
-        tvLog        = findViewById(R.id.tvLog);
-        scrollLog    = findViewById(R.id.scrollLog);
+        etChipNum      = findViewById(R.id.etChipNum);
+        btnScan        = findViewById(R.id.btnScan);
+        btnSkip        = findViewById(R.id.btnSkip);
+        btnModeRecord  = findViewById(R.id.btnModeRecord);
+        btnModeRead    = findViewById(R.id.btnModeRead);
+        tvScanEpc      = findViewById(R.id.tvScanEpc);
+        tvScanTid      = findViewById(R.id.tvScanTid);
+        tvStatPairs    = findViewById(R.id.tvStatPairs);
+        tvStatOk       = findViewById(R.id.tvStatOk);
+        tvStatBad      = findViewById(R.id.tvStatBad);
+        llStats        = findViewById(R.id.llStats);
+        llListHeader   = findViewById(R.id.llListHeader);
+        llRecords      = findViewById(R.id.llRecords);
+        llEmptyState   = findViewById(R.id.llEmptyState);
+        svRecords      = findViewById(R.id.svRecords);
+        llReadResult   = findViewById(R.id.llReadResult);
+        tvReadEpc      = findViewById(R.id.tvReadEpc);
+        tvReadTid      = findViewById(R.id.tvReadTid);
+        btnCopyRecords = findViewById(R.id.btnCopyRecords);
+        btnExportCsv   = findViewById(R.id.btnExportCsv);
+        btnClearAll    = findViewById(R.id.btnClearAll);
 
         // Page 1
         etWritePrt       = findViewById(R.id.etWritePrt);
@@ -161,8 +212,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindButtons() {
+        // Page 0
         btnScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startScan(); });
+        btnSkip.setOnClickListener(v -> skipScan());
+        btnModeRecord.setOnClickListener(v -> setRecordMode(true));
+        btnModeRead.setOnClickListener(v -> setRecordMode(false));
+        btnCopyRecords.setOnClickListener(v -> copyRecords());
+        btnExportCsv.setOnClickListener(v -> exportCsv());
+        btnClearAll.setOnClickListener(v -> clearAll());
+
+        // Page 1
         btnWrite.setOnClickListener(v -> writeEpc());
+
+        // Page 3
         btnWritePwd.setOnClickListener(v -> writePwd());
         btnLock.setOnClickListener(v -> lockTag());
     }
@@ -178,16 +240,16 @@ public class MainActivity extends AppCompatActivity {
                     if (ok) {
                         setStatus("● Připojeno — Chainway C5", "#4CAF50");
                         btnScan.setEnabled(true);
-                        log("SDK inicializováno OK");
+                        Log.d(TAG, "SDK inicializováno OK");
                     } else {
                         setStatus("● Chyba inicializace", "#F44336");
-                        log("CHYBA: init() vrátil false");
+                        Log.e(TAG, "init() vrátil false");
                     }
                 });
             } catch (Exception e) {
                 mHandler.post(() -> {
                     setStatus("● SDK chyba: " + e.getMessage(), "#F44336");
-                    log("VÝJIMKA: " + e.getMessage());
+                    Log.e(TAG, "SDK výjimka: " + e.getMessage());
                 });
             }
         }).start();
@@ -229,10 +291,299 @@ public class MainActivity extends AppCompatActivity {
 
     private void onTagFound(String epc, String tid) {
         stopScan();
-        tvCurrentEpc.setText(epc != null ? epc : "—");
-        tvTid.setText(tid != null ? tid : "—");
-        log("TAG nalezen — EPC: " + epc);
-        if (tid != null) log("              TID: " + tid);
+        String epcStr = epc != null ? epc : "";
+        String tidStr = tid != null ? tid : "";
+
+        tvScanEpc.setText(epcStr.isEmpty() ? "— žádné EPC —" : epcStr);
+        tvScanTid.setText(tidStr.isEmpty() ? "— žádné TID —" : tidStr);
+
+        Log.d(TAG, "TAG nalezen — EPC: " + epc + " TID: " + tid);
+
+        if (mRecordMode) {
+            savePair(epcStr, tidStr);
+        } else {
+            tvReadEpc.setText(epcStr.isEmpty() ? "—" : epcStr);
+            tvReadTid.setText(tidStr.isEmpty() ? "—" : tidStr);
+        }
+    }
+
+    private void skipScan() {
+        savePair("", "");
+    }
+
+    // ── Record mode / Read mode ───────────────────────────────────────────
+
+    private void setRecordMode(boolean record) {
+        mRecordMode = record;
+        int activeColor   = Color.parseColor("#00BCD4");
+        int inactiveColor = Color.parseColor("#2E2E2E");
+        btnModeRecord.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(record ? activeColor : inactiveColor));
+        btnModeRead.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(record ? inactiveColor : activeColor));
+
+        int recVis = record ? View.VISIBLE : View.GONE;
+        llStats.setVisibility(recVis);
+        llListHeader.setVisibility(recVis);
+        svRecords.setVisibility(recVis);
+        llReadResult.setVisibility(record ? View.GONE : View.VISIBLE);
+    }
+
+    // ── Record management ─────────────────────────────────────────────────
+
+    private void savePair(String epc, String tid) {
+        String chipNum = etChipNum.getText().toString().trim();
+        String time    = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+        boolean complete = !epc.isEmpty() && !tid.isEmpty();
+
+        // Duplicate detection
+        boolean isDup = false;
+        ScanRecord dupRecord = null;
+        if (!epc.isEmpty()) {
+            for (ScanRecord r : mRecords) {
+                if (epc.equals(r.epc)) { isDup = true; dupRecord = r; break; }
+            }
+        }
+        if (!isDup && !tid.isEmpty()) {
+            for (ScanRecord r : mRecords) {
+                if (tid.equals(r.tid)) { isDup = true; dupRecord = r; break; }
+            }
+        }
+
+        ScanRecord rec = new ScanRecord();
+        rec.seq      = mRecords.size() + 1;
+        rec.num      = chipNum;
+        rec.epc      = epc;
+        rec.tid      = tid;
+        rec.time     = time;
+        rec.complete = complete;
+        rec.dup      = isDup;
+        mRecords.add(rec);
+
+        // Auto-increment chip number
+        try {
+            int n = Integer.parseInt(chipNum);
+            String next = String.valueOf(n + 1);
+            etChipNum.setText(next);
+            etChipNum.setSelection(next.length());
+        } catch (NumberFormatException ignored) {}
+
+        if (isDup) {
+            String prev = dupRecord != null && !dupRecord.num.isEmpty()
+                    ? "ID_RFID: " + dupRecord.num : "záznam č. " + (dupRecord != null ? dupRecord.seq : "?");
+            toast("⚠️ Duplikát — " + prev);
+            Log.w(TAG, "DUPLIKÁT EPC=" + epc + " TID=" + tid);
+        } else {
+            toast(complete
+                    ? "✅ #" + rec.seq + " — ID_RFID " + chipNum + " uložen"
+                    : "⚠️ #" + rec.seq + " uložen — chybí EPC nebo TID");
+        }
+
+        saveRecords();
+        renderRecordList();
+        updateStats();
+    }
+
+    private void deleteRecord(int index) {
+        if (index < 0 || index >= mRecords.size()) return;
+        mRecords.remove(index);
+        for (int i = 0; i < mRecords.size(); i++) mRecords.get(i).seq = i + 1;
+        saveRecords();
+        renderRecordList();
+        updateStats();
+    }
+
+    private void clearAll() {
+        if (mRecords.isEmpty()) return;
+        new AlertDialog.Builder(this)
+                .setTitle("Smazat záznamy?")
+                .setMessage("Opravdu smazat všech " + mRecords.size() + " záznamů?")
+                .setPositiveButton("Smazat", (d, w) -> {
+                    mRecords.clear();
+                    saveRecords();
+                    renderRecordList();
+                    updateStats();
+                })
+                .setNegativeButton("Zrušit", null)
+                .show();
+    }
+
+    // ── Render list ───────────────────────────────────────────────────────
+
+    private void renderRecordList() {
+        // Remove all except the empty-state view (index 0)
+        while (llRecords.getChildCount() > 1) {
+            llRecords.removeViewAt(1);
+        }
+
+        if (mRecords.isEmpty()) {
+            llEmptyState.setVisibility(View.VISIBLE);
+            return;
+        }
+        llEmptyState.setVisibility(View.GONE);
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        for (int i = mRecords.size() - 1; i >= 0; i--) {
+            ScanRecord r   = mRecords.get(i);
+            View row       = inflater.inflate(R.layout.item_scan_record, llRecords, false);
+
+            ((TextView) row.findViewById(R.id.tvItemSeq)).setText(String.valueOf(r.seq));
+            ((TextView) row.findViewById(R.id.tvItemNum)).setText(r.num.isEmpty() ? "—" : r.num);
+            ((TextView) row.findViewById(R.id.tvItemTime)).setText(r.time);
+            ((TextView) row.findViewById(R.id.tvItemDup)).setText(r.dup ? "⚠ DUP" : "");
+
+            TextView tvEpc = row.findViewById(R.id.tvItemEpc);
+            tvEpc.setText(r.epc.isEmpty() ? "—" : r.epc);
+            tvEpc.setTextColor(Color.parseColor(r.epc.isEmpty() ? "#e3b341" : "#00BCD4"));
+
+            TextView tvTid = row.findViewById(R.id.tvItemTid);
+            tvTid.setText(r.tid.isEmpty() ? "—" : r.tid);
+            tvTid.setTextColor(Color.parseColor(r.tid.isEmpty() ? "#e3b341" : "#4CAF50"));
+
+            row.setBackgroundColor(Color.parseColor(r.dup ? "#2a1015" : "#0d1117"));
+
+            // Divider line between rows
+            View divider = new View(this);
+            divider.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 1));
+            divider.setBackgroundColor(Color.parseColor("#21262d"));
+
+            final int origIndex = i;
+            row.findViewById(R.id.btnItemDel).setOnClickListener(v -> deleteRecord(origIndex));
+
+            llRecords.addView(row);
+            llRecords.addView(divider);
+        }
+
+        svRecords.post(() -> svRecords.scrollTo(0, 0));
+    }
+
+    // ── Stats ─────────────────────────────────────────────────────────────
+
+    private void updateStats() {
+        int ok = 0;
+        for (ScanRecord r : mRecords) if (r.complete) ok++;
+        tvStatPairs.setText(String.valueOf(mRecords.size()));
+        tvStatOk.setText(String.valueOf(ok));
+        tvStatBad.setText(String.valueOf(mRecords.size() - ok));
+    }
+
+    // ── Persistence ───────────────────────────────────────────────────────
+
+    private void saveRecords() {
+        try {
+            JSONArray arr = new JSONArray();
+            for (ScanRecord r : mRecords) {
+                JSONObject obj = new JSONObject();
+                obj.put("seq",      r.seq);
+                obj.put("num",      r.num);
+                obj.put("epc",      r.epc);
+                obj.put("tid",      r.tid);
+                obj.put("time",     r.time);
+                obj.put("complete", r.complete);
+                obj.put("dup",      r.dup);
+                arr.put(obj);
+            }
+            getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit().putString(KEY_RECORDS, arr.toString()).apply();
+        } catch (Exception e) {
+            Log.e(TAG, "saveRecords: " + e.getMessage());
+        }
+    }
+
+    private void loadRecords() {
+        try {
+            String json = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    .getString(KEY_RECORDS, "[]");
+            JSONArray arr = new JSONArray(json);
+            mRecords.clear();
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                ScanRecord r = new ScanRecord();
+                r.seq      = obj.getInt("seq");
+                r.num      = obj.getString("num");
+                r.epc      = obj.getString("epc");
+                r.tid      = obj.getString("tid");
+                r.time     = obj.getString("time");
+                r.complete = obj.getBoolean("complete");
+                r.dup      = obj.getBoolean("dup");
+                mRecords.add(r);
+            }
+            if (!mRecords.isEmpty()) {
+                String lastNum = mRecords.get(mRecords.size() - 1).num;
+                try {
+                    int n = Integer.parseInt(lastNum);
+                    String next = String.valueOf(n + 1);
+                    etChipNum.setText(next);
+                    etChipNum.setSelection(next.length());
+                } catch (NumberFormatException ignored) {}
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "loadRecords: " + e.getMessage());
+        }
+    }
+
+    // ── Export CSV ────────────────────────────────────────────────────────
+
+    private void exportCsv() {
+        if (mRecords.isEmpty()) { toast("Žádné záznamy!"); return; }
+
+        StringBuilder sb = new StringBuilder("\uFEFF"); // BOM for Excel UTF-8
+        sb.append("Seq,ID_RFID,EPC,TID,Stav,Cas,Poznamka\n");
+        for (ScanRecord r : mRecords) {
+            sb.append(r.seq).append(",")
+              .append(escCsv(r.num)).append(",")
+              .append(escCsv(r.epc)).append(",")
+              .append(escCsv(r.tid)).append(",")
+              .append(r.complete ? "OK" : "NEUPLNE").append(",")
+              .append(escCsv(r.time)).append(",")
+              .append(r.dup ? "DUPLIKAT" : "").append("\n");
+        }
+
+        try {
+            String stamp    = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
+            String filename = "rfid_" + stamp + ".csv";
+            File dir  = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            if (dir == null) dir = getFilesDir();
+            if (!dir.exists()) dir.mkdirs();
+            File file = new File(dir, filename);
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(sb.toString().getBytes("UTF-8"));
+            }
+            toast("✅ CSV: " + filename);
+            Log.d(TAG, "Export: " + file.getAbsolutePath());
+        } catch (Exception e) {
+            toast("Chyba exportu: " + e.getMessage());
+            Log.e(TAG, "exportCsv: " + e.getMessage());
+        }
+    }
+
+    private String escCsv(String s) {
+        if (s == null) return "";
+        if (s.contains(",") || s.contains("\"") || s.contains("\n")) {
+            return "\"" + s.replace("\"", "\"\"") + "\"";
+        }
+        return s;
+    }
+
+    // ── Copy to clipboard ─────────────────────────────────────────────────
+
+    private void copyRecords() {
+        if (mRecords.isEmpty()) { toast("Žádné záznamy!"); return; }
+        StringBuilder sb = new StringBuilder("Seq\tID_RFID\tEPC\tTID\tStav\tCas\n");
+        for (ScanRecord r : mRecords) {
+            sb.append(r.seq).append("\t")
+              .append(r.num).append("\t")
+              .append(r.epc).append("\t")
+              .append(r.tid).append("\t")
+              .append(r.complete ? "OK" : "NEUPLNE").append("\t")
+              .append(r.time).append("\n");
+        }
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm != null) {
+            cm.setPrimaryClip(ClipData.newPlainText("RFID záznamy", sb.toString()));
+            toast("📋 Zkopírováno — vložte do Excelu");
+        }
     }
 
     // ── Write EPC (Page 1) ────────────────────────────────────────────────
@@ -258,7 +609,7 @@ public class MainActivity extends AppCompatActivity {
 
         String accessPwd = readPassword(etWriteAccessPwd);
 
-        log("Zapisuji EPC: " + newEpc + "  (bank=EPC, prt=" + prt + ", len=" + len + ")");
+        Log.d(TAG, "Zapisuji EPC: " + newEpc + " (bank=EPC, prt=" + prt + ", len=" + len + ")");
         setStatus("● Zapisuji EPC...", "#FF9800");
         btnWrite.setEnabled(false);
 
@@ -268,14 +619,14 @@ public class MainActivity extends AppCompatActivity {
             mHandler.post(() -> {
                 btnWrite.setEnabled(true);
                 if (ok) {
-                    tvCurrentEpc.setText(newEpc);
+                    tvScanEpc.setText(newEpc);
                     setStatus("● EPC zapsáno OK", "#4CAF50");
-                    log("✓ EPC zapsáno: " + newEpc);
                     toast("EPC zapsáno!");
+                    Log.d(TAG, "EPC zapsáno: " + newEpc);
                 } else {
                     setStatus("● Zápis EPC selhal", "#F44336");
-                    log("✗ Zápis EPC selhal — zkontrolujte heslo a dosah");
                     toast("Zápis selhal");
+                    Log.w(TAG, "Zápis EPC selhal");
                 }
             });
         }).start();
@@ -294,25 +645,23 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        log("Zapisuji heslo: " + newPwd + "  (bank=Reserved, prt=2, len=2)");
+        Log.d(TAG, "Zapisuji heslo: " + newPwd + " (bank=Reserved, prt=2, len=2)");
         setStatus("● Zapisuji heslo...", "#FF9800");
         btnWritePwd.setEnabled(false);
 
         new Thread(() -> {
-            // Reserved bank (0), word pointer 2 = access password location
             boolean ok = mReader.writeData(currentPwd, 0, 2, newPwd);
             mHandler.post(() -> {
                 btnWritePwd.setEnabled(true);
                 if (ok) {
                     setStatus("● Heslo zapsáno", "#4CAF50");
-                    log("✓ Heslo zapsáno: " + newPwd);
-                    // auto-fill Lock Access Pwd with the new password
                     etLockAccessPwd.setText(newPwd);
                     toast("Heslo zapsáno!");
+                    Log.d(TAG, "Heslo zapsáno: " + newPwd);
                 } else {
                     setStatus("● Zápis hesla selhal", "#F44336");
-                    log("✗ Zápis hesla selhal — zkontrolujte stávající heslo a dosah");
                     toast("Zápis hesla selhal");
+                    Log.w(TAG, "Zápis hesla selhal");
                 }
             });
         }).start();
@@ -324,10 +673,10 @@ public class MainActivity extends AppCompatActivity {
         if (mReader == null) return;
 
         String accessPwd = readPassword(etLockAccessPwd);
-        String lockCode = etLockCode.getText().toString().trim().toUpperCase();
+        String lockCode  = etLockCode.getText().toString().trim().toUpperCase();
         if (lockCode.isEmpty()) lockCode = "008020";
 
-        log("Zamykám tag — kód: " + lockCode);
+        Log.d(TAG, "Zamykám tag — kód: " + lockCode);
         setStatus("● Zamykám...", "#FF9800");
         btnLock.setEnabled(false);
 
@@ -338,12 +687,12 @@ public class MainActivity extends AppCompatActivity {
                 btnLock.setEnabled(true);
                 if (ok) {
                     setStatus("● Tag zamčen", "#4CAF50");
-                    log("✓ Tag zamčen (kód: " + finalCode + ")");
                     toast("Tag zamčen!");
+                    Log.d(TAG, "Tag zamčen (kód: " + finalCode + ")");
                 } else {
                     setStatus("● Lock selhal", "#F44336");
-                    log("✗ Zamčení selhalo — zkontrolujte heslo a dosah");
                     toast("Lock selhal");
+                    Log.w(TAG, "Zamčení selhalo");
                 }
             });
         }).start();
@@ -351,7 +700,6 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    /** Returns password from field, falls back to "00000000" if empty or not 8 valid hex chars. */
     private String readPassword(EditText field) {
         String val = field.getText().toString().trim().toUpperCase();
         if (val.length() == 8 && val.matches("[0-9A-F]+")) return val;
@@ -361,12 +709,6 @@ public class MainActivity extends AppCompatActivity {
     private void setStatus(String text, String hexColor) {
         tvStatus.setText(text);
         tvStatus.setTextColor(Color.parseColor(hexColor));
-    }
-
-    private void log(String message) {
-        String time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        tvLog.append("[" + time + "] " + message + "\n");
-        scrollLog.post(() -> scrollLog.fullScroll(View.FOCUS_DOWN));
     }
 
     private void toast(String msg) {
