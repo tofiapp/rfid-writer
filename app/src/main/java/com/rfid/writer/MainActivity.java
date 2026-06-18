@@ -614,8 +614,9 @@ public class MainActivity extends AppCompatActivity {
         btnWrite.setEnabled(false);
 
         final int finalPrt = prt;
+        final int finalLen = len;
         new Thread(() -> {
-            boolean ok = mReader.writeData(accessPwd, 1, finalPrt, newEpc);
+            boolean ok = mReader.writeData(accessPwd, 1, finalPrt, finalLen, newEpc);
             mHandler.post(() -> {
                 btnWrite.setEnabled(true);
                 if (ok) {
@@ -650,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
         btnWritePwd.setEnabled(false);
 
         new Thread(() -> {
-            boolean ok = mReader.writeData(currentPwd, 0, 2, newPwd);
+            boolean ok = mReader.writeData(currentPwd, 0, 2, 2, newPwd);
             mHandler.post(() -> {
                 btnWritePwd.setEnabled(true);
                 if (ok) {
