@@ -620,228 +620,32 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Bank / Prt / Len -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="#1E1E1E"
-                    android:padding="12dp"
-                    android:layout_marginBottom="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PARAMETRY"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"
-                        android:paddingBottom="10dp"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Bank"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="EPC"
-                                android:textColor="#00BCD4"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:fontFamily="monospace"
-                                android:paddingTop="6dp"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:paddingStart="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Prt"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <EditText
-                                android:id="@+id/etWritePrt"
-                                android:layout_width="56dp"
-                                android:layout_height="wrap_content"
-                                android:text="2"
-                                android:textColor="#E0E0E0"
-                                android:textSize="18sp"
-                                android:fontFamily="monospace"
-                                android:inputType="number"
-                                android:background="@null"
-                                android:paddingTop="4dp"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:paddingStart="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Len"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <EditText
-                                android:id="@+id/etWriteLen"
-                                android:layout_width="56dp"
-                                android:layout_height="wrap_content"
-                                android:text="6"
-                                android:textColor="#E0E0E0"
-                                android:textSize="18sp"
-                                android:fontFamily="monospace"
-                                android:inputType="number"
-                                android:background="@null"
-                                android:paddingTop="4dp"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-                <!-- Access Password -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="#1E1E1E"
-                    android:padding="12dp"
-                    android:layout_marginBottom="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ACCESS PWD"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"/>
-
-                    <EditText
-                        android:id="@+id/etWriteAccessPwd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="00000000"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
-                        android:textSize="18sp"
-                        android:fontFamily="monospace"
-                        android:inputType="textNoSuggestions|textCapCharacters"
-                        android:background="@null"
-                        android:paddingTop="8dp"
-                        android:maxLength="8"/>
-
-                </LinearLayout>
-
-                <!-- New EPC -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="#1E1E1E"
-                    android:padding="12dp"
-                    android:layout_marginBottom="14dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="NEW EPC"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"/>
-
-                    <EditText
-                        android:id="@+id/etNewEpc"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="např. E28011700000020F33A81001"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
-                        android:textSize="16sp"
-                        android:fontFamily="monospace"
-                        android:inputType="textNoSuggestions|textCapCharacters"
-                        android:background="@null"
-                        android:paddingTop="8dp"
-                        android:maxLines="2"/>
-
-                </LinearLayout>
-
-                <!-- Write button -->
+                <!-- ── EPC šablona toggle ─────────────────────────────── -->
                 <Button
-                    android:id="@+id/btnWrite"
+                    android:id="@+id/btnToggleWrtTemplate"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="✏️  WRITE"
-                    android:textSize="16sp"
-                    android:textColor="#121212"
-                    android:backgroundTint="#4CAF50"/>
-
-            </LinearLayout>
-
-        </ScrollView>
-
-        <!-- ══════════════════════════════════════════════════════════════════
-             PAGE 2 — Skupinový zápis
-             ══════════════════════════════════════════════════════════════ -->
-        <ScrollView
-            android:id="@+id/pageGroupWrite"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <!-- ── Section: EPC šablona ─────────────────────────────── -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="EPC ŠABLONA"
-                    android:textColor="#00BCD4"
-                    android:textSize="12sp"
+                    android:layout_height="44dp"
+                    android:text="▼  EPC ŠABLONA"
+                    android:textSize="13sp"
                     android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:paddingBottom="10dp"/>
+                    android:textColor="#00BCD4"
+                    android:backgroundTint="#1E1E1E"
+                    android:gravity="start|center_vertical"
+                    android:paddingStart="12dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginBottom="2dp"/>
 
-                <!-- Groups card -->
+                <!-- ── EPC šablona skupiny (expanded by default) ──────── -->
                 <LinearLayout
+                    android:id="@+id/llWrtTemplateGroups"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="#1E1E1E"
                     android:padding="12dp"
-                    android:layout_marginBottom="10dp">
+                    android:layout_marginBottom="10dp"
+                    android:visibility="visible">
 
                     <!-- Column headers -->
                     <LinearLayout
@@ -900,345 +704,198 @@
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="1" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Rok"
-                            android:textColor="#E0E0E0"
-                            android:textSize="14sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Rok"
+                            android:textColor="#E0E0E0" android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup1"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="2026"
-                            android:textColor="#E0E0E0"
-                            android:textSize="16sp"
+                        <EditText android:id="@+id/etWrt1" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="2026"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
-                            android:background="@null"
-                            android:maxLength="4"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup1"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:checked="false"
-                            android:buttonTint="#00BCD4"/>
+                        <CheckBox android:id="@+id/cbWrt1" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
 
                     </LinearLayout>
 
                     <!-- Row 2 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="2"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="2" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="—"
-                            android:textColor="#888888"
-                            android:textSize="14sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup2"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="0000"
-                            android:textColor="#E0E0E0"
-                            android:textSize="16sp"
+                        <EditText android:id="@+id/etWrt2" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
-                            android:background="@null"
-                            android:maxLength="4"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup2"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:checked="false"
-                            android:buttonTint="#00BCD4"/>
+                        <CheckBox android:id="@+id/cbWrt2" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
 
                     </LinearLayout>
 
                     <!-- Row 3 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="3"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="3" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="—"
-                            android:textColor="#888888"
-                            android:textSize="14sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup3"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="0000"
-                            android:textColor="#E0E0E0"
-                            android:textSize="16sp"
+                        <EditText android:id="@+id/etWrt3" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
-                            android:background="@null"
-                            android:maxLength="4"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup3"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:checked="false"
-                            android:buttonTint="#00BCD4"/>
+                        <CheckBox android:id="@+id/cbWrt3" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
 
                     </LinearLayout>
 
                     <!-- Row 4 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="4"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="4" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="—"
-                            android:textColor="#888888"
-                            android:textSize="14sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup4"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="0000"
-                            android:textColor="#E0E0E0"
-                            android:textSize="16sp"
+                        <EditText android:id="@+id/etWrt4" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
-                            android:background="@null"
-                            android:maxLength="4"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup4"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:checked="false"
-                            android:buttonTint="#00BCD4"/>
+                        <CheckBox android:id="@+id/cbWrt4" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
 
                     </LinearLayout>
 
                     <!-- Row 5: Prefix -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="5"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="5" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Prefix"
-                            android:textColor="#E0E0E0"
-                            android:textSize="14sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Prefix"
+                            android:textColor="#E0E0E0" android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup5"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="0000"
-                            android:textColor="#E0E0E0"
-                            android:textSize="16sp"
+                        <EditText android:id="@+id/etWrt5" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
-                            android:background="@null"
-                            android:maxLength="4"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup5"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:checked="false"
-                            android:buttonTint="#00BCD4"/>
+                        <CheckBox android:id="@+id/cbWrt5" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
 
                     </LinearLayout>
 
-                    <!-- Row 6: ID_RFID (auto-increment on) -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp">
+                    <!-- Row 6: ID_RFID -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
 
-                        <TextView
-                            android:layout_width="22dp"
-                            android:layout_height="wrap_content"
-                            android:text="6"
-                            android:textColor="#888888"
-                            android:textSize="11sp"/>
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="6" android:textColor="#888888" android:textSize="11sp"/>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="ID_RFID"
-                            android:textColor="#d2a8ff"
-                            android:textStyle="bold"
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="ID_RFID"
+                            android:textColor="#d2a8ff" android:textStyle="bold"
                             android:textSize="14sp"/>
 
-                        <EditText
-                            android:id="@+id/etGroup6"
-                            android:layout_width="76dp"
-                            android:layout_height="wrap_content"
-                            android:text="0001"
-                            android:textColor="#d2a8ff"
-                            android:textSize="16sp"
-                            android:fontFamily="monospace"
-                            android:inputType="number"
-                            android:background="@null"
-                            android:maxLength="4"
+                        <EditText android:id="@+id/etWrt6" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0001"
+                            android:textColor="#d2a8ff" android:textSize="16sp"
+                            android:fontFamily="monospace" android:inputType="number"
+                            android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
-                        <CheckBox
-                            android:id="@+id/cbGroup6"
-                            android:layout_width="52dp"
-                            android:layout_height="wrap_content"
-                            android:text="+1"
-                            android:textColor="#d2a8ff"
-                            android:textSize="11sp"
-                            android:checked="true"
-                            android:buttonTint="#d2a8ff"/>
+                        <CheckBox android:id="@+id/cbWrt6" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#d2a8ff" android:textSize="11sp"
+                            android:checked="true" android:buttonTint="#d2a8ff"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- EPC preview card -->
+                <!-- ── EPC náhled ─────────────────────────────────────── -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginBottom="12dp"
                     app:cardBackgroundColor="#161b22"
                     app:cardCornerRadius="10dp"
                     app:strokeColor="#00BCD4"
                     app:strokeWidth="2dp"
                     app:cardElevation="0dp">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <LinearLayout android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="12dp">
+                        android:orientation="vertical" android:padding="12dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
+                        <TextView android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="EPC NÁHLED"
-                            android:textColor="#888888"
-                            android:textSize="10sp"
+                            android:textColor="#888888" android:textSize="10sp"
                             android:letterSpacing="0.1"/>
 
-                        <TextView
-                            android:id="@+id/tvEpcPreview"
+                        <TextView android:id="@+id/tvWrtEpcPreview"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="2026-0000-0000-0000-0000-0001"
-                            android:textColor="#00BCD4"
-                            android:textSize="17sp"
-                            android:fontFamily="monospace"
-                            android:paddingTop="6dp"/>
+                            android:textColor="#00BCD4" android:textSize="16sp"
+                            android:fontFamily="monospace" android:paddingTop="5dp"/>
 
                     </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── Section: Zápis ────────────────────────────────────── -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ZÁPIS"
-                    android:textColor="#00BCD4"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:paddingBottom="10dp"/>
-
-                <!-- Parameters: Bank EPC / Prt 2 / Len 6 (fixed) -->
+                <!-- ── Parametry (Prt / Len) ──────────────────────────── -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1247,100 +904,59 @@
                     android:padding="12dp"
                     android:layout_marginBottom="10dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PARAMETRY"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="PARAMETRY" android:textColor="#888888"
+                        android:textSize="11sp" android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Bank"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="EPC"
-                                android:textColor="#00BCD4"
-                                android:textSize="18sp"
-                                android:textStyle="bold"
-                                android:fontFamily="monospace"
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Bank"
+                                android:textColor="#888888" android:textSize="11sp"/>
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="EPC"
+                                android:textColor="#00BCD4" android:textSize="18sp"
+                                android:textStyle="bold" android:fontFamily="monospace"
                                 android:paddingTop="4dp"/>
-
                         </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
                             android:paddingStart="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Prt"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="2"
-                                android:textColor="#E0E0E0"
-                                android:textSize="18sp"
-                                android:fontFamily="monospace"
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Prt"
+                                android:textColor="#888888" android:textSize="11sp"/>
+                            <EditText android:id="@+id/etWritePrt"
+                                android:layout_width="56dp" android:layout_height="wrap_content"
+                                android:text="2" android:textColor="#E0E0E0"
+                                android:textSize="18sp" android:fontFamily="monospace"
+                                android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
-
                         </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical"
                             android:paddingStart="8dp">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Len"
-                                android:textColor="#888888"
-                                android:textSize="11sp"/>
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="6"
-                                android:textColor="#E0E0E0"
-                                android:textSize="18sp"
-                                android:fontFamily="monospace"
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Len"
+                                android:textColor="#888888" android:textSize="11sp"/>
+                            <EditText android:id="@+id/etWriteLen"
+                                android:layout_width="56dp" android:layout_height="wrap_content"
+                                android:text="6" android:textColor="#E0E0E0"
+                                android:textSize="18sp" android:fontFamily="monospace"
+                                android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
-
                         </LinearLayout>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Access Pwd -->
+                <!-- ── Access Pwd ─────────────────────────────────────── -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1349,192 +965,608 @@
                     android:padding="12dp"
                     android:layout_marginBottom="14dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ACCESS PWD"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ACCESS PWD" android:textColor="#888888"
+                        android:textSize="11sp" android:letterSpacing="0.1"/>
 
-                    <EditText
-                        android:id="@+id/etGroupAccessPwd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="00000000"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
-                        android:textSize="18sp"
+                    <EditText android:id="@+id/etWriteAccessPwd"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:hint="00000000" android:textColorHint="#555555"
+                        android:textColor="#E0E0E0" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
-                        android:background="@null"
-                        android:paddingTop="8dp"
-                        android:maxLength="8"/>
+                        android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
 
                 </LinearLayout>
 
-                <!-- Write button -->
+                <!-- ── Write button ───────────────────────────────────── -->
                 <Button
-                    android:id="@+id/btnGroupWrite"
+                    android:id="@+id/btnWrite"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:text="✏️  WRITE"
                     android:textSize="16sp"
                     android:textColor="#121212"
-                    android:backgroundTint="#4CAF50"
-                    android:layout_marginBottom="20dp"/>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#2E2E2E"
-                    android:layout_marginBottom="20dp"/>
-
-                <!-- ── Section: Výstupní soubor ──────────────────────────── -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="VÝSTUPNÍ SOUBOR (CSV)"
-                    android:textColor="#00BCD4"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:paddingBottom="10dp"/>
-
-                <!-- File name input + set button -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="#1E1E1E"
-                    android:padding="12dp"
-                    android:layout_marginBottom="10dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="NÁZEV SOUBORU"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:letterSpacing="0.1"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:paddingTop="8dp"
-                        android:gravity="center_vertical">
-
-                        <EditText
-                            android:id="@+id/etGroupFileName"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:hint="rfid_instalace_2026"
-                            android:textColorHint="#555555"
-                            android:textColor="#E0E0E0"
-                            android:textSize="14sp"
-                            android:fontFamily="monospace"
-                            android:inputType="textNoSuggestions"
-                            android:background="@null"
-                            android:singleLine="true"/>
-
-                        <Button
-                            android:id="@+id/btnGroupSetFile"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:text="Nastavit"
-                            android:textSize="12sp"
-                            android:textColor="#FFFFFF"
-                            android:backgroundTint="#1f6feb"
-                            android:layout_marginStart="8dp"
-                            android:padding="0dp"
-                            android:paddingStart="12dp"
-                            android:paddingEnd="12dp"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"/>
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tvGroupFilePath"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="— soubor není nastaven —"
-                        android:textColor="#888888"
-                        android:textSize="11sp"
-                        android:fontFamily="monospace"
-                        android:paddingTop="8dp"/>
-
-                </LinearLayout>
-
-                <!-- Stats: record count + last EPC -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="#1E1E1E"
-                    android:padding="12dp"
-                    android:layout_marginBottom="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Zapsáno:"
-                            android:textColor="#888888"
-                            android:textSize="12sp"/>
-
-                        <TextView
-                            android:id="@+id/tvGroupRecordCount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0"
-                            android:textColor="#00BCD4"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:fontFamily="monospace"/>
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingTop="6dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Poslední EPC:"
-                            android:textColor="#888888"
-                            android:textSize="12sp"/>
-
-                        <TextView
-                            android:id="@+id/tvGroupLastEpc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
-                            android:textColor="#888888"
-                            android:textSize="11sp"
-                            android:fontFamily="monospace"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:backgroundTint="#4CAF50"/>
 
             </LinearLayout>
 
         </ScrollView>
+
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 2 — Skupinový zápis
+             ══════════════════════════════════════════════════════════════ -->
+        <ScrollView
+            android:id="@+id/pageGroupWrite"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- ── Workflow status label ─────────────────────────── -->
+                <TextView
+                    android:id="@+id/tvGroupWorkflowStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Krok 1: Nastavte EPC a stiskněte WRITE"
+                    android:textColor="#8b949e"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:paddingBottom="12dp"/>
+
+                <!-- ══ KROK 1: ZÁPIS EPC ════════════════════════════════ -->
+                <LinearLayout
+                    android:id="@+id/llStep1Header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp">
+
+                    <TextView
+                        android:id="@+id/tvStep1Num"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="1"
+                        android:textColor="#121212"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView
+                        android:id="@+id/tvStep1Label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="  ZÁPIS EPC"
+                        android:textColor="#00BCD4"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+
+                </LinearLayout>
+
+                <!-- EPC šablona toggle (collapsed by default) -->
+                <Button
+                    android:id="@+id/btnToggleTemplate"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="▶  EPC ŠABLONA  (rozbalit)"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    android:backgroundTint="#1A1A1A"
+                    android:gravity="start|center_vertical"
+                    android:paddingStart="12dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:layout_marginBottom="4dp"/>
+
+                <!-- Template groups (COLLAPSED by default) -->
+                <LinearLayout
+                    android:id="@+id/llTemplateGroups"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="#1E1E1E"
+                    android:padding="12dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone">
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="6dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="#" android:textColor="#888888" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="SKUPINA"
+                            android:textColor="#888888" android:textSize="10sp" android:letterSpacing="0.07"/>
+                        <TextView android:layout_width="76dp" android:layout_height="wrap_content"
+                            android:text="HODNOTA" android:textColor="#888888" android:textSize="10sp"
+                            android:textAlignment="center"/>
+                        <TextView android:layout_width="52dp" android:layout_height="wrap_content"
+                            android:text="+1" android:textColor="#888888" android:textSize="10sp"
+                            android:textAlignment="center"/>
+                    </LinearLayout>
+
+                    <View android:layout_width="match_parent" android:layout_height="1dp"
+                        android:background="#2E2E2E" android:layout_marginBottom="4dp"/>
+
+                    <!-- Row 1 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="1" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Rok"
+                            android:textColor="#E0E0E0" android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup1" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="2026"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions|textCapCharacters"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup1" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
+                    </LinearLayout>
+
+                    <!-- Row 2 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="2" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup2" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions|textCapCharacters"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup2" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
+                    </LinearLayout>
+
+                    <!-- Row 3 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="3" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup3" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions|textCapCharacters"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup3" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
+                    </LinearLayout>
+
+                    <!-- Row 4 -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="4" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="—"
+                            android:textColor="#888888" android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup4" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions|textCapCharacters"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup4" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
+                    </LinearLayout>
+
+                    <!-- Row 5: Prefix -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="5" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Prefix"
+                            android:textColor="#E0E0E0" android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup5" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0000"
+                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions|textCapCharacters"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup5" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#888888" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="#00BCD4"/>
+                    </LinearLayout>
+
+                    <!-- Row 6: ID_RFID -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="center_vertical"
+                        android:paddingTop="5dp" android:paddingBottom="5dp">
+                        <TextView android:layout_width="22dp" android:layout_height="wrap_content"
+                            android:text="6" android:textColor="#888888" android:textSize="11sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="ID_RFID"
+                            android:textColor="#d2a8ff" android:textStyle="bold"
+                            android:textSize="14sp"/>
+                        <EditText android:id="@+id/etGroup6" android:layout_width="76dp"
+                            android:layout_height="wrap_content" android:text="0001"
+                            android:textColor="#d2a8ff" android:textSize="16sp"
+                            android:fontFamily="monospace" android:inputType="number"
+                            android:background="@null" android:maxLength="4"
+                            android:textAlignment="center"/>
+                        <CheckBox android:id="@+id/cbGroup6" android:layout_width="52dp"
+                            android:layout_height="wrap_content" android:text="+1"
+                            android:textColor="#d2a8ff" android:textSize="11sp"
+                            android:checked="true" android:buttonTint="#d2a8ff"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- EPC preview -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardBackgroundColor="#161b22"
+                    app:cardCornerRadius="10dp"
+                    app:strokeColor="#00BCD4"
+                    app:strokeWidth="2dp"
+                    app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" android:padding="12dp">
+                        <TextView android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:text="EPC NÁHLED"
+                            android:textColor="#888888" android:textSize="10sp"
+                            android:letterSpacing="0.1"/>
+                        <TextView android:id="@+id/tvEpcPreview"
+                            android:layout_width="match_parent" android:layout_height="wrap_content"
+                            android:text="2026-0000-0000-0000-0000-0001"
+                            android:textColor="#00BCD4" android:textSize="17sp"
+                            android:fontFamily="monospace" android:paddingTop="5dp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Bank EPC / Prt 2 / Len 6 (fixed) -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:padding="12dp" android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="PARAMETRY" android:textColor="#888888" android:textSize="11sp"
+                        android:letterSpacing="0.1" android:paddingBottom="8dp"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Bank" android:textColor="#888888" android:textSize="11sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="EPC" android:textColor="#00BCD4" android:textSize="18sp"
+                                android:textStyle="bold" android:fontFamily="monospace" android:paddingTop="4dp"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Prt" android:textColor="#888888" android:textSize="11sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="2" android:textColor="#E0E0E0" android:textSize="18sp"
+                                android:fontFamily="monospace" android:paddingTop="4dp"/>
+                        </LinearLayout>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="Len" android:textColor="#888888" android:textSize="11sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                                android:text="6" android:textColor="#E0E0E0" android:textSize="18sp"
+                                android:fontFamily="monospace" android:paddingTop="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Access Pwd (Krok 1) -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:padding="12dp" android:layout_marginBottom="12dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ACCESS PWD" android:textColor="#888888" android:textSize="11sp"
+                        android:letterSpacing="0.1"/>
+                    <EditText android:id="@+id/etGroupAccessPwd"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:hint="00000000" android:textColorHint="#555555"
+                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
+                </LinearLayout>
+
+                <Button android:id="@+id/btnGroupWrite"
+                    android:layout_width="match_parent" android:layout_height="56dp"
+                    android:text="✏️  WRITE" android:textSize="16sp"
+                    android:textColor="#121212" android:backgroundTint="#4CAF50"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- ══ KROK 2: OVĚŘENÍ + CSV ════════════════════════════ -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#2E2E2E" android:layout_marginBottom="16dp"/>
+
+                <LinearLayout
+                    android:id="@+id/llStep2Header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp">
+
+                    <TextView android:id="@+id/tvStep2Num"
+                        android:layout_width="28dp" android:layout_height="28dp"
+                        android:text="2" android:textColor="#888888" android:textSize="14sp"
+                        android:textStyle="bold" android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView android:id="@+id/tvStep2Label"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="  OVĚŘENÍ + CSV"
+                        android:textColor="#888888" android:textSize="13sp"
+                        android:textStyle="bold" android:letterSpacing="0.08"/>
+
+                </LinearLayout>
+
+                <!-- Scan button (for step 2) -->
+                <Button android:id="@+id/btnGroupScan"
+                    android:layout_width="match_parent" android:layout_height="56dp"
+                    android:text="📡  NAČÍST TAG"
+                    android:textSize="16sp" android:textColor="#121212"
+                    android:backgroundTint="#2E2E2E"
+                    android:layout_marginBottom="10dp"/>
+
+                <!-- Verification display (hidden until scan succeeds) -->
+                <LinearLayout android:id="@+id/llVerifyDisplay"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#161b22"
+                    android:padding="12dp" android:layout_marginBottom="10dp"
+                    android:visibility="gone">
+
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="VÝSLEDEK OVĚŘENÍ" android:textColor="#888888"
+                        android:textSize="10sp" android:letterSpacing="0.1"
+                        android:paddingBottom="10dp"/>
+
+                    <!-- Verification rows: label | value -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="Rok (1):" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyG1" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="Nede. (2):" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyG2" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="Nede. (3):" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyG3" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="Nede. (4):" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyG4" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="Prefix (5):" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyG5" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="ID_RFID (6):" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:textStyle="bold"/>
+                        <TextView android:id="@+id/tvVerifyG6" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:fontFamily="monospace" android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingBottom="4dp">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="EPC:" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyEpc" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#00BCD4" android:textSize="11sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView android:layout_width="90dp" android:layout_height="wrap_content"
+                            android:text="TID:" android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvVerifyTid" android:layout_width="0dp"
+                            android:layout_height="wrap_content" android:layout_weight="1"
+                            android:text="—" android:textColor="#4CAF50" android:textSize="11sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Output file -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:padding="12dp" android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="SOUBOR CSV" android:textColor="#888888"
+                        android:textSize="11sp" android:letterSpacing="0.1"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingTop="8dp"
+                        android:gravity="center_vertical">
+                        <EditText android:id="@+id/etGroupFileName"
+                            android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:hint="rfid_instalace_2026"
+                            android:textColorHint="#555555" android:textColor="#E0E0E0"
+                            android:textSize="14sp" android:fontFamily="monospace"
+                            android:inputType="textNoSuggestions" android:background="@null"
+                            android:singleLine="true"/>
+                        <Button android:id="@+id/btnGroupSetFile"
+                            android:layout_width="wrap_content" android:layout_height="40dp"
+                            android:text="Nastavit" android:textSize="12sp"
+                            android:textColor="#FFFFFF" android:backgroundTint="#1f6feb"
+                            android:layout_marginStart="8dp" android:padding="0dp"
+                            android:paddingStart="12dp" android:paddingEnd="12dp"
+                            android:insetTop="0dp" android:insetBottom="0dp"/>
+                    </LinearLayout>
+                    <TextView android:id="@+id/tvGroupFilePath"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="— soubor není nastaven —" android:textColor="#888888"
+                        android:textSize="11sp" android:fontFamily="monospace"
+                        android:paddingTop="6dp"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingTop="6dp"
+                        android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Záznamy:"
+                            android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvGroupRecordCount"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="0" android:textColor="#00BCD4" android:textSize="16sp"
+                            android:textStyle="bold" android:fontFamily="monospace"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:paddingTop="4dp"
+                        android:gravity="center_vertical">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:text="Poslední EPC:"
+                            android:textColor="#888888" android:textSize="12sp"/>
+                        <TextView android:id="@+id/tvGroupLastEpc"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="—" android:textColor="#888888" android:textSize="11sp"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- ══ KROK 3: ZAHESLOVÁNÍ ══════════════════════════════ -->
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#2E2E2E" android:layout_marginBottom="16dp"
+                    android:layout_marginTop="6dp"/>
+
+                <LinearLayout
+                    android:id="@+id/llStep3Header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp">
+
+                    <TextView android:id="@+id/tvStep3Num"
+                        android:layout_width="28dp" android:layout_height="28dp"
+                        android:text="3" android:textColor="#888888" android:textSize="14sp"
+                        android:textStyle="bold" android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView android:id="@+id/tvStep3Label"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="  ZAHESLOVÁNÍ"
+                        android:textColor="#888888" android:textSize="13sp"
+                        android:textStyle="bold" android:letterSpacing="0.08"/>
+
+                </LinearLayout>
+
+                <!-- Lock Access Pwd -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:padding="12dp" android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="ACCESS PWD" android:textColor="#888888"
+                        android:textSize="11sp" android:letterSpacing="0.1"/>
+                    <EditText android:id="@+id/etGroupLockPwd"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:hint="00000000" android:textColorHint="#555555"
+                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
+                </LinearLayout>
+
+                <!-- Lock Code -->
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:padding="12dp" android:layout_marginBottom="14dp">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="LOCK KÓD" android:textColor="#888888"
+                        android:textSize="11sp" android:letterSpacing="0.1"/>
+                    <EditText android:id="@+id/etGroupLockCode"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="008020" android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:fontFamily="monospace"
+                        android:inputType="textNoSuggestions|textCapCharacters"
+                        android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
+                </LinearLayout>
+
+                <Button android:id="@+id/btnGroupLock"
+                    android:layout_width="match_parent" android:layout_height="56dp"
+                    android:text="🔒  LOCK" android:textSize="16sp"
+                    android:textColor="#121212" android:backgroundTint="#FF9800"
+                    android:layout_marginBottom="16dp"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
 
         <!-- ══════════════════════════════════════════════════════════════════
              PAGE 3 — Uzamčení
