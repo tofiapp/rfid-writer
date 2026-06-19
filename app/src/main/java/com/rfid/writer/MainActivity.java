@@ -69,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
-    private Button btnScan, btnModeRecord, btnModeRead;
+    private Button btnScan, btnModeRecord, btnModeRead, btnToggleChipNum;
+    private boolean mChipNumVisible = true;
     private Button btnCopyRecords, btnExportCsv, btnClearAll;
     private TextView tvScanEpc, tvScanTid;
     private TextView tvStatPairs, tvStatOk, tvStatBad;
@@ -87,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvWrtPreviewLabel;
     private View     llWrtTemplateGroups;
     private Button   btnToggleWrtTemplate;
+    private View     llWrtRow1, llWrtRow2, llWrtRow3, llWrtRow4, llWrtRow5, llWrtRow6;
     // (keep existing Prt/Len/Pwd/Write IDs)
     private EditText etWritePrt, etWriteLen, etWriteAccessPwd;
     private Button   btnWrite;
@@ -101,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvEpcPreview;
     private Button   btnToggleTemplate;
     private View     llTemplateGroups;
-    private TextView tvGroupWorkflowStatus;
     // step headers
     private View     llStep1Header, llStep2Header, llStep3Header;
     private TextView tvStep1Num, tvStep2Num, tvStep3Num;
@@ -117,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
     private EditText etGroupFileName;
     private Button   btnGroupSetFile;
     private TextView tvGroupFilePath, tvGroupRecordCount, tvGroupLastEpc;
+    // step 3a controls: write password
+    private EditText etGroupPwdCurrentPwd, etGroupNewPwd;
+    private Button   btnGroupWritePwd;
     // step 3 controls
     private EditText etGroupLockPwd, etGroupLockCode;
     private Button   btnGroupLock;
@@ -226,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
         btnScan = findViewById(R.id.btnScan);
         btnModeRecord = findViewById(R.id.btnModeRecord);
         btnModeRead = findViewById(R.id.btnModeRead);
+        btnToggleChipNum = findViewById(R.id.btnToggleChipNum);
         tvScanEpc = findViewById(R.id.tvScanEpc);
         tvScanTid = findViewById(R.id.tvScanTid);
         tvStatPairs = findViewById(R.id.tvStatPairs);
@@ -259,6 +264,9 @@ public class MainActivity extends AppCompatActivity {
         tvWrtPreviewLabel  = findViewById(R.id.tvWrtPreviewLabel);
         llWrtTemplateGroups = findViewById(R.id.llWrtTemplateGroups);
         btnToggleWrtTemplate = findViewById(R.id.btnToggleWrtTemplate);
+        llWrtRow1 = findViewById(R.id.llWrtRow1); llWrtRow2 = findViewById(R.id.llWrtRow2);
+        llWrtRow3 = findViewById(R.id.llWrtRow3); llWrtRow4 = findViewById(R.id.llWrtRow4);
+        llWrtRow5 = findViewById(R.id.llWrtRow5); llWrtRow6 = findViewById(R.id.llWrtRow6);
         etWritePrt         = findViewById(R.id.etWritePrt);
         etWriteLen         = findViewById(R.id.etWriteLen);
         etWriteAccessPwd   = findViewById(R.id.etWriteAccessPwd);
@@ -282,7 +290,6 @@ public class MainActivity extends AppCompatActivity {
         tvEpcPreview           = findViewById(R.id.tvEpcPreview);
         btnToggleTemplate      = findViewById(R.id.btnToggleTemplate);
         llTemplateGroups       = findViewById(R.id.llTemplateGroups);
-        tvGroupWorkflowStatus  = findViewById(R.id.tvGroupWorkflowStatus);
         llStep1Header  = findViewById(R.id.llStep1Header);
         llStep2Header  = findViewById(R.id.llStep2Header);
         llStep3Header  = findViewById(R.id.llStep3Header);
@@ -303,6 +310,9 @@ public class MainActivity extends AppCompatActivity {
         tvGroupFilePath    = findViewById(R.id.tvGroupFilePath);
         tvGroupRecordCount = findViewById(R.id.tvGroupRecordCount);
         tvGroupLastEpc     = findViewById(R.id.tvGroupLastEpc);
+        etGroupPwdCurrentPwd = findViewById(R.id.etGroupPwdCurrentPwd);
+        etGroupNewPwd        = findViewById(R.id.etGroupNewPwd);
+        btnGroupWritePwd     = findViewById(R.id.btnGroupWritePwd);
         etGroupLockPwd  = findViewById(R.id.etGroupLockPwd);
         etGroupLockCode = findViewById(R.id.etGroupLockCode);
         btnGroupLock    = findViewById(R.id.btnGroupLock);
@@ -378,6 +388,18 @@ public class MainActivity extends AppCompatActivity {
         btnScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startScan(); });
         btnModeRecord.setOnClickListener(v -> setRecordMode(true));
         btnModeRead.setOnClickListener(v -> setRecordMode(false));
+        btnToggleChipNum.setOnClickListener(v -> {
+            mChipNumVisible = !mChipNumVisible;
+            if (mChipNumVisible) {
+                etChipNum.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                btnToggleChipNum.setText("👁");
+            } else {
+                etChipNum.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
+                        | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+                btnToggleChipNum.setText("🙈");
+            }
+            etChipNum.setSelection(etChipNum.getText().length());
+        });
         btnCopyRecords.setOnClickListener(v -> copyRecords());
         btnExportCsv.setOnClickListener(v -> exportCsv());
         btnClearAll.setOnClickListener(v -> clearAll());
@@ -386,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
         btnToggleWrtTemplate.setOnClickListener(v -> {
             boolean visible = llWrtTemplateGroups.getVisibility() == View.VISIBLE;
             llWrtTemplateGroups.setVisibility(visible ? View.GONE : View.VISIBLE);
-            btnToggleWrtTemplate.setText(visible ? "▶  EPC ŠABLONA  (rozbalit)" : "▼  EPC ŠABLONA");
+            updateWrtTemplateBtnText();
         });
 
         TextWatcher wrtWatcher = new TextWatcher() {
@@ -414,11 +436,14 @@ public class MainActivity extends AppCompatActivity {
         btnBankUser.setOnClickListener(v -> selectWriteBank(3));
         btnBankReserved.setOnClickListener(v -> selectWriteBank(0));
 
-        // Update preview when Len changes
+        // Update preview and template rows when Len changes
         etWriteLen.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { updateWrtEpcPreview(); }
+            @Override public void afterTextChanged(Editable s) {
+                updateWrtEpcPreview();
+                updateWrtTemplateRows();
+            }
         });
 
         // Page 2
@@ -449,6 +474,7 @@ public class MainActivity extends AppCompatActivity {
         btnGroupWrite.setOnClickListener(v -> groupWrite());
         btnGroupScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startGroupScan(); });
         btnGroupSetFile.setOnClickListener(v -> setGroupOutputFile());
+        btnGroupWritePwd.setOnClickListener(v -> groupWritePwd());
         btnGroupLock.setOnClickListener(v -> groupLock());
 
         // Page 3
@@ -719,12 +745,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setGroupStep(int step) {
         mGroupStep = step;
-        String[] msgs = {
-            "Krok 1: Stiskněte WRITE pro zápis EPC",
-            "Krok 2: Stiskněte NAČÍST TAG pro ověření a uložení",
-            "Krok 3: Stiskněte LOCK pro zaheslování"
-        };
-        tvGroupWorkflowStatus.setText(msgs[step]);
 
         int cyan  = Color.parseColor("#00BCD4");
         int green = Color.parseColor("#4CAF50");
@@ -772,7 +792,7 @@ public class MainActivity extends AppCompatActivity {
         if (epc.length() != 24) return;
 
         if (mWriteBank == 1) {
-            if (tvWrtPreviewLabel != null) tvWrtPreviewLabel.setText("EPC NÁHLED");
+            if (tvWrtPreviewLabel != null) tvWrtPreviewLabel.setText("náhled EPC");
             tvWrtEpcPreview.setText(
                 epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
                 epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
@@ -814,6 +834,43 @@ public class MainActivity extends AppCompatActivity {
                 ? android.graphics.Color.parseColor("#121212")
                 : android.graphics.Color.parseColor("#E0E0E0"));
         updateWrtEpcPreview();
+        updateWrtTemplateBtnText();
+        updateWrtTemplateRows();
+    }
+
+    private String getWrtTemplateLabel() {
+        if (mWriteBank == 1) return "EPC šablona";
+        if (mWriteBank == 3) return "USER šablona";
+        return "RESERVED šablona";
+    }
+
+    private void updateWrtTemplateBtnText() {
+        if (btnToggleWrtTemplate == null) return;
+        boolean visible = llWrtTemplateGroups != null
+                && llWrtTemplateGroups.getVisibility() == View.VISIBLE;
+        String label = getWrtTemplateLabel();
+        btnToggleWrtTemplate.setText(visible ? "▼  " + label : "▶  " + label + "  (rozbalit)");
+    }
+
+    private void updateWrtTemplateRows() {
+        if (mWriteBank == 1) {
+            // EPC bank — always show all 6 rows
+            showWrtRows(6);
+            return;
+        }
+        int len = 6;
+        try { len = Integer.parseInt(etWriteLen.getText().toString().trim()); }
+        catch (NumberFormatException ignored) {}
+        if (len < 1) len = 1;
+        if (len > 6) len = 6;
+        showWrtRows(len);
+    }
+
+    private void showWrtRows(int count) {
+        View[] rows = {llWrtRow1, llWrtRow2, llWrtRow3, llWrtRow4, llWrtRow5, llWrtRow6};
+        for (int i = 0; i < 6; i++) {
+            if (rows[i] != null) rows[i].setVisibility(i < count ? View.VISIBLE : View.GONE);
+        }
     }
 
     private void autoIncrementWrtGroups() {
@@ -856,6 +913,8 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception ignored) {}
         loadWrtGroupNames();
         updateWrtEpcPreview();
+        updateWrtTemplateBtnText();
+        updateWrtTemplateRows();
     }
 
     private void saveWrtGroupSettings() {
@@ -984,6 +1043,33 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     setStatus("● Skupinový zápis selhal", "#F44336");
                     toast("Zápis selhal");
+                }
+            });
+        }).start();
+    }
+
+    // ── Group Write Password — Step 3a ────────────────────────────────────
+
+    private void groupWritePwd() {
+        if (mReader == null) return;
+        String cur = readPassword(etGroupPwdCurrentPwd);
+        String np  = etGroupNewPwd.getText().toString().trim().toUpperCase();
+        if (np.isEmpty() || np.length() != 8 || !np.matches("[0-9A-F]+")) {
+            toast("Platné heslo: přesně 8 hex znaků"); return;
+        }
+        setStatus("● Zapisuji heslo...", "#FF9800");
+        btnGroupWritePwd.setEnabled(false);
+        new Thread(() -> {
+            boolean ok = mReader.writeData(cur, 0, 2, 2, np);
+            mHandler.post(() -> {
+                btnGroupWritePwd.setEnabled(true);
+                if (ok) {
+                    setStatus("● Heslo zapsáno", "#4CAF50");
+                    etGroupLockPwd.setText(np);
+                    toast("Heslo zapsáno!");
+                } else {
+                    setStatus("● Zápis hesla selhal", "#F44336");
+                    toast("Zápis hesla selhal");
                 }
             });
         }).start();
