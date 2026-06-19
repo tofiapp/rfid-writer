@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
-    private Button btnScan, btnSkip, btnModeRecord, btnModeRead;
+    private Button btnScan, btnModeRecord, btnModeRead;
     private Button btnCopyRecords, btnExportCsv, btnClearAll;
     private TextView tvScanEpc, tvScanTid;
     private TextView tvStatPairs, tvStatOk, tvStatBad;
@@ -84,11 +84,14 @@ public class MainActivity extends AppCompatActivity {
     private final CheckBox[]  cbWrtGroups    = new CheckBox[6];
     private final boolean[]   wrtGroupAutoInc = {false, false, false, false, false, true};
     private TextView tvWrtEpcPreview;
+    private TextView tvWrtPreviewLabel;
     private View     llWrtTemplateGroups;
     private Button   btnToggleWrtTemplate;
     // (keep existing Prt/Len/Pwd/Write IDs)
     private EditText etWritePrt, etWriteLen, etWriteAccessPwd;
     private Button   btnWrite;
+    private Button   btnBankEpc, btnBankUser, btnBankReserved;
+    private int      mWriteBank = 1; // 0=RESERVED, 1=EPC, 3=USER
 
     // ── Page 2: Skupinový zápis (3-step workflow) ─────────────────────────
     private final EditText[]  etGroups      = new EditText[6];
@@ -127,14 +130,14 @@ public class MainActivity extends AppCompatActivity {
     private View     llLockCodes;
 
     // ── Nastavení ─────────────────────────────────────────────────────────
-    private Button   btnToggleSettings;
+    private com.google.android.material.button.MaterialButton btnToggleSettings;
     private View     llSettings;
     private SeekBar  sbOutputPower;
     private TextView tvOutputPowerValue;
 
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying    = false;
-    private boolean mRecordMode      = true;
+    private boolean mRecordMode      = false;
     private int     mScanContext     = SCAN_CTX_TAG;
     private int     mGroupStep       = STEP_WRITE;
     private String  mGroupEpcWritten = "";   // EPC just written, needed for verify
@@ -221,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         // Page 0
         etChipNum = findViewById(R.id.etChipNum);
         btnScan = findViewById(R.id.btnScan);
-        btnSkip = findViewById(R.id.btnSkip);
         btnModeRecord = findViewById(R.id.btnModeRecord);
         btnModeRead = findViewById(R.id.btnModeRead);
         tvScanEpc = findViewById(R.id.tvScanEpc);
@@ -254,12 +256,16 @@ public class MainActivity extends AppCompatActivity {
         cbWrtGroups[2] = findViewById(R.id.cbWrt3); cbWrtGroups[3] = findViewById(R.id.cbWrt4);
         cbWrtGroups[4] = findViewById(R.id.cbWrt5); cbWrtGroups[5] = findViewById(R.id.cbWrt6);
         tvWrtEpcPreview    = findViewById(R.id.tvWrtEpcPreview);
+        tvWrtPreviewLabel  = findViewById(R.id.tvWrtPreviewLabel);
         llWrtTemplateGroups = findViewById(R.id.llWrtTemplateGroups);
         btnToggleWrtTemplate = findViewById(R.id.btnToggleWrtTemplate);
         etWritePrt         = findViewById(R.id.etWritePrt);
         etWriteLen         = findViewById(R.id.etWriteLen);
         etWriteAccessPwd   = findViewById(R.id.etWriteAccessPwd);
         btnWrite           = findViewById(R.id.btnWrite);
+        btnBankEpc         = findViewById(R.id.btnBankEpc);
+        btnBankUser        = findViewById(R.id.btnBankUser);
+        btnBankReserved    = findViewById(R.id.btnBankReserved);
 
         // Page 2
         etGroups[0] = findViewById(R.id.etGroup1); etGroups[1] = findViewById(R.id.etGroup2);
@@ -312,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         llLockCodes        = findViewById(R.id.llLockCodes);
 
         // Nastavení
-        btnToggleSettings  = findViewById(R.id.btnToggleSettings);
+        btnToggleSettings  = (com.google.android.material.button.MaterialButton) findViewById(R.id.btnToggleSettings);
         llSettings         = findViewById(R.id.llSettings);
         sbOutputPower      = findViewById(R.id.sbOutputPower);
         tvOutputPowerValue = findViewById(R.id.tvOutputPowerValue);
@@ -352,8 +358,9 @@ public class MainActivity extends AppCompatActivity {
         btnToggleSettings.setOnClickListener(v -> {
             boolean visible = llSettings.getVisibility() == View.VISIBLE;
             llSettings.setVisibility(visible ? View.GONE : View.VISIBLE);
-            btnToggleSettings.setTextColor(
-                    android.graphics.Color.parseColor(visible ? "#888888" : "#00BCD4"));
+            int tint = android.graphics.Color.parseColor(visible ? "#888888" : "#00BCD4");
+            ((com.google.android.material.button.MaterialButton) btnToggleSettings)
+                    .setIconTint(android.content.res.ColorStateList.valueOf(tint));
         });
 
         sbOutputPower.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -369,7 +376,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Page 0
         btnScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startScan(); });
-        btnSkip.setOnClickListener(v -> skipScan());
         btnModeRecord.setOnClickListener(v -> setRecordMode(true));
         btnModeRead.setOnClickListener(v -> setRecordMode(false));
         btnCopyRecords.setOnClickListener(v -> copyRecords());
@@ -402,6 +408,18 @@ public class MainActivity extends AppCompatActivity {
             cbWrtGroups[i].setOnCheckedChangeListener((b, checked) -> wrtGroupAutoInc[idx] = checked);
         }
         btnWrite.setOnClickListener(v -> writeEpc());
+
+        // Bank selection
+        btnBankEpc.setOnClickListener(v -> selectWriteBank(1));
+        btnBankUser.setOnClickListener(v -> selectWriteBank(3));
+        btnBankReserved.setOnClickListener(v -> selectWriteBank(0));
+
+        // Update preview when Len changes
+        etWriteLen.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { updateWrtEpcPreview(); }
+        });
 
         // Page 2
         btnToggleTemplate.setOnClickListener(v -> {
@@ -643,10 +661,15 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tvReadEpc.setText(epcStr.isEmpty() ? "—" : epcStr);
             tvReadTid.setText(tidStr.isEmpty() ? "—" : tidStr);
+            // Set ID_RFID from last 8 chars of EPC, stripping leading zeros
+            if (epcStr.length() >= 8) {
+                String last8 = epcStr.substring(epcStr.length() - 8);
+                String stripped = last8.replaceFirst("^0+", "");
+                if (stripped.isEmpty()) stripped = "0";
+                etChipNum.setText(stripped);
+            }
         }
     }
-
-    private void skipScan() { savePair("", ""); }
 
     // ── Tag found — Tab 2 group workflow context ───────────────────────────
 
@@ -746,12 +769,51 @@ public class MainActivity extends AppCompatActivity {
     private void updateWrtEpcPreview() {
         if (tvWrtEpcPreview == null) return;
         String epc = buildWrtEpc();
-        if (epc.length() == 24) {
+        if (epc.length() != 24) return;
+
+        if (mWriteBank == 1) {
+            if (tvWrtPreviewLabel != null) tvWrtPreviewLabel.setText("EPC NÁHLED");
             tvWrtEpcPreview.setText(
                 epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
                 epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
                 epc.substring(16,20)+"-"+epc.substring(20,24));
+        } else {
+            String label = (mWriteBank == 3) ? "náhled USER" : "náhled RESERVED";
+            if (tvWrtPreviewLabel != null) tvWrtPreviewLabel.setText(label);
+            int len = 6;
+            try { len = Integer.parseInt(etWriteLen.getText().toString().trim()); }
+            catch (NumberFormatException ignored) {}
+            if (len < 1) len = 1;
+            if (len > 6) len = 6;
+            StringBuilder preview = new StringBuilder();
+            for (int i = 0; i < len; i++) {
+                if (i > 0) preview.append("-");
+                preview.append(epc, i * 4, i * 4 + 4);
+            }
+            tvWrtEpcPreview.setText(preview.toString());
         }
+    }
+
+    private void selectWriteBank(int bank) {
+        mWriteBank = bank;
+        int active   = android.graphics.Color.parseColor("#00BCD4");
+        int inactive = android.graphics.Color.parseColor("#2E2E2E");
+        btnBankEpc.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 1 ? active : inactive));
+        btnBankEpc.setTextColor(bank == 1
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+        btnBankUser.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 3 ? active : inactive));
+        btnBankUser.setTextColor(bank == 3
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+        btnBankReserved.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 0 ? active : inactive));
+        btnBankReserved.setTextColor(bank == 0
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+        updateWrtEpcPreview();
     }
 
     private void autoIncrementWrtGroups() {
@@ -813,8 +875,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void writeEpc() {
         if (mReader == null) return;
-        String newEpc = buildWrtEpc();
-        if (!newEpc.matches("[0-9A-F]{24}")) { toast("Neplatné hex znaky v šabloně"); return; }
+        String templateEpc = buildWrtEpc();
+        if (!templateEpc.matches("[0-9A-F]{24}")) { toast("Neplatné hex znaky v šabloně"); return; }
 
         int prt, len;
         try {
@@ -822,22 +884,35 @@ public class MainActivity extends AppCompatActivity {
             len = Integer.parseInt(etWriteLen.getText().toString().trim());
         } catch (NumberFormatException e) { toast("Neplatné Prt / Len"); return; }
 
+        // Build write data: exactly len * 4 hex chars
+        int dataLen = len * 4;
+        String data;
+        if (dataLen <= 24) {
+            data = templateEpc.substring(0, dataLen);
+        } else {
+            StringBuilder sb = new StringBuilder(templateEpc);
+            while (sb.length() < dataLen) sb.append("0000");
+            data = sb.substring(0, dataLen);
+        }
+
         String accessPwd = readPassword(etWriteAccessPwd);
-        setStatus("● Zapisuji EPC...", "#FF9800");
+        String bankName = mWriteBank == 1 ? "EPC" : mWriteBank == 3 ? "USER" : "RESERVED";
+        setStatus("● Zapisuji " + bankName + "...", "#FF9800");
         btnWrite.setEnabled(false);
 
-        final int fp = prt, fl = len;
+        final int fp = prt, fl = len, fb = mWriteBank;
+        final String fd = data, fe = templateEpc;
         new Thread(() -> {
-            boolean ok = mReader.writeData(accessPwd, 1, fp, fl, newEpc);
+            boolean ok = mReader.writeData(accessPwd, fb, fp, fl, fd);
             mHandler.post(() -> {
                 btnWrite.setEnabled(true);
                 if (ok) {
-                    tvScanEpc.setText(newEpc);
-                    setStatus("● EPC zapsáno OK", "#4CAF50");
-                    toast("EPC zapsáno!");
-                    autoIncrementWrtGroups();
+                    if (fb == 1) tvScanEpc.setText(fe);
+                    setStatus("● " + bankName + " zapsáno OK", "#4CAF50");
+                    toast(bankName + " zapsáno!");
+                    if (fb == 1) autoIncrementWrtGroups();
                 } else {
-                    setStatus("● Zápis EPC selhal", "#F44336");
+                    setStatus("● Zápis " + bankName + " selhal", "#F44336");
                     toast("Zápis selhal");
                 }
             });
