@@ -1,0 +1,11 @@
+# Android build
+.gradle/
+app/build/
+build/
+
+# Local SDK path — not tracked, each dev sets their own
+local.properties
+
+# Android Studio
+.idea/
+*.iml
