@@ -80,6 +80,18 @@ public class MainActivity extends AppCompatActivity {
     private View llStats, llListHeader, llEmptyState, llReadResult;
     private TextView tvReadEpc, tvReadTid;
 
+    // ── Page 0: Lupa CSV vstup ────────────────────────────────────────────
+    private EditText etLupaFileName;
+    private Button   btnLupaSetFile;
+    private TextView tvLupaFilePath;
+    private View     llLupaFileInput;
+    private View     llLupaGroups;
+    private final TextView[] tvLupaGroupLabels = new TextView[4];
+    private final TextView[] tvLupaGroupValues = new TextView[4];
+    private String   mLupaInputFile  = null;
+    private final java.util.HashMap<String, String[]> mLupaCsvData = new java.util.HashMap<>();
+    private String[] mLupaColumnNames = {"Skupina 1", "Skupina 2", "Skupina 3", "Skupina 4"};
+
     // ── Page 1: Zápis EPC — template ──────────────────────────────────────
     private final EditText[]  etWrtGroups    = new EditText[6];
     private final EditText[]  etWrtGroupNames = new EditText[6]; // groups 1-6, all editable
@@ -183,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
         loadSettings();
         loadGroupSettings();
         loadWrtGroupSettings();
+        loadLupaSettings();
         initReader();
     }
 
@@ -260,6 +273,19 @@ public class MainActivity extends AppCompatActivity {
         btnCopyRecords = findViewById(R.id.btnCopyRecords);
         btnExportCsv = findViewById(R.id.btnExportCsv);
         btnClearAll = findViewById(R.id.btnClearAll);
+        etLupaFileName   = findViewById(R.id.etLupaFileName);
+        btnLupaSetFile   = findViewById(R.id.btnLupaSetFile);
+        tvLupaFilePath   = findViewById(R.id.tvLupaFilePath);
+        llLupaFileInput  = findViewById(R.id.llLupaFileInput);
+        llLupaGroups     = findViewById(R.id.llLupaGroups);
+        tvLupaGroupLabels[0] = findViewById(R.id.tvLupaLabel1);
+        tvLupaGroupLabels[1] = findViewById(R.id.tvLupaLabel2);
+        tvLupaGroupLabels[2] = findViewById(R.id.tvLupaLabel3);
+        tvLupaGroupLabels[3] = findViewById(R.id.tvLupaLabel4);
+        tvLupaGroupValues[0] = findViewById(R.id.tvLupaVal1);
+        tvLupaGroupValues[1] = findViewById(R.id.tvLupaVal2);
+        tvLupaGroupValues[2] = findViewById(R.id.tvLupaVal3);
+        tvLupaGroupValues[3] = findViewById(R.id.tvLupaVal4);
 
         // Page 1 template
         etWrtGroups[0] = findViewById(R.id.etWrt1); etWrtGroups[1] = findViewById(R.id.etWrt2);
@@ -407,6 +433,7 @@ public class MainActivity extends AppCompatActivity {
         btnCopyRecords.setOnClickListener(v -> copyRecords());
         btnExportCsv.setOnClickListener(v -> exportCsv());
         btnClearAll.setOnClickListener(v -> clearAll());
+        btnLupaSetFile.setOnClickListener(v -> setLupaInputFile());
 
         // Page 1 — template
         btnToggleWrtTemplate.setOnClickListener(v -> {
@@ -716,6 +743,11 @@ public class MainActivity extends AppCompatActivity {
                 String stripped = last8.replaceFirst("^0+", "");
                 if (stripped.isEmpty()) stripped = "0";
                 etChipNum.setText(stripped);
+            }
+            if (!tidStr.isEmpty() && !mLupaCsvData.isEmpty()) {
+                lookupAndDisplayFromCsv(tidStr);
+            } else {
+                llLupaGroups.setVisibility(View.GONE);
             }
         }
     }
@@ -1350,6 +1382,8 @@ public class MainActivity extends AppCompatActivity {
         int rv = record ? View.VISIBLE : View.GONE;
         llStats.setVisibility(rv); llListHeader.setVisibility(rv); svRecords.setVisibility(rv);
         llReadResult.setVisibility(record ? View.GONE : View.VISIBLE);
+        llLupaFileInput.setVisibility(record ? View.GONE : View.VISIBLE);
+        if (record) llLupaGroups.setVisibility(View.GONE);
     }
 
     private void savePair(String epc, String tid) {
@@ -1583,5 +1617,101 @@ public class MainActivity extends AppCompatActivity {
             sb.append(hex, i, Math.min(i + 4, hex.length()));
         }
         return sb.toString();
+    }
+
+    // ── Lupa CSV vstup ────────────────────────────────────────────────────
+
+    private void setLupaInputFile() {
+        String name = etLupaFileName.getText().toString().trim();
+        if (name.isEmpty()) { toast("Zadejte název souboru"); return; }
+        try {
+            File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            if (dir == null) dir = getFilesDir();
+            File file = new File(dir, name + ".csv");
+            if (!file.exists()) {
+                toast("⚠️ Soubor nenalezen: " + file.getName());
+                return;
+            }
+            mLupaInputFile = file.getAbsolutePath();
+            loadLupaCsvData();
+            saveLupaSettings();
+        } catch (Exception e) { toast("Chyba: " + e.getMessage()); }
+    }
+
+    private void loadLupaCsvData() {
+        mLupaCsvData.clear();
+        if (mLupaInputFile == null) return;
+        try {
+            java.io.BufferedReader br = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(new java.io.FileInputStream(mLupaInputFile), "UTF-8"));
+            String headerLine = br.readLine();
+            if (headerLine != null) {
+                if (headerLine.startsWith("\uFEFF")) headerLine = headerLine.substring(1);
+                String[] headers = headerLine.split(";", -1);
+                // CSV: ID_RFID(0);EPC(1);TID(2);Col1(3);Col2(4);Col3(5);Col4(6)
+                for (int i = 0; i < 4; i++) {
+                    int col = 3 + i;
+                    mLupaColumnNames[i] = (col < headers.length) ? headers[col].trim() : ("Skupina " + (i + 1));
+                }
+            }
+            updateLupaGroupLabels();
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] cols = line.split(";", -1);
+                if (cols.length < 3) continue;
+                String tid = cols[2].trim().replace("-", "").toUpperCase();
+                if (!tid.isEmpty()) mLupaCsvData.put(tid, cols);
+            }
+            br.close();
+            File f = new File(mLupaInputFile);
+            tvLupaFilePath.setText(f.getName() + " (" + mLupaCsvData.size() + " záznamů)");
+            toast("✅ Načteno " + mLupaCsvData.size() + " záznamů");
+        } catch (Exception e) {
+            toast("Chyba načítání: " + e.getMessage());
+        }
+    }
+
+    private void updateLupaGroupLabels() {
+        for (int i = 0; i < 4; i++) {
+            if (tvLupaGroupLabels[i] != null)
+                tvLupaGroupLabels[i].setText(mLupaColumnNames[i] + ":");
+        }
+    }
+
+    private void lookupAndDisplayFromCsv(String tid) {
+        String tidKey = tid.replace("-", "").toUpperCase();
+        String[] row = mLupaCsvData.get(tidKey);
+        if (row == null) {
+            llLupaGroups.setVisibility(View.GONE);
+            toast("TID nenalezeno v CSV");
+            return;
+        }
+        for (int i = 0; i < 4; i++) {
+            int col = 3 + i;
+            String val = (col < row.length) ? row[col].trim() : "";
+            String stripped = val.replaceFirst("^0+", "");
+            if (stripped.isEmpty()) stripped = val.isEmpty() ? "—" : "0";
+            tvLupaGroupValues[i].setText(stripped);
+        }
+        llLupaGroups.setVisibility(View.VISIBLE);
+    }
+
+    private void saveLupaSettings() {
+        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putString("lupa_file", mLupaInputFile).apply();
+    }
+
+    private void loadLupaSettings() {
+        mLupaInputFile = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("lupa_file", null);
+        if (mLupaInputFile != null) {
+            File f = new File(mLupaInputFile);
+            if (f.exists()) {
+                loadLupaCsvData();
+                etLupaFileName.setText(f.getName().replace(".csv", ""));
+            } else {
+                mLupaInputFile = null;
+            }
+        }
     }
 }
