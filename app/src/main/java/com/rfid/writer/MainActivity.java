@@ -20,6 +20,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 1: Zápis EPC — template ──────────────────────────────────────
     private final EditText[]  etWrtGroups    = new EditText[6];
+    private final EditText[]  etWrtGroupNames = new EditText[5]; // groups 1-5, editable labels
     private final CheckBox[]  cbWrtGroups    = new CheckBox[6];
     private final boolean[]   wrtGroupAutoInc = {false, false, false, false, false, true};
     private TextView tvWrtEpcPreview;
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 2: Skupinový zápis (3-step workflow) ─────────────────────────
     private final EditText[]  etGroups      = new EditText[6];
+    private final EditText[]  etGroupNames  = new EditText[5]; // groups 1-5, editable labels
     private final CheckBox[]  cbGroups      = new CheckBox[6];
     private final boolean[]   groupAutoInc  = {false, false, false, false, false, true};
     private TextView tvEpcPreview;
@@ -120,6 +123,14 @@ public class MainActivity extends AppCompatActivity {
     private Button   btnWritePwd;
     private EditText etLockAccessPwd, etLockCode;
     private Button   btnLock;
+    private Button   btnToggleLockCodes;
+    private View     llLockCodes;
+
+    // ── Nastavení ─────────────────────────────────────────────────────────
+    private Button   btnToggleSettings;
+    private View     llSettings;
+    private SeekBar  sbOutputPower;
+    private TextView tvOutputPowerValue;
 
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying    = false;
@@ -153,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         loadRecords();
         renderRecordList();
         updateStats();
+        loadSettings();
         loadGroupSettings();
         loadWrtGroupSettings();
         initReader();
@@ -233,6 +245,11 @@ public class MainActivity extends AppCompatActivity {
         etWrtGroups[0] = findViewById(R.id.etWrt1); etWrtGroups[1] = findViewById(R.id.etWrt2);
         etWrtGroups[2] = findViewById(R.id.etWrt3); etWrtGroups[3] = findViewById(R.id.etWrt4);
         etWrtGroups[4] = findViewById(R.id.etWrt5); etWrtGroups[5] = findViewById(R.id.etWrt6);
+        etWrtGroupNames[0] = findViewById(R.id.etWrtGrpName1);
+        etWrtGroupNames[1] = findViewById(R.id.etWrtGrpName2);
+        etWrtGroupNames[2] = findViewById(R.id.etWrtGrpName3);
+        etWrtGroupNames[3] = findViewById(R.id.etWrtGrpName4);
+        etWrtGroupNames[4] = findViewById(R.id.etWrtGrpName5);
         cbWrtGroups[0] = findViewById(R.id.cbWrt1); cbWrtGroups[1] = findViewById(R.id.cbWrt2);
         cbWrtGroups[2] = findViewById(R.id.cbWrt3); cbWrtGroups[3] = findViewById(R.id.cbWrt4);
         cbWrtGroups[4] = findViewById(R.id.cbWrt5); cbWrtGroups[5] = findViewById(R.id.cbWrt6);
@@ -248,6 +265,11 @@ public class MainActivity extends AppCompatActivity {
         etGroups[0] = findViewById(R.id.etGroup1); etGroups[1] = findViewById(R.id.etGroup2);
         etGroups[2] = findViewById(R.id.etGroup3); etGroups[3] = findViewById(R.id.etGroup4);
         etGroups[4] = findViewById(R.id.etGroup5); etGroups[5] = findViewById(R.id.etGroup6);
+        etGroupNames[0] = findViewById(R.id.etGrpName1);
+        etGroupNames[1] = findViewById(R.id.etGrpName2);
+        etGroupNames[2] = findViewById(R.id.etGrpName3);
+        etGroupNames[3] = findViewById(R.id.etGrpName4);
+        etGroupNames[4] = findViewById(R.id.etGrpName5);
         cbGroups[0] = findViewById(R.id.cbGroup1); cbGroups[1] = findViewById(R.id.cbGroup2);
         cbGroups[2] = findViewById(R.id.cbGroup3); cbGroups[3] = findViewById(R.id.cbGroup4);
         cbGroups[4] = findViewById(R.id.cbGroup5); cbGroups[5] = findViewById(R.id.cbGroup6);
@@ -286,6 +308,14 @@ public class MainActivity extends AppCompatActivity {
         etLockAccessPwd = findViewById(R.id.etLockAccessPwd);
         etLockCode      = findViewById(R.id.etLockCode);
         btnLock         = findViewById(R.id.btnLock);
+        btnToggleLockCodes = findViewById(R.id.btnToggleLockCodes);
+        llLockCodes        = findViewById(R.id.llLockCodes);
+
+        // Nastavení
+        btnToggleSettings  = findViewById(R.id.btnToggleSettings);
+        llSettings         = findViewById(R.id.llSettings);
+        sbOutputPower      = findViewById(R.id.sbOutputPower);
+        tvOutputPowerValue = findViewById(R.id.tvOutputPowerValue);
     }
 
     private void setupTabs() {
@@ -318,6 +348,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bindButtons() {
+        // Nastavení toggle
+        btnToggleSettings.setOnClickListener(v -> {
+            boolean visible = llSettings.getVisibility() == View.VISIBLE;
+            llSettings.setVisibility(visible ? View.GONE : View.VISIBLE);
+            btnToggleSettings.setTextColor(
+                    android.graphics.Color.parseColor(visible ? "#888888" : "#00BCD4"));
+        });
+
+        sbOutputPower.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
+                tvOutputPowerValue.setText(progress + " dBm");
+                if (fromUser) saveSettings();
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) {}
+            @Override public void onStopTrackingTouch(SeekBar sb) {
+                applyOutputPower(sb.getProgress());
+            }
+        });
+
         // Page 0
         btnScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startScan(); });
         btnSkip.setOnClickListener(v -> skipScan());
@@ -341,6 +390,13 @@ public class MainActivity extends AppCompatActivity {
         };
         for (EditText et : etWrtGroups) et.addTextChangedListener(wrtWatcher);
 
+        TextWatcher wrtNameWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { saveWrtGroupNames(); }
+        };
+        for (EditText et : etWrtGroupNames) et.addTextChangedListener(wrtNameWatcher);
+
         for (int i = 0; i < 6; i++) {
             final int idx = i;
             cbWrtGroups[i].setOnCheckedChangeListener((b, checked) -> wrtGroupAutoInc[idx] = checked);
@@ -361,6 +417,13 @@ public class MainActivity extends AppCompatActivity {
         };
         for (EditText et : etGroups) et.addTextChangedListener(grpWatcher);
 
+        TextWatcher grpNameWatcher = new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { onGroupNameChanged(); }
+        };
+        for (EditText et : etGroupNames) et.addTextChangedListener(grpNameWatcher);
+
         for (int i = 0; i < 6; i++) {
             final int idx = i;
             cbGroups[i].setOnCheckedChangeListener((b, checked) -> groupAutoInc[idx] = checked);
@@ -373,6 +436,11 @@ public class MainActivity extends AppCompatActivity {
         // Page 3
         btnWritePwd.setOnClickListener(v -> writePwd());
         btnLock.setOnClickListener(v -> lockTag());
+        btnToggleLockCodes.setOnClickListener(v -> {
+            boolean visible = llLockCodes.getVisibility() == View.VISIBLE;
+            llLockCodes.setVisibility(visible ? View.GONE : View.VISIBLE);
+            btnToggleLockCodes.setText(visible ? "▶  PŘEHLED LOCK KÓDŮ" : "▼  PŘEHLED LOCK KÓDŮ");
+        });
     }
 
     // ── SDK init ──────────────────────────────────────────────────────────
@@ -386,6 +454,7 @@ public class MainActivity extends AppCompatActivity {
                     if (ok) {
                         setStatus("● Připojeno — Chainway C5", "#4CAF50");
                         btnScan.setEnabled(true);
+                        applyOutputPower(sbOutputPower.getProgress());
                     } else {
                         setStatus("● Chyba inicializace", "#F44336");
                         Log.e(TAG, "init() false");
@@ -395,6 +464,112 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.post(() -> setStatus("● SDK chyba: " + e.getMessage(), "#F44336"));
             }
         }).start();
+    }
+
+    // ── Nastavení (output power) ──────────────────────────────────────────
+
+    private static final String KEY_OUTPUT_POWER = "output_power";
+
+    private void loadSettings() {
+        int power = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                .getInt(KEY_OUTPUT_POWER, 20);
+        sbOutputPower.setProgress(power);
+        tvOutputPowerValue.setText(power + " dBm");
+    }
+
+    private void saveSettings() {
+        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putInt(KEY_OUTPUT_POWER, sbOutputPower.getProgress()).apply();
+    }
+
+    private void applyOutputPower(int power) {
+        if (mReader == null) return;
+        new Thread(() -> {
+            try {
+                mReader.setPower(power);
+            } catch (Exception e) {
+                Log.w(TAG, "setPower: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    // ── EPC template group names ──────────────────────────────────────────
+
+    private static final String KEY_WRT_GROUP_NAMES = "wrt_group_names";
+    private static final String KEY_GROUP_NAMES_P2  = "group_names_p2";
+    private static final String[] DEFAULT_WRT_NAMES = {"Rok", "—", "—", "—", "Prefix"};
+    private static final String[] DEFAULT_GRP_NAMES = {"Rok", "—", "—", "—", "Prefix"};
+
+    private void loadWrtGroupNames() {
+        try {
+            String json = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .getString(KEY_WRT_GROUP_NAMES, null);
+            if (json != null) {
+                JSONArray arr = new JSONArray(json);
+                for (int i = 0; i < 5 && i < arr.length(); i++)
+                    etWrtGroupNames[i].setText(arr.getString(i));
+            } else {
+                for (int i = 0; i < 5; i++) etWrtGroupNames[i].setText(DEFAULT_WRT_NAMES[i]);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void saveWrtGroupNames() {
+        try {
+            JSONArray arr = new JSONArray();
+            for (int i = 0; i < 5; i++) arr.put(etWrtGroupNames[i].getText().toString());
+            getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                    .putString(KEY_WRT_GROUP_NAMES, arr.toString()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void loadGrpNames() {
+        try {
+            String json = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+                    .getString(KEY_GROUP_NAMES_P2, null);
+            if (json != null) {
+                JSONArray arr = new JSONArray(json);
+                for (int i = 0; i < 5 && i < arr.length(); i++)
+                    etGroupNames[i].setText(arr.getString(i));
+            } else {
+                for (int i = 0; i < 5; i++) etGroupNames[i].setText(DEFAULT_GRP_NAMES[i]);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void saveGrpNames() {
+        try {
+            JSONArray arr = new JSONArray();
+            for (int i = 0; i < 5; i++) arr.put(etGroupNames[i].getText().toString());
+            getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                    .putString(KEY_GROUP_NAMES_P2, arr.toString()).apply();
+        } catch (Exception ignored) {}
+    }
+
+    private void onGroupNameChanged() {
+        saveGrpNames();
+        if (mGroupOutputFile != null && mGroupRecordCount == 0) {
+            try {
+                File file = new File(mGroupOutputFile);
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    fos.write(buildGroupCsvHeader().getBytes("UTF-8"));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "rewrite CSV header: " + e.getMessage());
+            }
+        }
+    }
+
+    private String buildGroupCsvHeader() {
+        String g1 = etGroupNames[0].getText().toString().trim();
+        String g2 = etGroupNames[1].getText().toString().trim();
+        String g3 = etGroupNames[2].getText().toString().trim();
+        String g4 = etGroupNames[3].getText().toString().trim();
+        if (g1.isEmpty() || g1.equals("—")) g1 = "Skupina_1";
+        if (g2.isEmpty() || g2.equals("—")) g2 = "Skupina_2";
+        if (g3.isEmpty() || g3.equals("—")) g3 = "Skupina_3";
+        if (g4.isEmpty() || g4.equals("—")) g4 = "Skupina_4";
+        return "\uFEFFID_RFID,EPC,TID," + g1 + "," + g2 + "," + g3 + "," + g4 + "\n";
     }
 
     // ── Scan helpers ──────────────────────────────────────────────────────
@@ -617,6 +792,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         } catch (Exception ignored) {}
+        loadWrtGroupNames();
         updateWrtEpcPreview();
     }
 
@@ -785,8 +961,7 @@ public class MainActivity extends AppCompatActivity {
             File file = new File(dir, name + ".csv");
             if (!file.exists()) {
                 try (FileOutputStream fos = new FileOutputStream(file)) {
-                    fos.write("\uFEFFID_RFID,EPC,TID,ROK,Nedefinovano_2,Nedefinovano_3,Nedefinovano_4\n"
-                            .getBytes("UTF-8"));
+                    fos.write(buildGroupCsvHeader().getBytes("UTF-8"));
                 }
                 mGroupRecordCount = 0;
             }
@@ -844,6 +1019,7 @@ public class MainActivity extends AppCompatActivity {
             tvGroupRecordCount.setText(String.valueOf(mGroupRecordCount));
             etGroupFileName.setText(f.getName().replace(".csv", ""));
         }
+        loadGrpNames();
         updateGroupEpcPreview();
         setGroupStep(STEP_WRITE);
     }
