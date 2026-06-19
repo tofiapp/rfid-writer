@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
     private Button btnScan, btnModeRecord, btnModeRead, btnToggleChipNum;
-    private boolean mChipNumVisible = true;
+    private boolean mAutoLoadIdRfid = true;
     private Button btnCopyRecords, btnExportCsv, btnClearAll;
     private TextView tvScanEpc, tvScanTid;
     private TextView tvStatPairs, tvStatOk, tvStatBad;
@@ -101,8 +101,12 @@ public class MainActivity extends AppCompatActivity {
     private final CheckBox[]  cbGroups      = new CheckBox[6];
     private final boolean[]   groupAutoInc  = {false, false, false, false, false, true};
     private TextView tvEpcPreview;
+    private TextView tvGrpPreviewLabel;
     private Button   btnToggleTemplate;
     private View     llTemplateGroups;
+    private Button   btnGrpBankEpc, btnGrpBankUser, btnGrpBankReserved;
+    private EditText etGroupPrt, etGroupLen;
+    private int      mGroupWriteBank = 1; // 0=RESERVED, 1=EPC, 3=USER
     // step headers
     private View     llStep1Header, llStep2Header, llStep3Header;
     private TextView tvStep1Num, tvStep2Num, tvStep3Num;
@@ -288,8 +292,14 @@ public class MainActivity extends AppCompatActivity {
         cbGroups[2] = findViewById(R.id.cbGroup3); cbGroups[3] = findViewById(R.id.cbGroup4);
         cbGroups[4] = findViewById(R.id.cbGroup5); cbGroups[5] = findViewById(R.id.cbGroup6);
         tvEpcPreview           = findViewById(R.id.tvEpcPreview);
+        tvGrpPreviewLabel      = findViewById(R.id.tvGrpPreviewLabel);
         btnToggleTemplate      = findViewById(R.id.btnToggleTemplate);
         llTemplateGroups       = findViewById(R.id.llTemplateGroups);
+        btnGrpBankEpc          = findViewById(R.id.btnGrpBankEpc);
+        btnGrpBankUser         = findViewById(R.id.btnGrpBankUser);
+        btnGrpBankReserved     = findViewById(R.id.btnGrpBankReserved);
+        etGroupPrt             = findViewById(R.id.etGroupPrt);
+        etGroupLen             = findViewById(R.id.etGroupLen);
         llStep1Header  = findViewById(R.id.llStep1Header);
         llStep2Header  = findViewById(R.id.llStep2Header);
         llStep3Header  = findViewById(R.id.llStep3Header);
@@ -349,16 +359,6 @@ public class MainActivity extends AppCompatActivity {
         pageGroupWrite.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
         pageLock.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
 
-        // Sync Group 6 (ID_RFID) on Tab 1 and Tab 2 when entering
-        String chipNum = etChipNum.getText().toString().trim();
-        if (!chipNum.isEmpty()) {
-            try {
-                int n = Integer.parseInt(chipNum);
-                String fmt = String.format("%04d", n % 10000);
-                if (index == 1) etWrtGroups[5].setText(fmt);
-                if (index == 2) etGroups[5].setText(fmt);
-            } catch (NumberFormatException ignored) {}
-        }
         if (index == 1) updateWrtEpcPreview();
         if (index == 2) updateGroupEpcPreview();
     }
@@ -389,16 +389,9 @@ public class MainActivity extends AppCompatActivity {
         btnModeRecord.setOnClickListener(v -> setRecordMode(true));
         btnModeRead.setOnClickListener(v -> setRecordMode(false));
         btnToggleChipNum.setOnClickListener(v -> {
-            mChipNumVisible = !mChipNumVisible;
-            if (mChipNumVisible) {
-                etChipNum.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-                btnToggleChipNum.setText("👁");
-            } else {
-                etChipNum.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
-                        | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-                btnToggleChipNum.setText("🙈");
-            }
-            etChipNum.setSelection(etChipNum.getText().length());
+            mAutoLoadIdRfid = !mAutoLoadIdRfid;
+            btnToggleChipNum.setText(mAutoLoadIdRfid ? "🔄" : "🚫");
+            toast(mAutoLoadIdRfid ? "ID_RFID: automatické načítání ZAP" : "ID_RFID: automatické načítání VYP");
         });
         btnCopyRecords.setOnClickListener(v -> copyRecords());
         btnExportCsv.setOnClickListener(v -> exportCsv());
@@ -450,7 +443,7 @@ public class MainActivity extends AppCompatActivity {
         btnToggleTemplate.setOnClickListener(v -> {
             boolean visible = llTemplateGroups.getVisibility() == View.VISIBLE;
             llTemplateGroups.setVisibility(visible ? View.GONE : View.VISIBLE);
-            btnToggleTemplate.setText(visible ? "▶  EPC ŠABLONA  (rozbalit)" : "▼  EPC ŠABLONA  (sbalit)");
+            updateGrpTemplateBtnText();
         });
 
         TextWatcher grpWatcher = new TextWatcher() {
@@ -476,6 +469,20 @@ public class MainActivity extends AppCompatActivity {
         btnGroupSetFile.setOnClickListener(v -> setGroupOutputFile());
         btnGroupWritePwd.setOnClickListener(v -> groupWritePwd());
         btnGroupLock.setOnClickListener(v -> groupLock());
+
+        // Skupinový bank selection
+        btnGrpBankEpc.setOnClickListener(v -> selectGroupWriteBank(1));
+        btnGrpBankUser.setOnClickListener(v -> selectGroupWriteBank(3));
+        btnGrpBankReserved.setOnClickListener(v -> selectGroupWriteBank(0));
+
+        // Update skupinový preview and template rows when Len changes
+        etGroupLen.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                updateGroupEpcPreview();
+            }
+        });
 
         // Page 3
         btnWritePwd.setOnClickListener(v -> writePwd());
@@ -688,7 +695,7 @@ public class MainActivity extends AppCompatActivity {
             tvReadEpc.setText(epcStr.isEmpty() ? "—" : epcStr);
             tvReadTid.setText(tidStr.isEmpty() ? "—" : tidStr);
             // Set ID_RFID from last 8 chars of EPC, stripping leading zeros
-            if (epcStr.length() >= 8) {
+            if (mAutoLoadIdRfid && epcStr.length() >= 8) {
                 String last8 = epcStr.substring(epcStr.length() - 8);
                 String stripped = last8.replaceFirst("^0+", "");
                 if (stripped.isEmpty()) stripped = "0";
@@ -746,31 +753,38 @@ public class MainActivity extends AppCompatActivity {
     private void setGroupStep(int step) {
         mGroupStep = step;
 
-        int cyan  = Color.parseColor("#00BCD4");
-        int green = Color.parseColor("#4CAF50");
-        int gray  = Color.parseColor("#888888");
-        int dark  = Color.parseColor("#2E2E2E");
+        int cyan   = Color.parseColor("#00BCD4");
+        int green  = Color.parseColor("#4CAF50");
+        int orange = Color.parseColor("#FF9800");
+        int gray   = Color.parseColor("#888888");
+        int dark   = Color.parseColor("#2E2E2E");
+
+        // Step numbers are always white for visibility
+        tvStep1Num.setTextColor(Color.WHITE);
+        tvStep2Num.setTextColor(Color.WHITE);
+        tvStep3Num.setTextColor(Color.WHITE);
 
         // Step 1
         int c1 = (step == STEP_WRITE) ? cyan : (step > STEP_WRITE ? green : gray);
-        tvStep1Num.setTextColor(step == STEP_WRITE ? Color.parseColor("#121212") : c1);
         tvStep1Label.setTextColor(c1);
         btnGroupWrite.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                step == STEP_WRITE ? Color.parseColor("#4CAF50") : dark));
+                step == STEP_WRITE ? green : dark));
 
         // Step 2
         int c2 = (step == STEP_SCAN) ? cyan : (step > STEP_SCAN ? green : gray);
-        tvStep2Num.setTextColor(step == STEP_SCAN ? Color.parseColor("#121212") : c2);
         tvStep2Label.setTextColor(c2);
         btnGroupScan.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 step == STEP_SCAN ? cyan : dark));
 
-        // Step 3
-        int c3 = (step == STEP_LOCK) ? Color.parseColor("#FF9800") : gray;
-        tvStep3Num.setTextColor(step == STEP_LOCK ? Color.parseColor("#121212") : c3);
+        // Step 3 (ZAHESLOVÁNÍ) + ZÁPIS HESLA sub-button
+        int c3 = (step == STEP_LOCK) ? orange : gray;
         tvStep3Label.setTextColor(c3);
+        btnGroupWritePwd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                step == STEP_LOCK ? green : dark));
+        btnGroupWritePwd.setTextColor(step == STEP_LOCK
+                ? Color.parseColor("#121212") : Color.parseColor("#888888"));
         btnGroupLock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
-                step == STEP_LOCK ? Color.parseColor("#FF9800") : dark));
+                step == STEP_LOCK ? orange : dark));
     }
 
     // ── Page 1 — EPC template (Zápis EPC) ────────────────────────────────
@@ -994,10 +1008,71 @@ public class MainActivity extends AppCompatActivity {
     private void updateGroupEpcPreview() {
         if (tvEpcPreview == null) return;
         String epc = buildGroupEpc();
-        if (epc.length() == 24)
+        if (epc.length() != 24) return;
+
+        if (mGroupWriteBank == 1) {
+            if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText("EPC NÁHLED");
             tvEpcPreview.setText(epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
                 epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
                 epc.substring(16,20)+"-"+epc.substring(20,24));
+        } else {
+            String label = (mGroupWriteBank == 3) ? "USER NÁHLED" : "RESERVED NÁHLED";
+            if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText(label);
+            int len = 6;
+            try { len = Integer.parseInt(etGroupLen.getText().toString().trim()); }
+            catch (NumberFormatException ignored) {}
+            if (len < 1) len = 1;
+            if (len > 6) len = 6;
+            StringBuilder preview = new StringBuilder();
+            for (int i = 0; i < len; i++) {
+                if (i > 0) preview.append("-");
+                preview.append(epc, i * 4, i * 4 + 4);
+            }
+            tvEpcPreview.setText(preview.toString());
+        }
+    }
+
+    private void selectGroupWriteBank(int bank) {
+        mGroupWriteBank = bank;
+        int active   = android.graphics.Color.parseColor("#00BCD4");
+        int inactive = android.graphics.Color.parseColor("#2E2E2E");
+        btnGrpBankEpc.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 1 ? active : inactive));
+        btnGrpBankEpc.setTextColor(bank == 1
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+        btnGrpBankUser.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 3 ? active : inactive));
+        btnGrpBankUser.setTextColor(bank == 3
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+        btnGrpBankReserved.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(bank == 0 ? active : inactive));
+        btnGrpBankReserved.setTextColor(bank == 0
+                ? android.graphics.Color.parseColor("#121212")
+                : android.graphics.Color.parseColor("#E0E0E0"));
+
+        // Update Prt/Len defaults for bank
+        if (bank == 1) {
+            etGroupPrt.setText("2");
+            etGroupLen.setText("6");
+        }
+        updateGroupEpcPreview();
+        updateGrpTemplateBtnText();
+    }
+
+    private String getGrpTemplateLabel() {
+        if (mGroupWriteBank == 1) return "EPC šablona";
+        if (mGroupWriteBank == 3) return "USER šablona";
+        return "RESERVED šablona";
+    }
+
+    private void updateGrpTemplateBtnText() {
+        if (btnToggleTemplate == null) return;
+        boolean visible = llTemplateGroups != null
+                && llTemplateGroups.getVisibility() == View.VISIBLE;
+        String label = getGrpTemplateLabel();
+        btnToggleTemplate.setText(visible ? "▼  " + label + "  (sbalit)" : "▶  " + label + "  (rozbalit)");
     }
 
     private void autoIncrementGroups() {
@@ -1023,25 +1098,50 @@ public class MainActivity extends AppCompatActivity {
 
     private void groupWrite() {
         if (mReader == null) return;
-        String epc = buildGroupEpc();
-        if (!epc.matches("[0-9A-F]{24}")) { toast("EPC obsahuje neplatné znaky"); return; }
+        String templateEpc = buildGroupEpc();
+        if (!templateEpc.matches("[0-9A-F]{24}")) { toast("EPC obsahuje neplatné znaky"); return; }
+
+        int prt, len;
+        try {
+            prt = Integer.parseInt(etGroupPrt.getText().toString().trim());
+            len = Integer.parseInt(etGroupLen.getText().toString().trim());
+        } catch (NumberFormatException e) { toast("Neplatné Prt / Len"); return; }
+
+        // Build write data: exactly len * 4 hex chars
+        int dataLen = len * 4;
+        String data;
+        if (dataLen <= 24) {
+            data = templateEpc.substring(0, dataLen);
+        } else {
+            StringBuilder sb = new StringBuilder(templateEpc);
+            while (sb.length() < dataLen) sb.append("0000");
+            data = sb.substring(0, dataLen);
+        }
 
         String accessPwd = readPassword(etGroupAccessPwd);
-        mGroupEpcWritten = epc;
+        mGroupEpcWritten = templateEpc;
 
-        setStatus("● Skupinový zápis...", "#FF9800");
+        String bankName = mGroupWriteBank == 1 ? "EPC" : mGroupWriteBank == 3 ? "USER" : "RESERVED";
+        setStatus("● Skupinový zápis " + bankName + "...", "#FF9800");
         btnGroupWrite.setEnabled(false);
 
+        final int fp = prt, fl = len, fb = mGroupWriteBank;
+        final String fd = data, fe = templateEpc;
         new Thread(() -> {
-            boolean ok = mReader.writeData(accessPwd, 1, 2, 6, epc);
+            boolean ok = mReader.writeData(accessPwd, fb, fp, fl, fd);
             mHandler.post(() -> {
                 btnGroupWrite.setEnabled(true);
                 if (ok) {
-                    setStatus("● EPC zapsáno — naskenujte tag", "#4CAF50");
-                    toast("✅ EPC zapsáno — stiskněte NAČÍST TAG");
-                    setGroupStep(STEP_SCAN);
+                    setStatus("● " + bankName + " zapsáno — naskenujte tag", "#4CAF50");
+                    toast("✅ " + bankName + " zapsáno — stiskněte NAČÍST TAG");
+                    if (fb == 1) setGroupStep(STEP_SCAN);
+                    else {
+                        // For USER/RESERVED bank, auto-increment and reset to write step
+                        autoIncrementGroups();
+                        setGroupStep(STEP_WRITE);
+                    }
                 } else {
-                    setStatus("● Skupinový zápis selhal", "#F44336");
+                    setStatus("● Skupinový zápis " + bankName + " selhal", "#F44336");
                     toast("Zápis selhal");
                 }
             });
@@ -1181,7 +1281,8 @@ public class MainActivity extends AppCompatActivity {
             etGroupFileName.setText(f.getName().replace(".csv", ""));
         }
         loadGrpNames();
-        updateGroupEpcPreview();
+        selectGroupWriteBank(mGroupWriteBank);
+        updateGrpTemplateBtnText();
         setGroupStep(STEP_WRITE);
     }
 

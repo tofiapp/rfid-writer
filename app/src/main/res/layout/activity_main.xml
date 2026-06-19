@@ -225,7 +225,7 @@
                         android:id="@+id/btnToggleChipNum"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:text="👁"
+                        android:text="🔄"
                         android:textSize="14sp"
                         android:backgroundTint="@android:color/transparent"
                         android:padding="0dp"
@@ -1115,7 +1115,7 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:text="1"
-                        android:textColor="#121212"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
@@ -1346,7 +1346,8 @@
                     <LinearLayout android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical" android:padding="12dp">
-                        <TextView android:layout_width="wrap_content"
+                        <TextView android:id="@+id/tvGrpPreviewLabel"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content" android:text="EPC NÁHLED"
                             android:textColor="#888888" android:textSize="10sp"
                             android:letterSpacing="0.1"/>
@@ -1358,39 +1359,73 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Bank EPC / Prt 2 / Len 6 (fixed) -->
+                <!-- Interactive PARAMETRY (Bank / Prt / Len) -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:background="#1E1E1E"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="PARAMETRY" android:textColor="#888888" android:textSize="11sp"
-                        android:letterSpacing="0.1" android:paddingBottom="8dp"/>
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:letterSpacing="0.1" android:paddingBottom="10dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="Bank"
+                        android:textColor="#888888" android:textSize="11sp"
+                        android:paddingBottom="6dp"/>
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <Button android:id="@+id/btnGrpBankEpc"
+                            android:layout_width="0dp" android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:text="EPC"
+                            android:textSize="12sp" android:textColor="#121212"
+                            android:backgroundTint="#00BCD4"
+                            android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnGrpBankUser"
+                            android:layout_width="0dp" android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:text="USER"
+                            android:textSize="12sp" android:textColor="#E0E0E0"
+                            android:backgroundTint="#2E2E2E"
+                            android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
+                            android:layout_marginEnd="4dp"/>
+                        <Button android:id="@+id/btnGrpBankReserved"
+                            android:layout_width="0dp" android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:text="RESERVED"
+                            android:textSize="11sp" android:textColor="#E0E0E0"
+                            android:backgroundTint="#2E2E2E"
+                            android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:orientation="horizontal">
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Bank" android:textColor="#888888" android:textSize="11sp"/>
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="EPC" android:textColor="#00BCD4" android:textSize="18sp"
-                                android:textStyle="bold" android:fontFamily="monospace" android:paddingTop="4dp"/>
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Prt"
+                                android:textColor="#888888" android:textSize="11sp"/>
+                            <EditText android:id="@+id/etGroupPrt"
+                                android:layout_width="56dp" android:layout_height="wrap_content"
+                                android:text="2" android:textColor="#E0E0E0"
+                                android:textSize="18sp" android:fontFamily="monospace"
+                                android:inputType="number" android:background="@null"
+                                android:paddingTop="4dp"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Prt" android:textColor="#888888" android:textSize="11sp"/>
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="2" android:textColor="#E0E0E0" android:textSize="18sp"
-                                android:fontFamily="monospace" android:paddingTop="4dp"/>
+                            android:layout_weight="1" android:orientation="vertical"
+                            android:paddingStart="8dp">
+                            <TextView android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:text="Len"
+                                android:textColor="#888888" android:textSize="11sp"/>
+                            <EditText android:id="@+id/etGroupLen"
+                                android:layout_width="56dp" android:layout_height="wrap_content"
+                                android:text="6" android:textColor="#E0E0E0"
+                                android:textSize="18sp" android:fontFamily="monospace"
+                                android:inputType="number" android:background="@null"
+                                android:paddingTop="4dp"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Len" android:textColor="#888888" android:textSize="11sp"/>
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="6" android:textColor="#E0E0E0" android:textSize="18sp"
-                                android:fontFamily="monospace" android:paddingTop="4dp"/>
-                        </LinearLayout>
+                            android:layout_weight="1"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -1430,7 +1465,7 @@
 
                     <TextView android:id="@+id/tvStep2Num"
                         android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="2" android:textColor="#888888" android:textSize="14sp"
+                        android:text="2" android:textColor="#FFFFFF" android:textSize="14sp"
                         android:textStyle="bold" android:gravity="center"
                         android:background="@drawable/chip_bar_bg"/>
 
@@ -1600,11 +1635,35 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- ══ KROK 3a: ZÁPIS HESLA (volitelné) ══════════════════ -->
+                <!-- ══ KROK 3: ZAHESLOVÁNÍ + ZÁPIS HESLA ═══════════════ -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
                     android:background="#2E2E2E" android:layout_marginBottom="16dp"
                     android:layout_marginTop="6dp"/>
 
+                <!-- Step 3 header moved above ZÁPIS HESLA -->
+                <LinearLayout
+                    android:id="@+id/llStep3Header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp">
+
+                    <TextView android:id="@+id/tvStep3Num"
+                        android:layout_width="28dp" android:layout_height="28dp"
+                        android:text="3" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:textStyle="bold" android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView android:id="@+id/tvStep3Label"
+                        android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="  ZAHESLOVÁNÍ"
+                        android:textColor="#888888" android:textSize="13sp"
+                        android:textStyle="bold" android:letterSpacing="0.08"/>
+
+                </LinearLayout>
+
+                <!-- KROK 3a: ZÁPIS HESLA (volitelné) -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -1687,35 +1746,8 @@
                 <Button android:id="@+id/btnGroupWritePwd"
                     android:layout_width="match_parent" android:layout_height="56dp"
                     android:text="✏️  WRITE" android:textSize="16sp"
-                    android:textColor="#121212" android:backgroundTint="#4CAF50"
+                    android:textColor="#E0E0E0" android:backgroundTint="#2E2E2E"
                     android:layout_marginBottom="20dp"/>
-
-                <!-- ══ KROK 3: ZAHESLOVÁNÍ ══════════════════════════════ -->
-                <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#2E2E2E" android:layout_marginBottom="16dp"
-                    android:layout_marginTop="6dp"/>
-
-                <LinearLayout
-                    android:id="@+id/llStep3Header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingBottom="8dp">
-
-                    <TextView android:id="@+id/tvStep3Num"
-                        android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="3" android:textColor="#888888" android:textSize="14sp"
-                        android:textStyle="bold" android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
-
-                    <TextView android:id="@+id/tvStep3Label"
-                        android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:text="  ZAHESLOVÁNÍ"
-                        android:textColor="#888888" android:textSize="13sp"
-                        android:textStyle="bold" android:letterSpacing="0.08"/>
-
-                </LinearLayout>
 
                 <!-- Lock Access Pwd -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
