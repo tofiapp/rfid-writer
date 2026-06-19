@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cyan background square (same as original inset colorPrimary) -->
+    <path
+        android:fillColor="#00BCD4"
+        android:pathData="M27,27 L81,27 L81,81 L27,81 Z"/>
+
+    <!--
+        "RFID" letters in dark #121212
+        Letters span x=29..79, y=38..70 (32dp tall)
+        R: 29-42, F: 45-56, I: 59-67, D: 70-79
+    -->
+    <path
+        android:fillColor="#121212"
+        android:pathData="
+        M29,38 H33 V70 H29 Z
+        M29,38 H42 V42 H29 Z
+        M38,38 H42 V53 H38 Z
+        M29,50 H42 V54 H29 Z
+        M36,54 H42 L45,70 H40 Z
+
+        M45,38 H49 V70 H45 Z
+        M45,38 H57 V42 H45 Z
+        M45,50 H55 V54 H45 Z
+
+        M59,38 H67 V42 H59 Z
+        M62,42 H66 V66 H62 Z
+        M59,66 H67 V70 H59 Z
+
+        M70,38 H74 V70 H70 Z
+        M70,38 H79 V42 H70 Z
+        M76,42 H80 V66 H76 Z
+        M70,66 H79 V70 H70 Z
+        "/>
+
+</vector>

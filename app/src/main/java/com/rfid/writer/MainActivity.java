@@ -22,10 +22,10 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.rscja.deviceapi.RFIDWithUHFUART;
 import com.rscja.deviceapi.entity.UHFTAGInfo;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 1: Zápis EPC — template ──────────────────────────────────────
     private final EditText[]  etWrtGroups    = new EditText[6];
-    private final EditText[]  etWrtGroupNames = new EditText[5]; // groups 1-5, editable labels
+    private final EditText[]  etWrtGroupNames = new EditText[6]; // groups 1-6, all editable
     private final CheckBox[]  cbWrtGroups    = new CheckBox[6];
     private final boolean[]   wrtGroupAutoInc = {false, false, false, false, false, true};
     private TextView tvWrtEpcPreview;
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 2: Skupinový zápis (3-step workflow) ─────────────────────────
     private final EditText[]  etGroups      = new EditText[6];
-    private final EditText[]  etGroupNames  = new EditText[5]; // groups 1-5, editable labels
+    private final EditText[]  etGroupNames  = new EditText[6]; // groups 1-6, all editable
     private final CheckBox[]  cbGroups      = new CheckBox[6];
     private final boolean[]   groupAutoInc  = {false, false, false, false, false, true};
     private TextView tvEpcPreview;
@@ -149,6 +149,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean mRecordMode      = false;
     private int     mScanContext     = SCAN_CTX_TAG;
     private int     mGroupStep       = STEP_WRITE;
+    // Sub-steps within ZAMČENÍ tab (0=ZÁPIS HESLA, 1=ZAMČENÍ)
+    private int     mLockSubStep     = 0;
+    // Sub-steps within SKUPINOVÝ STEP_LOCK (0=ZÁPIS HESLA, 1=LOCK)
+    private int     mGroupLockSubStep = 0;
     private String  mGroupEpcWritten = "";   // EPC just written, needed for verify
     private String  mGroupOutputFile = null;
     private int     mGroupRecordCount = 0;
@@ -205,18 +209,21 @@ public class MainActivity extends AppCompatActivity {
     private void onTriggerDown() {
         switch (tabLayout.getSelectedTabPosition()) {
             case 0: if (mInventorying) stopScan(); else startScan(); break;
-            case 1: writeEpc();        break;
-            case 2: lockTag();         break;  // tab 2 = Zamčení
-            case 3: onGroupTrigger();  break;  // tab 3 = Skupinový
+            case 1: writeEpc(); break;
+            case 2: // Zamčení: sub-step 0 = ZÁPIS HESLA, sub-step 1 = ZAMČENÍ
+                if (mLockSubStep == 0) writePwd(); else lockTag(); break;
+            case 3: onGroupTrigger(); break;  // Skupinový
         }
     }
 
     private void onGroupTrigger() {
         switch (mGroupStep) {
-            case STEP_WRITE: groupWrite();    break;
+            case STEP_WRITE: groupWrite(); break;
             case STEP_SCAN:
                 if (mInventorying) stopScan(); else startGroupScan(); break;
-            case STEP_LOCK:  groupLock();     break;
+            case STEP_LOCK:
+                // Sub-step 0 = ZÁPIS HESLA, sub-step 1 = LOCK
+                if (mGroupLockSubStep == 0) groupWritePwd(); else groupLock(); break;
         }
     }
 
@@ -263,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         etWrtGroupNames[2] = findViewById(R.id.etWrtGrpName3);
         etWrtGroupNames[3] = findViewById(R.id.etWrtGrpName4);
         etWrtGroupNames[4] = findViewById(R.id.etWrtGrpName5);
+        etWrtGroupNames[5] = findViewById(R.id.etWrtGrpName6);
         cbWrtGroups[0] = findViewById(R.id.cbWrt1); cbWrtGroups[1] = findViewById(R.id.cbWrt2);
         cbWrtGroups[2] = findViewById(R.id.cbWrt3); cbWrtGroups[3] = findViewById(R.id.cbWrt4);
         cbWrtGroups[4] = findViewById(R.id.cbWrt5); cbWrtGroups[5] = findViewById(R.id.cbWrt6);
@@ -290,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
         etGroupNames[2] = findViewById(R.id.etGrpName3);
         etGroupNames[3] = findViewById(R.id.etGrpName4);
         etGroupNames[4] = findViewById(R.id.etGrpName5);
+        etGroupNames[5] = findViewById(R.id.etGrpName6);
         cbGroups[0] = findViewById(R.id.cbGroup1); cbGroups[1] = findViewById(R.id.cbGroup2);
         cbGroups[2] = findViewById(R.id.cbGroup3); cbGroups[3] = findViewById(R.id.cbGroup4);
         cbGroups[4] = findViewById(R.id.cbGroup5); cbGroups[5] = findViewById(R.id.cbGroup6);
@@ -418,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) { saveWrtGroupNames(); }
         };
-        for (EditText et : etWrtGroupNames) et.addTextChangedListener(wrtNameWatcher);
+        for (EditText et : etWrtGroupNames) if (et != null) et.addTextChangedListener(wrtNameWatcher);
 
         for (int i = 0; i < 6; i++) {
             final int idx = i;
@@ -460,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) { onGroupNameChanged(); }
         };
-        for (EditText et : etGroupNames) et.addTextChangedListener(grpNameWatcher);
+        for (EditText et : etGroupNames) if (et != null) et.addTextChangedListener(grpNameWatcher);
 
         for (int i = 0; i < 6; i++) {
             final int idx = i;
@@ -550,8 +559,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_WRT_GROUP_NAMES = "wrt_group_names";
     private static final String KEY_GROUP_NAMES_P2  = "group_names_p2";
-    private static final String[] DEFAULT_WRT_NAMES = {"-", "-", "-", "-", "-"};
-    private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-"};
+    private static final String[] DEFAULT_WRT_NAMES = {"-", "-", "-", "-", "-", "ID_RFID"};
+    private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-", "ID_RFID"};
 
     private void loadWrtGroupNames() {
         try {
@@ -559,10 +568,11 @@ public class MainActivity extends AppCompatActivity {
                     .getString(KEY_WRT_GROUP_NAMES, null);
             if (json != null) {
                 JSONArray arr = new JSONArray(json);
-                for (int i = 0; i < 5 && i < arr.length(); i++)
-                    etWrtGroupNames[i].setText(arr.getString(i));
+                for (int i = 0; i < 6 && i < arr.length(); i++)
+                    if (etWrtGroupNames[i] != null) etWrtGroupNames[i].setText(arr.getString(i));
             } else {
-                for (int i = 0; i < 5; i++) etWrtGroupNames[i].setText(DEFAULT_WRT_NAMES[i]);
+                for (int i = 0; i < 6; i++)
+                    if (etWrtGroupNames[i] != null) etWrtGroupNames[i].setText(DEFAULT_WRT_NAMES[i]);
             }
         } catch (Exception ignored) {}
     }
@@ -570,7 +580,8 @@ public class MainActivity extends AppCompatActivity {
     private void saveWrtGroupNames() {
         try {
             JSONArray arr = new JSONArray();
-            for (int i = 0; i < 5; i++) arr.put(etWrtGroupNames[i].getText().toString());
+            for (int i = 0; i < 6; i++)
+                arr.put(etWrtGroupNames[i] != null ? etWrtGroupNames[i].getText().toString() : DEFAULT_WRT_NAMES[i]);
             getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                     .putString(KEY_WRT_GROUP_NAMES, arr.toString()).apply();
         } catch (Exception ignored) {}
@@ -582,10 +593,11 @@ public class MainActivity extends AppCompatActivity {
                     .getString(KEY_GROUP_NAMES_P2, null);
             if (json != null) {
                 JSONArray arr = new JSONArray(json);
-                for (int i = 0; i < 5 && i < arr.length(); i++)
-                    etGroupNames[i].setText(arr.getString(i));
+                for (int i = 0; i < 6 && i < arr.length(); i++)
+                    if (etGroupNames[i] != null) etGroupNames[i].setText(arr.getString(i));
             } else {
-                for (int i = 0; i < 5; i++) etGroupNames[i].setText(DEFAULT_GRP_NAMES[i]);
+                for (int i = 0; i < 6; i++)
+                    if (etGroupNames[i] != null) etGroupNames[i].setText(DEFAULT_GRP_NAMES[i]);
             }
         } catch (Exception ignored) {}
     }
@@ -593,7 +605,8 @@ public class MainActivity extends AppCompatActivity {
     private void saveGrpNames() {
         try {
             JSONArray arr = new JSONArray();
-            for (int i = 0; i < 5; i++) arr.put(etGroupNames[i].getText().toString());
+            for (int i = 0; i < 6; i++)
+                arr.put(etGroupNames[i] != null ? etGroupNames[i].getText().toString() : DEFAULT_GRP_NAMES[i]);
             getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                     .putString(KEY_GROUP_NAMES_P2, arr.toString()).apply();
         } catch (Exception ignored) {}
@@ -614,15 +627,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String buildGroupCsvHeader() {
-        String g1 = etGroupNames[0].getText().toString().trim();
-        String g2 = etGroupNames[1].getText().toString().trim();
-        String g3 = etGroupNames[2].getText().toString().trim();
-        String g4 = etGroupNames[3].getText().toString().trim();
-        if (g1.isEmpty() || g1.equals("—")) g1 = "Skupina_1";
-        if (g2.isEmpty() || g2.equals("—")) g2 = "Skupina_2";
-        if (g3.isEmpty() || g3.equals("—")) g3 = "Skupina_3";
-        if (g4.isEmpty() || g4.equals("—")) g4 = "Skupina_4";
-        return "\uFEFFID_RFID,EPC,TID," + g1 + "," + g2 + "," + g3 + "," + g4 + "\n";
+        String[] names = new String[6];
+        String[] defaults = {"Skupina_1","Skupina_2","Skupina_3","Skupina_4","Skupina_5","ID_RFID"};
+        for (int i = 0; i < 6; i++) {
+            names[i] = etGroupNames[i] != null ? etGroupNames[i].getText().toString().trim() : "";
+            if (names[i].isEmpty() || names[i].equals("—") || names[i].equals("-"))
+                names[i] = defaults[i];
+        }
+        return "\uFEFFID_RFID,EPC,TID,"
+                + names[0] + "," + names[1] + "," + names[2] + ","
+                + names[3] + "," + names[4] + "," + names[5] + "\n";
     }
 
     // ── Scan helpers ──────────────────────────────────────────────────────
@@ -738,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
         llVerifyDisplay.setVisibility(View.VISIBLE);
 
         // Save to CSV
-        appendToGroupCsv(g5 + g6, epc, tid, g1, g2, g3, g4);
+        appendToGroupCsv(g5 + g6, epc, tid, g1, g2, g3, g4, g5, g6);
 
         // Auto-fill lock pwd from write step
         String writePwd = readPassword(etGroupAccessPwd);
@@ -753,6 +767,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setGroupStep(int step) {
         mGroupStep = step;
+        if (step == STEP_LOCK) mGroupLockSubStep = 0; // always start at ZÁPIS HESLA sub-step
 
         int cyan   = Color.parseColor("#00BCD4");
         int green  = Color.parseColor("#4CAF50");
@@ -787,15 +802,14 @@ public class MainActivity extends AppCompatActivity {
         btnGroupLock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 step == STEP_LOCK ? orange : dark));
 
-        // Auto-scroll to active section
+        // Auto-scroll to active section (only steps 1 and 2; step 3 stays where user is)
         scrollToGroupStep(step);
     }
 
     private void scrollToGroupStep(int step) {
         if (svGroupPage == null) return;
-        View target = (step == STEP_SCAN) ? llStep2Header
-                    : (step == STEP_LOCK) ? llStep3Header
-                    : llStep1Header;
+        if (step == STEP_LOCK) return; // no autoscroll when advancing to step 3
+        View target = (step == STEP_SCAN) ? llStep2Header : llStep1Header;
         final View t = target;
         svGroupPage.post(() -> {
             int y = (t == llStep1Header) ? 0 : t.getTop();
@@ -1027,12 +1041,12 @@ public class MainActivity extends AppCompatActivity {
         if (epc.length() != 24) return;
 
         if (mGroupWriteBank == 1) {
-            if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText("EPC NÁHLED");
+            if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText("náhled EPC");
             tvEpcPreview.setText(epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
                 epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
                 epc.substring(16,20)+"-"+epc.substring(20,24));
         } else {
-            String label = (mGroupWriteBank == 3) ? "USER NÁHLED" : "RESERVED NÁHLED";
+            String label = (mGroupWriteBank == 3) ? "náhled USER" : "náhled RESERVED";
             if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText(label);
             int len = 6;
             try { len = Integer.parseInt(etGroupLen.getText().toString().trim()); }
@@ -1088,7 +1102,7 @@ public class MainActivity extends AppCompatActivity {
         boolean visible = llTemplateGroups != null
                 && llTemplateGroups.getVisibility() == View.VISIBLE;
         String label = getGrpTemplateLabel();
-        btnToggleTemplate.setText(visible ? "▼  " + label + "  (sbalit)" : "▶  " + label + "  (rozbalit)");
+        btnToggleTemplate.setText(visible ? "▼  " + label : "▶  " + label + "  (rozbalit)");
     }
 
     private void autoIncrementGroups() {
@@ -1182,6 +1196,7 @@ public class MainActivity extends AppCompatActivity {
                 if (ok) {
                     setStatus("● Heslo zapsáno", "#4CAF50");
                     etGroupLockPwd.setText(np);
+                    mGroupLockSubStep = 1; // advance to LOCK sub-step
                     toast("Heslo zapsáno!");
                 } else {
                     setStatus("● Zápis hesla selhal", "#F44336");
@@ -1213,6 +1228,7 @@ public class MainActivity extends AppCompatActivity {
                 btnGroupLock.setEnabled(true);
                 if (ok) {
                     setStatus("● Tag zaheslován ✓", "#4CAF50");
+                    mGroupLockSubStep = 0; // reset sub-step for next tag
                     toast("✅ Tag zaheslován — připraven další");
                     // Reset for next tag
                     llVerifyDisplay.setVisibility(View.GONE);
@@ -1251,11 +1267,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void appendToGroupCsv(String idRfid, String epc, String tid,
-                                   String g1, String g2, String g3, String g4) {
+                                   String g1, String g2, String g3, String g4,
+                                   String g5, String g6) {
         if (mGroupOutputFile == null) { toast("⚠️ Nastavte výstupní soubor"); return; }
         mGroupRecordCount++;
-        String line = escCsv(idRfid) + "," + epc + "," + tid + ","
-                + g1 + "," + g2 + "," + g3 + "," + g4 + "\n";
+        // Strip leading zeros from ID_RFID (e.g. 00000001 -> 1)
+        String strippedId = idRfid.replaceFirst("^0+", "");
+        if (strippedId.isEmpty()) strippedId = "0";
+        // Format EPC and TID with dashes between 4-digit groups
+        String fmtEpc = epc.length() >= 24
+                ? epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+epc.substring(8,12)
+                  +"-"+epc.substring(12,16)+"-"+epc.substring(16,20)+"-"+epc.substring(20,24)
+                : epc;
+        String fmtTid = tid.isEmpty() ? "" : formatHexWithDashes(tid);
+        String line = escCsv(strippedId) + "," + fmtEpc + "," + fmtTid + ","
+                + g1 + "," + g2 + "," + g3 + "," + g4 + "," + g5 + "," + g6 + "\n";
         try (FileOutputStream fos = new FileOutputStream(mGroupOutputFile, true)) {
             fos.write(line.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -1263,8 +1289,6 @@ public class MainActivity extends AppCompatActivity {
             mGroupRecordCount--;
             return;
         }
-        String fmtEpc = epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+epc.substring(8,12)
-                +"-"+epc.substring(12,16)+"-"+epc.substring(16,20)+"-"+epc.substring(20,24);
         tvGroupRecordCount.setText(String.valueOf(mGroupRecordCount));
         tvGroupLastEpc.setText(fmtEpc);
         saveGroupSettings();
@@ -1429,7 +1453,8 @@ public class MainActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder("\uFEFF"); sb.append("Seq,ID_RFID,EPC,TID,Stav,Cas\n");
         for (ScanRecord r : mRecords)
             sb.append(r.seq).append(",").append(escCsv(r.num)).append(",")
-              .append(escCsv(r.epc)).append(",").append(escCsv(r.tid)).append(",")
+              .append(escCsv(formatHexWithDashes(r.epc))).append(",")
+              .append(escCsv(formatHexWithDashes(r.tid))).append(",")
               .append(r.complete?"OK":"NEUPLNE").append(",").append(escCsv(r.time)).append("\n");
         try {
             String stamp=new SimpleDateFormat("yyyyMMdd_HHmm",Locale.getDefault()).format(new Date());
@@ -1465,8 +1490,15 @@ public class MainActivity extends AppCompatActivity {
             boolean ok = mReader.writeData(cur, 0, 2, 2, np);
             mHandler.post(() -> {
                 btnWritePwd.setEnabled(true);
-                if (ok) { setStatus("● Heslo zapsáno", "#4CAF50"); etLockAccessPwd.setText(np); toast("Heslo zapsáno!"); }
-                else    { setStatus("● Zápis hesla selhal", "#F44336"); toast("Zápis hesla selhal"); }
+                if (ok) {
+                    setStatus("● Heslo zapsáno", "#4CAF50");
+                    etLockAccessPwd.setText(np);
+                    mLockSubStep = 1; // advance to ZAMČENÍ sub-step
+                    toast("Heslo zapsáno!");
+                } else {
+                    setStatus("● Zápis hesla selhal", "#F44336");
+                    toast("Zápis hesla selhal");
+                }
             });
         }).start();
     }
@@ -1482,8 +1514,14 @@ public class MainActivity extends AppCompatActivity {
             boolean ok = mReader.lockMem(ap, fc);
             mHandler.post(() -> {
                 btnLock.setEnabled(true);
-                if (ok) { setStatus("● Tag zamčen", "#4CAF50"); toast("Tag zamčen!"); }
-                else    { setStatus("● Lock selhal", "#F44336"); toast("Lock selhal"); }
+                if (ok) {
+                    setStatus("● Tag zamčen", "#4CAF50");
+                    mLockSubStep = 0; // reset to ZÁPIS HESLA sub-step
+                    toast("Tag zamčen!");
+                } else {
+                    setStatus("● Lock selhal", "#F44336");
+                    toast("Lock selhal");
+                }
             });
         }).start();
     }
@@ -1500,7 +1538,33 @@ public class MainActivity extends AppCompatActivity {
         tvStatus.setText(text); tvStatus.setTextColor(Color.parseColor(hexColor));
     }
 
-    private void toast(String msg) { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show(); }
+    private void toast(String msg) {
+        View root = findViewById(android.R.id.content);
+        Snackbar snackbar = Snackbar.make(root, msg, Snackbar.LENGTH_SHORT);
+        View snackView = snackbar.getView();
+        // Color-code by message type
+        int bg, fg;
+        if (msg.contains("✅") || msg.contains("zapsáno") || msg.contains("uložen")
+                || msg.contains("zamčen") || msg.contains("Zkopírováno") || msg.contains("CSV:")) {
+            bg = Color.parseColor("#0d2b0d");
+            fg = Color.parseColor("#4CAF50");
+        } else if (msg.contains("⚠") || msg.contains("selhal") || msg.contains("Chyba")
+                || msg.contains("Duplikát") || msg.contains("Neplatné") || msg.contains("Platné heslo")) {
+            bg = Color.parseColor("#2b0d0d");
+            fg = Color.parseColor("#F44336");
+        } else {
+            bg = Color.parseColor("#0d1e2b");
+            fg = Color.parseColor("#00BCD4");
+        }
+        snackView.setBackgroundColor(bg);
+        TextView tv = snackView.findViewById(com.google.android.material.R.id.snackbar_text);
+        if (tv != null) {
+            tv.setTextColor(fg);
+            tv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14);
+            tv.setMaxLines(3);
+        }
+        snackbar.show();
+    }
 
     private String escCsv(String s) {
         if (s == null) return "";
