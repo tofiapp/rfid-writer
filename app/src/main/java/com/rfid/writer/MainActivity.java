@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
     private Button btnScan, btnModeRecord, btnModeRead, btnToggleChipNum;
-    private boolean mAutoLoadIdRfid = true;
+    private boolean mAutoLoadIdRfid = false;
     private Button btnCopyRecords, btnExportCsv, btnClearAll;
     private TextView tvScanEpc, tvScanTid;
     private TextView tvStatPairs, tvStatOk, tvStatBad;
@@ -634,9 +634,10 @@ public class MainActivity extends AppCompatActivity {
             if (names[i].isEmpty() || names[i].equals("—") || names[i].equals("-"))
                 names[i] = defaults[i];
         }
-        return "\uFEFFID_RFID,EPC,TID,"
-                + names[0] + "," + names[1] + "," + names[2] + ","
-                + names[3] + "," + names[4] + "," + names[5] + "\n";
+        // Groups 5 and 6 are merged into ID_RFID; only groups 1-4 appear as separate columns
+        return "\uFEFFID_RFID;EPC;TID;"
+                + names[0] + ";" + names[1] + ";" + names[2] + ";"
+                + names[3] + "\n";
     }
 
     // ── Scan helpers ──────────────────────────────────────────────────────
@@ -893,7 +894,7 @@ public class MainActivity extends AppCompatActivity {
         boolean visible = llWrtTemplateGroups != null
                 && llWrtTemplateGroups.getVisibility() == View.VISIBLE;
         String label = getWrtTemplateLabel();
-        btnToggleWrtTemplate.setText(visible ? "▼  " + label : "▶  " + label + "  (rozbalit)");
+        btnToggleWrtTemplate.setText(visible ? "▼  " + label : "▶  " + label);
     }
 
     private void updateWrtTemplateRows() {
@@ -1102,7 +1103,7 @@ public class MainActivity extends AppCompatActivity {
         boolean visible = llTemplateGroups != null
                 && llTemplateGroups.getVisibility() == View.VISIBLE;
         String label = getGrpTemplateLabel();
-        btnToggleTemplate.setText(visible ? "▼  " + label : "▶  " + label + "  (rozbalit)");
+        btnToggleTemplate.setText(visible ? "▼  " + label : "▶  " + label);
     }
 
     private void autoIncrementGroups() {
@@ -1271,7 +1272,7 @@ public class MainActivity extends AppCompatActivity {
                                    String g5, String g6) {
         if (mGroupOutputFile == null) { toast("⚠️ Nastavte výstupní soubor"); return; }
         mGroupRecordCount++;
-        // Strip leading zeros from ID_RFID (e.g. 00000001 -> 1)
+        // ID_RFID = decimal value of groups 5+6 combined, leading zeros stripped
         String strippedId = idRfid.replaceFirst("^0+", "");
         if (strippedId.isEmpty()) strippedId = "0";
         // Format EPC and TID with dashes between 4-digit groups
@@ -1280,8 +1281,9 @@ public class MainActivity extends AppCompatActivity {
                   +"-"+epc.substring(12,16)+"-"+epc.substring(16,20)+"-"+epc.substring(20,24)
                 : epc;
         String fmtTid = tid.isEmpty() ? "" : formatHexWithDashes(tid);
-        String line = escCsv(strippedId) + "," + fmtEpc + "," + fmtTid + ","
-                + g1 + "," + g2 + "," + g3 + "," + g4 + "," + g5 + "," + g6 + "\n";
+        // Groups 5 and 6 are encoded in ID_RFID; only groups 1-4 appear as separate columns
+        String line = escCsv(strippedId) + ";" + fmtEpc + ";" + fmtTid + ";"
+                + g1 + ";" + g2 + ";" + g3 + ";" + g4 + "\n";
         try (FileOutputStream fos = new FileOutputStream(mGroupOutputFile, true)) {
             fos.write(line.getBytes("UTF-8"));
         } catch (Exception e) {
@@ -1450,12 +1452,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void exportCsv() {
         if (mRecords.isEmpty()) { toast("Žádné záznamy!"); return; }
-        StringBuilder sb = new StringBuilder("\uFEFF"); sb.append("Seq,ID_RFID,EPC,TID,Stav,Cas\n");
+        StringBuilder sb = new StringBuilder("\uFEFF"); sb.append("Seq;ID_RFID;EPC;TID;Stav;Cas\n");
         for (ScanRecord r : mRecords)
-            sb.append(r.seq).append(",").append(escCsv(r.num)).append(",")
-              .append(escCsv(formatHexWithDashes(r.epc))).append(",")
-              .append(escCsv(formatHexWithDashes(r.tid))).append(",")
-              .append(r.complete?"OK":"NEUPLNE").append(",").append(escCsv(r.time)).append("\n");
+            sb.append(r.seq).append(";").append(escCsv(r.num)).append(";")
+              .append(escCsv(formatHexWithDashes(r.epc))).append(";")
+              .append(escCsv(formatHexWithDashes(r.tid))).append(";")
+              .append(r.complete?"OK":"NEUPLNE").append(";").append(escCsv(r.time)).append("\n");
         try {
             String stamp=new SimpleDateFormat("yyyyMMdd_HHmm",Locale.getDefault()).format(new Date());
             File dir=getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
@@ -1568,7 +1570,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String escCsv(String s) {
         if (s == null) return "";
-        if (s.contains(",") || s.contains("\"") || s.contains("\n"))
+        if (s.contains(";") || s.contains("\"") || s.contains("\n"))
             return "\"" + s.replace("\"", "\"\"") + "\"";
         return s;
     }

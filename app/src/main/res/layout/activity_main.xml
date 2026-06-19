@@ -119,6 +119,12 @@
 
     </LinearLayout>
 
+    <!-- ── Separator between header/settings and tabs ─────────────────────── -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#00BCD4"/>
+
     <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
@@ -225,7 +231,7 @@
                         android:id="@+id/btnToggleChipNum"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:text="🔄"
+                        android:text="🚫"
                         android:textSize="14sp"
                         android:backgroundTint="@android:color/transparent"
                         android:padding="0dp"
@@ -643,7 +649,7 @@
                     android:id="@+id/btnToggleWrtTemplate"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
-                    android:text="▼  EPC ŠABLONA"
+                    android:text="▶  EPC ŠABLONA"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:textColor="#00BCD4"
@@ -654,7 +660,7 @@
                     android:insetBottom="0dp"
                     android:layout_marginBottom="2dp"/>
 
-                <!-- ── EPC šablona skupiny (expanded by default) ──────── -->
+                <!-- ── EPC šablona skupiny (collapsed by default) ──────── -->
                 <LinearLayout
                     android:id="@+id/llWrtTemplateGroups"
                     android:layout_width="match_parent"
@@ -663,7 +669,7 @@
                     android:background="#1E1E1E"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <!-- Column headers -->
                     <LinearLayout
@@ -1119,7 +1125,7 @@
                     android:id="@+id/btnToggleTemplate"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
-                    android:text="▶  EPC ŠABLONA  (rozbalit)"
+                    android:text="▶  EPC ŠABLONA"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:textColor="#00BCD4"
