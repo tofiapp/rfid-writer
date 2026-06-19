@@ -65,7 +65,8 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Tabs ──────────────────────────────────────────────────────────────
     private TabLayout tabLayout;
-    private View pageTag, pageWriteEpc, pageGroupWrite, pageLock;
+    private View      pageTag, pageWriteEpc, pageGroupWrite, pageLock;
+    private android.widget.ScrollView svGroupPage;
 
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
@@ -204,9 +205,9 @@ public class MainActivity extends AppCompatActivity {
     private void onTriggerDown() {
         switch (tabLayout.getSelectedTabPosition()) {
             case 0: if (mInventorying) stopScan(); else startScan(); break;
-            case 1: writeEpc();    break;
-            case 2: onGroupTrigger(); break;
-            case 3: lockTag();     break;
+            case 1: writeEpc();        break;
+            case 2: lockTag();         break;  // tab 2 = Zamčení
+            case 3: onGroupTrigger();  break;  // tab 3 = Skupinový
         }
     }
 
@@ -228,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         pageWriteEpc = findViewById(R.id.pageWriteEpc);
         pageGroupWrite = findViewById(R.id.pageGroupWrite);
         pageLock = findViewById(R.id.pageLock);
+        svGroupPage = (android.widget.ScrollView) pageGroupWrite;
 
         // Page 0
         etChipNum = findViewById(R.id.etChipNum);
@@ -356,11 +358,11 @@ public class MainActivity extends AppCompatActivity {
     private void showPage(int index) {
         pageTag.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         pageWriteEpc.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
-        pageGroupWrite.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
-        pageLock.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        pageLock.setVisibility(index == 2 ? View.VISIBLE : View.GONE);          // tab 2 = Zamčení
+        pageGroupWrite.setVisibility(index == 3 ? View.VISIBLE : View.GONE);   // tab 3 = Skupinový
 
         if (index == 1) updateWrtEpcPreview();
-        if (index == 2) updateGroupEpcPreview();
+        if (index == 3) updateGroupEpcPreview();
     }
 
     private void bindButtons() {
@@ -548,8 +550,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_WRT_GROUP_NAMES = "wrt_group_names";
     private static final String KEY_GROUP_NAMES_P2  = "group_names_p2";
-    private static final String[] DEFAULT_WRT_NAMES = {"Rok", "—", "—", "—", "Prefix"};
-    private static final String[] DEFAULT_GRP_NAMES = {"Rok", "—", "—", "—", "Prefix"};
+    private static final String[] DEFAULT_WRT_NAMES = {"-", "-", "-", "-", "-"};
+    private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-"};
 
     private void loadWrtGroupNames() {
         try {
@@ -692,9 +694,8 @@ public class MainActivity extends AppCompatActivity {
         if (mRecordMode) {
             savePair(epcStr, tidStr);
         } else {
-            tvReadEpc.setText(epcStr.isEmpty() ? "—" : epcStr);
-            tvReadTid.setText(tidStr.isEmpty() ? "—" : tidStr);
-            // Set ID_RFID from last 8 chars of EPC, stripping leading zeros
+            tvReadEpc.setText(epcStr.isEmpty() ? "—" : formatHexWithDashes(epcStr));
+            tvReadTid.setText(tidStr.isEmpty() ? "—" : formatHexWithDashes(tidStr));
             if (mAutoLoadIdRfid && epcStr.length() >= 8) {
                 String last8 = epcStr.substring(epcStr.length() - 8);
                 String stripped = last8.replaceFirst("^0+", "");
@@ -759,9 +760,9 @@ public class MainActivity extends AppCompatActivity {
         int gray   = Color.parseColor("#888888");
         int dark   = Color.parseColor("#2E2E2E");
 
-        // Step numbers are always white for visibility
-        tvStep1Num.setTextColor(Color.WHITE);
-        tvStep2Num.setTextColor(Color.WHITE);
+        // Step numbers: white when active/pending, green when completed
+        tvStep1Num.setTextColor(step > STEP_WRITE ? green : Color.WHITE);
+        tvStep2Num.setTextColor(step > STEP_SCAN  ? green : Color.WHITE);
         tvStep3Num.setTextColor(Color.WHITE);
 
         // Step 1
@@ -785,6 +786,21 @@ public class MainActivity extends AppCompatActivity {
                 ? Color.parseColor("#121212") : Color.parseColor("#888888"));
         btnGroupLock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 step == STEP_LOCK ? orange : dark));
+
+        // Auto-scroll to active section
+        scrollToGroupStep(step);
+    }
+
+    private void scrollToGroupStep(int step) {
+        if (svGroupPage == null) return;
+        View target = (step == STEP_SCAN) ? llStep2Header
+                    : (step == STEP_LOCK) ? llStep3Header
+                    : llStep1Header;
+        final View t = target;
+        svGroupPage.post(() -> {
+            int y = (t == llStep1Header) ? 0 : t.getTop();
+            svGroupPage.smoothScrollTo(0, y);
+        });
     }
 
     // ── Page 1 — EPC template (Zápis EPC) ────────────────────────────────
@@ -1491,5 +1507,15 @@ public class MainActivity extends AppCompatActivity {
         if (s.contains(",") || s.contains("\"") || s.contains("\n"))
             return "\"" + s.replace("\"", "\"\"") + "\"";
         return s;
+    }
+
+    private String formatHexWithDashes(String hex) {
+        if (hex == null || hex.length() < 4) return hex != null ? hex : "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hex.length(); i += 4) {
+            if (i > 0) sb.append("-");
+            sb.append(hex, i, Math.min(i + 4, hex.length()));
+        }
+        return sb.toString();
     }
 }

@@ -146,12 +146,12 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SKUPINOVÝ"/>
+            android:text="ZAMČENÍ"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ZAMČENÍ"/>
+            android:text="SKUPINOVÝ"/>
 
     </com.google.android.material.tabs.TabLayout>
 
@@ -267,74 +267,51 @@
 
             </LinearLayout>
 
-            <!-- ── Scan preview card ──────────────────────────────────────── -->
-            <com.google.android.material.card.MaterialCardView
+            <!-- scan preview — hidden, values still updated in code -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tvScanEpc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="— čekám —"
+                    android:textColor="#58a6ff"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"/>
+
+                <TextView
+                    android:id="@+id/tvScanTid"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="— čekám —"
+                    android:textColor="#3fb950"
+                    android:textSize="13sp"
+                    android:fontFamily="monospace"/>
+
+            </LinearLayout>
+
+            <!-- Scan button – no card frame, consistent with other tabs -->
+            <Button
+                android:id="@+id/btnScan"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginTop="7dp"
-                app:cardBackgroundColor="#161b22"
-                app:cardCornerRadius="10dp"
-                app:strokeColor="#00BCD4"
-                app:strokeWidth="2dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <!-- scan preview — hidden, values still updated in code -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/tvScanEpc"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="— čekám —"
-                            android:textColor="#58a6ff"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace"
-                            android:maxLines="2"
-                            android:ellipsize="end"/>
-
-                        <TextView
-                            android:id="@+id/tvScanTid"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="— čekám —"
-                            android:textColor="#3fb950"
-                            android:textSize="13sp"
-                            android:fontFamily="monospace"
-                            android:paddingStart="10dp"
-                            android:maxLines="2"
-                            android:ellipsize="end"/>
-
-                    </LinearLayout>
-
-                    <!-- Scan button -->
-                    <Button
-                        android:id="@+id/btnScan"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:layout_marginTop="8dp"
-                        android:text="📡  SKENOVAT TAG"
-                        android:textSize="14sp"
-                        android:textColor="#121212"
-                        android:backgroundTint="#00BCD4"
-                        android:enabled="false"/>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
+                android:layout_marginTop="8dp"
+                android:text="📡  SKENOVAT TAG"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#121212"
+                android:backgroundTint="#00BCD4"
+                android:enabled="false"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"/>
 
             <!-- ── Stats bar (record mode) ───────────────────────────────── -->
             <LinearLayout
@@ -751,14 +728,14 @@
 
                         <EditText android:id="@+id/etWrtGrpName1"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="Rok"
-                            android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:layout_weight="1" android:text="-"
+                            android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt1" android:layout_width="76dp"
-                            android:layout_height="wrap_content" android:text="2026"
+                            android:layout_height="wrap_content" android:text="0000"
                             android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
@@ -782,7 +759,7 @@
 
                         <EditText android:id="@+id/etWrtGrpName2"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -813,7 +790,7 @@
 
                         <EditText android:id="@+id/etWrtGrpName3"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -844,7 +821,7 @@
 
                         <EditText android:id="@+id/etWrtGrpName4"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -875,8 +852,8 @@
 
                         <EditText android:id="@+id/etWrtGrpName5"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="Prefix"
-                            android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:layout_weight="1" android:text="-"
+                            android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
@@ -1187,13 +1164,13 @@
                             android:text="1" android:textColor="#888888" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName1"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="Rok"
-                            android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:layout_weight="1" android:text="-"
+                            android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup1" android:layout_width="76dp"
-                            android:layout_height="wrap_content" android:text="2026"
+                            android:layout_height="wrap_content" android:text="0000"
                             android:textColor="#E0E0E0" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
@@ -1213,7 +1190,7 @@
                             android:text="2" android:textColor="#888888" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName2"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -1239,7 +1216,7 @@
                             android:text="3" android:textColor="#888888" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName3"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -1265,7 +1242,7 @@
                             android:text="4" android:textColor="#888888" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName4"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="—"
+                            android:layout_weight="1" android:text="-"
                             android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
@@ -1291,8 +1268,8 @@
                             android:text="5" android:textColor="#888888" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName5"
                             android:layout_width="0dp" android:layout_height="wrap_content"
-                            android:layout_weight="1" android:text="Prefix"
-                            android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:layout_weight="1" android:text="-"
+                            android:textColor="#888888" android:textSize="13sp"
                             android:hint="název skupiny" android:textColorHint="#555555"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
@@ -1749,12 +1726,12 @@
                     android:textColor="#E0E0E0" android:backgroundTint="#2E2E2E"
                     android:layout_marginBottom="20dp"/>
 
-                <!-- Lock Access Pwd -->
+                <!-- Lock New Pwd (password just written in ZÁPIS HESLA step) -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                     android:orientation="vertical" android:background="#1E1E1E"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="ACCESS PWD" android:textColor="#888888"
+                        android:text="NEW PWD" android:textColor="#888888"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupLockPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -1806,16 +1783,35 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- ── Section: Zápis hesla ──────────────────────────────── -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- ── Section 1: Zápis hesla ────────────────────────────── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="ZÁPIS HESLA"
-                    android:textColor="#00BCD4"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:paddingBottom="10dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="12dp">
+
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="1"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="  ZÁPIS HESLA"
+                        android:textColor="#00BCD4"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+
+                </LinearLayout>
 
                 <!-- Bank / Prt / Len (Reserved, 2, 2) -->
                 <LinearLayout
@@ -2001,20 +1997,40 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#2E2E2E"
-                    android:layout_marginBottom="20dp"/>
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="4dp"/>
 
-                <!-- ── Section: Zamčení ───────────────────────────────────── -->
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- ── Section 2: Zamčení ─────────────────────────────────── -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="ZAMČENÍ"
-                    android:textColor="#00BCD4"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.15"
-                    android:paddingBottom="10dp"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="12dp">
 
-                <!-- Access Pwd (nové) -->
+                    <TextView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:text="2"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:background="@drawable/chip_bar_bg"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="  ZAMČENÍ"
+                        android:textColor="#FF9800"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"/>
+
+                </LinearLayout>
+
+                <!-- New Pwd for lock (password just written above) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -2026,7 +2042,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ACCESS PWD"
+                        android:text="NEW PWD"
                         android:textColor="#888888"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"/>
