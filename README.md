@@ -44,3 +44,30 @@ Nahrajte tyto soubory do složky `app/libs/` ve vašem repozitáři:
 ## Hesla
 - Výchozí heslo tagu: `00000000`
 - Pokud tag změníte na jiné heslo, bez něj ho nelze odemknout!
+
+## Struktura výstupního CSV (karta Skupinový)
+
+Soubor se vytváří přes tlačítko **Nastavit** v sekci OVĚŘENÍ + CSV.
+
+### Záhlaví
+```
+ID_RFID,EPC,TID,<Skupina 1>,<Skupina 2>,<Skupina 3>,<Skupina 4>
+```
+Názvy sloupců Skupina 1–4 se berou z editovatelných názvů skupin v šabloně EPC.
+
+### Každý řádek (1 naskenovaný tag)
+```
+<ID_RFID>,<EPC>,<TID>,<G1>,<G2>,<G3>,<G4>
+```
+
+| Sloupec | Obsah | Příklad |
+|---------|-------|---------|
+| ID_RFID | Skupina 5 (prefix) + skupina 6 (ID) — hex, 8 znaků | `00000001` |
+| EPC | Plný EPC kód, 24 hex znaků | `202600000000000000000001` |
+| TID | TID čipu | `E2806894000050009C27D793` |
+| G1–G4 | Hodnoty skupin 1–4 z EPC (každá 4 hex znaky) | `2026`, `0000`, … |
+
+### Poznámky
+- Soubor je kódován UTF-8 s BOM pro kompatibilitu s Excel.
+- Každý scan tagu automaticky připojí řádek a nastavení přežije restart aplikace.
+- Záhlaví se přepíše, pokud změníte názvy skupin ještě před prvním skenem.
