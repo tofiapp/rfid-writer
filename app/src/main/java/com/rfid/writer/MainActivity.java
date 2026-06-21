@@ -1045,17 +1045,47 @@ public class MainActivity extends AppCompatActivity {
             String val = etWrtGroups[i].getText().toString().toUpperCase(Locale.ROOT).trim();
             String next;
             if (i == 5) {
-                try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 1000); }
-                catch (NumberFormatException e) { next = "0001"; }
-                etChipNum.setText(next);
+                String g5 = padWrtField(4, etWrtGroups[4].getText().toString());
+                String g6 = padWrtField(5, etWrtGroups[5].getText().toString());
+                next = incrementMergedIdRfid(g5 + g6);
+                etWrtGroups[4].setText(next.substring(0, 4));
+                etWrtGroups[5].setText(next.substring(4, 8));
+                syncChipNumFromMergedIdRfid(next);
             } else {
                 try { next = String.format("%04X", (Integer.parseInt(val, 16) + 1) & 0xFFFF); }
                 catch (NumberFormatException e) { next = "0001"; }
+                etWrtGroups[i].setText(next);
             }
-            etWrtGroups[i].setText(next);
         }
         updateWrtEpcPreview();
         saveWrtGroupSettings();
+    }
+
+    private String padWrtField(int rowIdx, String raw) {
+        String v = raw.toUpperCase(Locale.ROOT).trim();
+        if (rowIdx == 5) {
+            try { return String.format("%04d", Integer.parseInt(v)); }
+            catch (NumberFormatException e) { return "0001"; }
+        }
+        while (v.length() < 4) v = "0" + v;
+        if (v.length() > 4) v = v.substring(0, 4);
+        return v;
+    }
+
+    /** +1 on the last digit of the 8-char merged ID_RFID, with carry (00000009 -> 00000010). */
+    private String incrementMergedIdRfid(String raw) {
+        String val = raw.toUpperCase(Locale.ROOT).trim();
+        while (val.length() < 8) val = "0" + val;
+        if (val.length() > 8) val = val.substring(val.length() - 8);
+        long n;
+        try { n = Long.parseLong(val); } catch (NumberFormatException e) { n = 0; }
+        n = (n + 1) % 100_000_000L;
+        return String.format("%08d", n);
+    }
+
+    private void syncChipNumFromMergedIdRfid(String merged) {
+        String display = merged.replaceFirst("^0+", "");
+        etChipNum.setText(display.isEmpty() ? "0" : display);
     }
 
     private void loadWrtGroupSettings() {
@@ -1484,22 +1514,16 @@ public class MainActivity extends AppCompatActivity {
         String val = etGroups[i].getText().toString().toUpperCase(Locale.ROOT).trim();
         String next;
         if (!isGroupPresetMode() && i == 5) {
-            try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 1000); }
-            catch (NumberFormatException e) { next = "0001"; }
-            etChipNum.setText(next.replaceFirst("^0+", "").isEmpty() ? "0"
-                    : next.replaceFirst("^0+", ""));
+            String g5 = padGroupField(4, etGroups[4].getText().toString());
+            String g6 = padGroupField(5, etGroups[5].getText().toString());
+            next = incrementMergedIdRfid(g5 + g6);
+            etGroups[4].setText(next.substring(0, 4));
+            etGroups[5].setText(next.substring(4, 8));
+            syncChipNumFromMergedIdRfid(next);
+            return;
         } else if (isGroupPresetMode() && i == 6) {
-            String prefix = val.length() > 4 ? val.substring(0, val.length() - 4) : "";
-            String suffix = val.length() > 4 ? val.substring(val.length() - 4) : val;
-            try {
-                next = prefix + String.format("%04d", (Integer.parseInt(suffix) + 1) % 10000);
-            } catch (NumberFormatException e) {
-                next = prefix + "0001";
-            }
-            while (next.length() < 8) next = "0" + next;
-            if (next.length() > 8) next = next.substring(next.length() - 8);
-            String display = next.replaceFirst("^0+", "");
-            etChipNum.setText(display.isEmpty() ? "0" : display);
+            next = incrementMergedIdRfid(val);
+            syncChipNumFromMergedIdRfid(next);
         } else if (isGroupPresetMode() && i == 5) {
             try { next = String.valueOf((Integer.parseInt(val) + 1)); }
             catch (NumberFormatException e) { next = "1"; }
