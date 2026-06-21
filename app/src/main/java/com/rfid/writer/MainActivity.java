@@ -86,11 +86,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLupaFilePath;
     private View     llLupaFileInput;
     private View     llLupaGroups;
-    private final TextView[] tvLupaGroupLabels = new TextView[4];
-    private final TextView[] tvLupaGroupValues = new TextView[4];
+    private LinearLayout llLupaGroupsContainer;
     private String   mLupaInputFile  = null;
     private final java.util.HashMap<String, String[]> mLupaCsvData = new java.util.HashMap<>();
-    private String[] mLupaColumnNames = {"Skupina 1", "Skupina 2", "Skupina 3", "Skupina 4"};
+    private String[] mLupaColumnNames = new String[0];
+    private int      mLupaAttrColumnCount = 0;
 
     // ── Page 1: Zápis EPC — template ──────────────────────────────────────
     private final EditText[]  etWrtGroups    = new EditText[6];
@@ -113,16 +113,17 @@ public class MainActivity extends AppCompatActivity {
     private static final int GRP_PRESET_STANDARD = 0;
     private static final int GRP_PRESET_1 = 1;
     private static final int GRP_PRESET_2 = 2;
-    private static final int[] PRESET_FIELD_LENS = {4, 4, 2, 2, 3, 1, 4, 4};
+    private static final int GRP_PRESET_ROW_COUNT = 7;
+    private static final int[] PRESET_FIELD_LENS = {4, 4, 2, 2, 3, 1, 8};
     private static final String[] PRESET1_NAMES = {
-            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "Část", "ID_RFID", "ID_RFID"};
+            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "Část", "ID_RFID"};
     private static final String[] PRESET2_NAMES = {
-            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "", "ID_RFID", "ID_RFID"};
+            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "", "ID_RFID"};
 
     private final EditText[]  etGroups      = new EditText[GRP_ROW_COUNT];
     private final EditText[]  etGroupNames  = new EditText[GRP_ROW_COUNT];
     private final CheckBox[]  cbGroups      = new CheckBox[GRP_ROW_COUNT];
-    private final boolean[]   groupAutoInc  = {false, false, false, false, false, true, false, true};
+    private final boolean[]   groupAutoInc  = {false, false, false, false, false, true, true, false};
     private final View[]      llGrpRows     = new View[GRP_ROW_COUNT];
     private final TextView[]  tvVerifyLbl   = new TextView[GRP_ROW_COUNT];
     private final TextView[]  tvVerifyG     = new TextView[GRP_ROW_COUNT];
@@ -294,15 +295,8 @@ public class MainActivity extends AppCompatActivity {
         btnLupaSetFile   = findViewById(R.id.btnLupaSetFile);
         tvLupaFilePath   = findViewById(R.id.tvLupaFilePath);
         llLupaFileInput  = findViewById(R.id.llLupaFileInput);
-        llLupaGroups     = findViewById(R.id.llLupaGroups);
-        tvLupaGroupLabels[0] = findViewById(R.id.tvLupaLabel1);
-        tvLupaGroupLabels[1] = findViewById(R.id.tvLupaLabel2);
-        tvLupaGroupLabels[2] = findViewById(R.id.tvLupaLabel3);
-        tvLupaGroupLabels[3] = findViewById(R.id.tvLupaLabel4);
-        tvLupaGroupValues[0] = findViewById(R.id.tvLupaVal1);
-        tvLupaGroupValues[1] = findViewById(R.id.tvLupaVal2);
-        tvLupaGroupValues[2] = findViewById(R.id.tvLupaVal3);
-        tvLupaGroupValues[3] = findViewById(R.id.tvLupaVal4);
+        llLupaGroups            = findViewById(R.id.llLupaGroups);
+        llLupaGroupsContainer   = findViewById(R.id.llLupaGroupsContainer);
 
         // Page 1 template
         etWrtGroups[0] = findViewById(R.id.etWrt1); etWrtGroups[1] = findViewById(R.id.etWrt2);
@@ -645,7 +639,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-", "ID_RFID", "ID_RFID", "ID_RFID"};
 
     private int getActiveGroupRowCount() {
-        return isGroupPresetMode() ? GRP_ROW_COUNT : 6;
+        return isGroupPresetMode() ? GRP_PRESET_ROW_COUNT : 6;
     }
 
     private boolean isGroupPresetMode() {
@@ -837,8 +831,7 @@ public class MainActivity extends AppCompatActivity {
         if (isGroupPresetMode()) {
             String[] vals = parsePresetFieldsFromEpc(epc);
             displayPresetVerify(epc, tid);
-            String idRfid = vals[6] + vals[7];
-            appendToGroupCsv(idRfid, epc, tid,
+            appendToGroupCsv(vals[6], epc, tid,
                     vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
         } else {
             String g1 = epc.substring(0, 4);
@@ -871,7 +864,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void displayPresetVerify(String epc, String tid) {
         String[] vals = parsePresetFieldsFromEpc(epc);
-        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+        int rows = getActiveGroupRowCount();
+        for (int i = 0; i < rows; i++) {
             if (tvVerifyG[i] != null) tvVerifyG[i].setText(vals[i]);
         }
         updateVerifyLabels();
@@ -880,15 +874,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String[] parsePresetFieldsFromEpc(String epc) {
-        String[] vals = new String[GRP_ROW_COUNT];
+        String[] vals = new String[GRP_PRESET_ROW_COUNT];
         vals[0] = epc.substring(0, 4);
         vals[1] = epc.substring(4, 8);
         vals[2] = epc.substring(8, 10);
         vals[3] = epc.substring(10, 12);
         vals[4] = epc.substring(12, 15);
         vals[5] = epc.substring(15, 16);
-        vals[6] = epc.substring(16, 20);
-        vals[7] = epc.substring(20, 24);
+        vals[6] = epc.substring(16, 24);
         return vals;
     }
 
@@ -1172,7 +1165,7 @@ public class MainActivity extends AppCompatActivity {
     private String buildGroupEpc() {
         if (isGroupPresetMode()) {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < GRP_ROW_COUNT; i++)
+            for (int i = 0; i < GRP_PRESET_ROW_COUNT; i++)
                 sb.append(padGroupField(i, etGroups[i].getText().toString()));
             return sb.toString();
         }
@@ -1279,7 +1272,7 @@ public class MainActivity extends AppCompatActivity {
                 llVerifyRows[i].setVisibility(i < rows ? View.VISIBLE : View.GONE);
             if (tvVerifyLbl[i] != null && i < rows) {
                 String label = getGroupRowLabel(i);
-                boolean isIdRow = isGroupPresetMode() ? (i >= 6) : (i == 5);
+                boolean isIdRow = isGroupPresetMode() ? (i == 6) : (i == 5);
                 tvVerifyLbl[i].setText(label.isEmpty() ? ("(" + (i + 1) + "):") : (label + " (" + (i + 1) + "):"));
                 int color = isIdRow ? Color.parseColor("#d2a8ff") : Color.parseColor("#888888");
                 tvVerifyLbl[i].setTextColor(color);
@@ -1334,10 +1327,17 @@ public class MainActivity extends AppCompatActivity {
         boolean preset = isGroupPresetMode();
 
         for (int i = 0; i < GRP_ROW_COUNT; i++) {
-            if (llGrpRows[i] != null)
-                llGrpRows[i].setVisibility((!preset && i >= 6) ? View.GONE : View.VISIBLE);
+            if (llGrpRows[i] != null) {
+                boolean hide = (!preset && i >= 6) || (preset && i >= GRP_PRESET_ROW_COUNT);
+                llGrpRows[i].setVisibility(hide ? View.GONE : View.VISIBLE);
+            }
             if (etGroups[i] != null) {
-                int maxLen = preset ? PRESET_FIELD_LENS[i] : 4;
+                int maxLen;
+                if (preset) {
+                    maxLen = (i < GRP_PRESET_ROW_COUNT) ? PRESET_FIELD_LENS[i] : 4;
+                } else {
+                    maxLen = 4;
+                }
                 if (!preset && i == 5) {
                     etGroups[i].setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
                 } else {
@@ -1347,8 +1347,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 etGroups[i].setFilters(new android.text.InputFilter[]{
                         new android.text.InputFilter.LengthFilter(maxLen)});
+                if (preset && i == 6) {
+                    android.view.ViewGroup.LayoutParams lp = etGroups[i].getLayoutParams();
+                    lp.width = (int) (120 * getResources().getDisplayMetrics().density);
+                    etGroups[i].setLayoutParams(lp);
+                } else if (!preset || i < GRP_PRESET_ROW_COUNT) {
+                    android.view.ViewGroup.LayoutParams lp = etGroups[i].getLayoutParams();
+                    lp.width = (int) (76 * getResources().getDisplayMetrics().density);
+                    etGroups[i].setLayoutParams(lp);
+                }
             }
-            if (preset && etGroupNames[i] != null) {
+            if (preset && etGroupNames[i] != null && i < GRP_PRESET_ROW_COUNT) {
                 etGroupNames[i].setText(presetNames[i]);
                 etGroupNames[i].setEnabled(mGroupPresetMode != GRP_PRESET_2 || i != 5);
             } else if (!preset && etGroupNames[i] != null) {
@@ -1356,16 +1365,24 @@ public class MainActivity extends AppCompatActivity {
             }
             if (preset && resetValues) {
                 if (etGroups[i] != null) etGroups[i].setText("");
-                groupAutoInc[i] = (i == 7);
-                if (cbGroups[i] != null) {
-                    cbGroups[i].setChecked(i == 7);
-                    cbGroups[i].setEnabled(i >= 6);
-                    cbGroups[i].setVisibility(i >= 6 ? View.VISIBLE : View.INVISIBLE);
+                if (i < GRP_PRESET_ROW_COUNT) {
+                    groupAutoInc[i] = (i == 6);
+                    if (cbGroups[i] != null) {
+                        cbGroups[i].setChecked(i == 6);
+                        cbGroups[i].setEnabled(i == 6);
+                        cbGroups[i].setVisibility(i == 6 ? View.VISIBLE : View.INVISIBLE);
+                    }
+                } else if (cbGroups[i] != null) {
+                    cbGroups[i].setVisibility(View.GONE);
                 }
             } else if (preset) {
                 if (cbGroups[i] != null) {
-                    cbGroups[i].setEnabled(i >= 6);
-                    cbGroups[i].setVisibility(i >= 6 ? View.VISIBLE : View.INVISIBLE);
+                    if (i < GRP_PRESET_ROW_COUNT) {
+                        cbGroups[i].setEnabled(i == 6);
+                        cbGroups[i].setVisibility(i == 6 ? View.VISIBLE : View.INVISIBLE);
+                    } else {
+                        cbGroups[i].setVisibility(View.GONE);
+                    }
                 }
             } else if (cbGroups[i] != null) {
                 cbGroups[i].setEnabled(true);
@@ -1429,7 +1446,7 @@ public class MainActivity extends AppCompatActivity {
     private void autoIncrementGroups() {
         if (isGroupPresetMode() && mGroupPresetMode == GRP_PRESET_1 && mPresetAuto56) {
             autoIncrementPreset56();
-            if (groupAutoInc[7]) incrementGroupRow(7);
+            if (groupAutoInc[6]) incrementGroupRow(6);
             updateGroupEpcPreview();
             saveGroupSettings();
             return;
@@ -1471,11 +1488,18 @@ public class MainActivity extends AppCompatActivity {
             catch (NumberFormatException e) { next = "0001"; }
             etChipNum.setText(next.replaceFirst("^0+", "").isEmpty() ? "0"
                     : next.replaceFirst("^0+", ""));
-        } else if (isGroupPresetMode() && i == 7) {
-            try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 10000); }
-            catch (NumberFormatException e) { next = "0001"; }
-            etChipNum.setText(next.replaceFirst("^0+", "").isEmpty() ? "0"
-                    : next.replaceFirst("^0+", ""));
+        } else if (isGroupPresetMode() && i == 6) {
+            String prefix = val.length() > 4 ? val.substring(0, val.length() - 4) : "";
+            String suffix = val.length() > 4 ? val.substring(val.length() - 4) : val;
+            try {
+                next = prefix + String.format("%04d", (Integer.parseInt(suffix) + 1) % 10000);
+            } catch (NumberFormatException e) {
+                next = prefix + "0001";
+            }
+            while (next.length() < 8) next = "0" + next;
+            if (next.length() > 8) next = next.substring(next.length() - 8);
+            String display = next.replaceFirst("^0+", "");
+            etChipNum.setText(display.isEmpty() ? "0" : display);
         } else if (isGroupPresetMode() && i == 5) {
             try { next = String.valueOf((Integer.parseInt(val) + 1)); }
             catch (NumberFormatException e) { next = "1"; }
@@ -1723,6 +1747,17 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray arr = new JSONArray(vJson);
                 for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++)
                     if (etGroups[i] != null) etGroups[i].setText(arr.getString(i));
+                if (isGroupPresetMode() && etGroups[6] != null && etGroups[7] != null) {
+                    String g7 = etGroups[6].getText().toString().trim();
+                    String g8 = etGroups[7].getText().toString().trim();
+                    if (g7.length() <= 4 && !g8.isEmpty()) {
+                        String combined = (g7 + g8).toUpperCase(Locale.ROOT);
+                        while (combined.length() < 8) combined = "0" + combined;
+                        if (combined.length() > 8) combined = combined.substring(combined.length() - 8);
+                        etGroups[6].setText(combined);
+                    }
+                    etGroups[7].setText("");
+                }
             }
             String iJson = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("group_autoinc", null);
             if (iJson != null) {
@@ -2041,13 +2076,18 @@ public class MainActivity extends AppCompatActivity {
             if (headerLine != null) {
                 if (headerLine.startsWith("\uFEFF")) headerLine = headerLine.substring(1);
                 String[] headers = headerLine.split(";", -1);
-                // CSV: ID_RFID(0);EPC(1);TID(2);Col1(3);Col2(4);Col3(5);Col4(6)
-                for (int i = 0; i < 4; i++) {
-                    int col = 3 + i;
-                    mLupaColumnNames[i] = (col < headers.length) ? headers[col].trim() : ("Skupina " + (i + 1));
+                int attrCount = Math.max(0, headers.length - 3);
+                mLupaAttrColumnCount = attrCount;
+                mLupaColumnNames = new String[attrCount];
+                for (int i = 0; i < attrCount; i++) {
+                    String name = headers[3 + i].trim();
+                    mLupaColumnNames[i] = name.isEmpty() ? ("Sloupec " + (i + 1)) : name;
                 }
+            } else {
+                mLupaAttrColumnCount = 0;
+                mLupaColumnNames = new String[0];
             }
-            updateLupaGroupLabels();
+            buildLupaGroupsUi();
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
@@ -2065,10 +2105,63 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updateLupaGroupLabels() {
-        for (int i = 0; i < 4; i++) {
-            if (tvLupaGroupLabels[i] != null)
-                tvLupaGroupLabels[i].setText(mLupaColumnNames[i] + ":");
+    private void buildLupaGroupsUi() {
+        if (llLupaGroupsContainer == null) return;
+        llLupaGroupsContainer.removeAllViews();
+        if (mLupaAttrColumnCount <= 0) return;
+
+        int purple = Color.parseColor("#d2a8ff");
+        float density = getResources().getDisplayMetrics().density;
+        int pad = (int) (10 * density);
+        int margin = (int) (6 * density);
+
+        for (int i = 0; i < mLupaAttrColumnCount; i += 2) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            if (i + 2 < mLupaAttrColumnCount) {
+                ((LinearLayout.LayoutParams) row.getLayoutParams()).bottomMargin = margin;
+            }
+
+            for (int j = 0; j < 2 && (i + j) < mLupaAttrColumnCount; j++) {
+                int idx = i + j;
+                LinearLayout card = new LinearLayout(this);
+                card.setOrientation(LinearLayout.VERTICAL);
+                card.setBackgroundResource(R.drawable.chip_bar_bg);
+                card.setPadding(pad, pad, pad, pad);
+                LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(
+                        0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                if (j == 0 && (i + 1) < mLupaAttrColumnCount) cardLp.setMarginEnd(margin / 2);
+                if (j == 1) cardLp.setMarginStart(margin / 2);
+                card.setLayoutParams(cardLp);
+
+                TextView lbl = new TextView(this);
+                lbl.setText(mLupaColumnNames[idx] + ":");
+                lbl.setTextColor(purple);
+                lbl.setTextSize(10);
+                lbl.setTypeface(null, android.graphics.Typeface.BOLD);
+                lbl.setLetterSpacing(0.03f);
+                card.addView(lbl);
+
+                TextView val = new TextView(this);
+                val.setText("—");
+                val.setTextColor(purple);
+                val.setTextSize(22);
+                val.setTypeface(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.BOLD);
+                val.setPadding(0, (int) (4 * density), 0, 0);
+                val.setTag("lupa_val_" + idx);
+                card.addView(val);
+
+                row.addView(card);
+            }
+            if ((i + 2) > mLupaAttrColumnCount && mLupaAttrColumnCount % 2 == 1) {
+                View spacer = new View(this);
+                spacer.setLayoutParams(new LinearLayout.LayoutParams(0, 0, 1f));
+                row.addView(spacer);
+            }
+            llLupaGroupsContainer.addView(row);
         }
     }
 
@@ -2080,12 +2173,16 @@ public class MainActivity extends AppCompatActivity {
             toast("TID nenalezeno v CSV");
             return;
         }
-        for (int i = 0; i < 4; i++) {
-            int col = 3 + i;
-            String val = (col < row.length) ? row[col].trim() : "";
-            String stripped = val.replaceFirst("^0+", "");
-            if (stripped.isEmpty()) stripped = val.isEmpty() ? "—" : "0";
-            tvLupaGroupValues[i].setText(stripped);
+        if (llLupaGroupsContainer != null) {
+            for (int i = 0; i < mLupaAttrColumnCount; i++) {
+                TextView valTv = llLupaGroupsContainer.findViewWithTag("lupa_val_" + i);
+                if (valTv == null) continue;
+                int col = 3 + i;
+                String val = (col < row.length) ? row[col].trim() : "";
+                String stripped = val.replaceFirst("^0+", "");
+                if (stripped.isEmpty()) stripped = val.isEmpty() ? "—" : "0";
+                valTv.setText(stripped);
+            }
         }
         llLupaGroups.setVisibility(View.VISIBLE);
     }
