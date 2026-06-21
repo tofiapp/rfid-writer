@@ -109,10 +109,28 @@ public class MainActivity extends AppCompatActivity {
     private int      mWriteBank = 1; // 0=RESERVED, 1=EPC, 3=USER
 
     // ── Page 2: Skupinový zápis (3-step workflow) ─────────────────────────
-    private final EditText[]  etGroups      = new EditText[6];
-    private final EditText[]  etGroupNames  = new EditText[6]; // groups 1-6, all editable
-    private final CheckBox[]  cbGroups      = new CheckBox[6];
-    private final boolean[]   groupAutoInc  = {false, false, false, false, false, true};
+    private static final int GRP_ROW_COUNT = 8;
+    private static final int GRP_PRESET_STANDARD = 0;
+    private static final int GRP_PRESET_1 = 1;
+    private static final int GRP_PRESET_2 = 2;
+    private static final int[] PRESET_FIELD_LENS = {4, 4, 2, 2, 3, 1, 4, 4};
+    private static final String[] PRESET1_NAMES = {
+            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "Část", "ID_RFID", "ID_RFID"};
+    private static final String[] PRESET2_NAMES = {
+            "Rok", "TUDU 1", "TUDU 2 ASCII", "TUDU 2", "Výhybka", "", "ID_RFID", "ID_RFID"};
+
+    private final EditText[]  etGroups      = new EditText[GRP_ROW_COUNT];
+    private final EditText[]  etGroupNames  = new EditText[GRP_ROW_COUNT];
+    private final CheckBox[]  cbGroups      = new CheckBox[GRP_ROW_COUNT];
+    private final boolean[]   groupAutoInc  = {false, false, false, false, false, true, false, true};
+    private final View[]      llGrpRows     = new View[GRP_ROW_COUNT];
+    private final TextView[]  tvVerifyLbl   = new TextView[GRP_ROW_COUNT];
+    private final TextView[]  tvVerifyG     = new TextView[GRP_ROW_COUNT];
+    private final View[]      llVerifyRows  = new View[GRP_ROW_COUNT];
+    private int     mGroupPresetMode = GRP_PRESET_STANDARD;
+    private boolean mPresetAuto56    = false;
+    private Button  btnGrpPresetStd, btnGrpPreset1, btnGrpPreset2;
+    private CheckBox cbPresetAuto56;
     private TextView tvEpcPreview;
     private TextView tvGrpPreviewLabel;
     private Button   btnToggleTemplate;
@@ -130,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
     // step 2 controls
     private Button   btnGroupScan;
     private View     llVerifyDisplay;
-    private TextView tvVerifyG1, tvVerifyG2, tvVerifyG3, tvVerifyG4, tvVerifyG5, tvVerifyG6;
     private TextView tvVerifyEpc, tvVerifyTid;
     private EditText etGroupFileName;
     private Button   btnGroupSetFile;
@@ -319,15 +336,27 @@ public class MainActivity extends AppCompatActivity {
         etGroups[0] = findViewById(R.id.etGroup1); etGroups[1] = findViewById(R.id.etGroup2);
         etGroups[2] = findViewById(R.id.etGroup3); etGroups[3] = findViewById(R.id.etGroup4);
         etGroups[4] = findViewById(R.id.etGroup5); etGroups[5] = findViewById(R.id.etGroup6);
+        etGroups[6] = findViewById(R.id.etGroup7); etGroups[7] = findViewById(R.id.etGroup8);
         etGroupNames[0] = findViewById(R.id.etGrpName1);
         etGroupNames[1] = findViewById(R.id.etGrpName2);
         etGroupNames[2] = findViewById(R.id.etGrpName3);
         etGroupNames[3] = findViewById(R.id.etGrpName4);
         etGroupNames[4] = findViewById(R.id.etGrpName5);
         etGroupNames[5] = findViewById(R.id.etGrpName6);
+        etGroupNames[6] = findViewById(R.id.etGrpName7);
+        etGroupNames[7] = findViewById(R.id.etGrpName8);
         cbGroups[0] = findViewById(R.id.cbGroup1); cbGroups[1] = findViewById(R.id.cbGroup2);
         cbGroups[2] = findViewById(R.id.cbGroup3); cbGroups[3] = findViewById(R.id.cbGroup4);
         cbGroups[4] = findViewById(R.id.cbGroup5); cbGroups[5] = findViewById(R.id.cbGroup6);
+        cbGroups[6] = findViewById(R.id.cbGroup7); cbGroups[7] = findViewById(R.id.cbGroup8);
+        llGrpRows[0] = findViewById(R.id.llGrpRow1); llGrpRows[1] = findViewById(R.id.llGrpRow2);
+        llGrpRows[2] = findViewById(R.id.llGrpRow3); llGrpRows[3] = findViewById(R.id.llGrpRow4);
+        llGrpRows[4] = findViewById(R.id.llGrpRow5); llGrpRows[5] = findViewById(R.id.llGrpRow6);
+        llGrpRows[6] = findViewById(R.id.llGrpRow7); llGrpRows[7] = findViewById(R.id.llGrpRow8);
+        btnGrpPresetStd = findViewById(R.id.btnGrpPresetStd);
+        btnGrpPreset1   = findViewById(R.id.btnGrpPreset1);
+        btnGrpPreset2   = findViewById(R.id.btnGrpPreset2);
+        cbPresetAuto56  = findViewById(R.id.cbPresetAuto56);
         tvEpcPreview           = findViewById(R.id.tvEpcPreview);
         tvGrpPreviewLabel      = findViewById(R.id.tvGrpPreviewLabel);
         btnToggleTemplate      = findViewById(R.id.btnToggleTemplate);
@@ -348,9 +377,18 @@ public class MainActivity extends AppCompatActivity {
         btnGroupWrite      = findViewById(R.id.btnGroupWrite);
         btnGroupScan       = findViewById(R.id.btnGroupScan);
         llVerifyDisplay    = findViewById(R.id.llVerifyDisplay);
-        tvVerifyG1 = findViewById(R.id.tvVerifyG1); tvVerifyG2 = findViewById(R.id.tvVerifyG2);
-        tvVerifyG3 = findViewById(R.id.tvVerifyG3); tvVerifyG4 = findViewById(R.id.tvVerifyG4);
-        tvVerifyG5 = findViewById(R.id.tvVerifyG5); tvVerifyG6 = findViewById(R.id.tvVerifyG6);
+        tvVerifyG[0] = findViewById(R.id.tvVerifyG1); tvVerifyG[1] = findViewById(R.id.tvVerifyG2);
+        tvVerifyG[2] = findViewById(R.id.tvVerifyG3); tvVerifyG[3] = findViewById(R.id.tvVerifyG4);
+        tvVerifyG[4] = findViewById(R.id.tvVerifyG5); tvVerifyG[5] = findViewById(R.id.tvVerifyG6);
+        tvVerifyG[6] = findViewById(R.id.tvVerifyG7); tvVerifyG[7] = findViewById(R.id.tvVerifyG8);
+        tvVerifyLbl[0] = findViewById(R.id.tvVerifyLbl1); tvVerifyLbl[1] = findViewById(R.id.tvVerifyLbl2);
+        tvVerifyLbl[2] = findViewById(R.id.tvVerifyLbl3); tvVerifyLbl[3] = findViewById(R.id.tvVerifyLbl4);
+        tvVerifyLbl[4] = findViewById(R.id.tvVerifyLbl5); tvVerifyLbl[5] = findViewById(R.id.tvVerifyLbl6);
+        tvVerifyLbl[6] = findViewById(R.id.tvVerifyLbl7); tvVerifyLbl[7] = findViewById(R.id.tvVerifyLbl8);
+        llVerifyRows[0] = findViewById(R.id.llVerifyRow1); llVerifyRows[1] = findViewById(R.id.llVerifyRow2);
+        llVerifyRows[2] = findViewById(R.id.llVerifyRow3); llVerifyRows[3] = findViewById(R.id.llVerifyRow4);
+        llVerifyRows[4] = findViewById(R.id.llVerifyRow5); llVerifyRows[5] = findViewById(R.id.llVerifyRow6);
+        llVerifyRows[6] = findViewById(R.id.llVerifyRow7); llVerifyRows[7] = findViewById(R.id.llVerifyRow8);
         tvVerifyEpc = findViewById(R.id.tvVerifyEpc); tvVerifyTid = findViewById(R.id.tvVerifyTid);
         etGroupFileName    = findViewById(R.id.etGroupFileName);
         btnGroupSetFile    = findViewById(R.id.btnGroupSetFile);
@@ -484,23 +522,40 @@ public class MainActivity extends AppCompatActivity {
             updateGrpTemplateBtnText();
         });
 
+        btnGrpPresetStd.setOnClickListener(v -> setGroupPresetMode(GRP_PRESET_STANDARD));
+        btnGrpPreset1.setOnClickListener(v -> setGroupPresetMode(GRP_PRESET_1));
+        btnGrpPreset2.setOnClickListener(v -> setGroupPresetMode(GRP_PRESET_2));
+        cbPresetAuto56.setOnCheckedChangeListener((b, checked) -> {
+            mPresetAuto56 = checked;
+            saveGroupSettings();
+        });
+
         TextWatcher grpWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override public void afterTextChanged(Editable s) { updateGroupEpcPreview(); }
         };
-        for (EditText et : etGroups) et.addTextChangedListener(grpWatcher);
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+            if (etGroups[i] != null) etGroups[i].addTextChangedListener(grpWatcher);
+        }
 
         TextWatcher grpNameWatcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { onGroupNameChanged(); }
+            @Override public void afterTextChanged(Editable s) {
+                onGroupNameChanged();
+                updateGroupEpcPreview();
+                updateVerifyLabels();
+            }
         };
-        for (EditText et : etGroupNames) if (et != null) et.addTextChangedListener(grpNameWatcher);
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+            if (etGroupNames[i] != null) etGroupNames[i].addTextChangedListener(grpNameWatcher);
+        }
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
             final int idx = i;
-            cbGroups[i].setOnCheckedChangeListener((b, checked) -> groupAutoInc[idx] = checked);
+            if (cbGroups[i] != null)
+                cbGroups[i].setOnCheckedChangeListener((b, checked) -> groupAutoInc[idx] = checked);
         }
         btnGroupWrite.setOnClickListener(v -> groupWrite());
         btnGroupScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startGroupScan(); });
@@ -587,7 +642,15 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_WRT_GROUP_NAMES = "wrt_group_names";
     private static final String KEY_GROUP_NAMES_P2  = "group_names_p2";
     private static final String[] DEFAULT_WRT_NAMES = {"-", "-", "-", "-", "-", "ID_RFID"};
-    private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-", "ID_RFID"};
+    private static final String[] DEFAULT_GRP_NAMES = {"-", "-", "-", "-", "-", "ID_RFID", "ID_RFID", "ID_RFID"};
+
+    private int getActiveGroupRowCount() {
+        return isGroupPresetMode() ? GRP_ROW_COUNT : 6;
+    }
+
+    private boolean isGroupPresetMode() {
+        return mGroupPresetMode == GRP_PRESET_1 || mGroupPresetMode == GRP_PRESET_2;
+    }
 
     private void loadWrtGroupNames() {
         try {
@@ -620,10 +683,10 @@ public class MainActivity extends AppCompatActivity {
                     .getString(KEY_GROUP_NAMES_P2, null);
             if (json != null) {
                 JSONArray arr = new JSONArray(json);
-                for (int i = 0; i < 6 && i < arr.length(); i++)
+                for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++)
                     if (etGroupNames[i] != null) etGroupNames[i].setText(arr.getString(i));
             } else {
-                for (int i = 0; i < 6; i++)
+                for (int i = 0; i < GRP_ROW_COUNT; i++)
                     if (etGroupNames[i] != null) etGroupNames[i].setText(DEFAULT_GRP_NAMES[i]);
             }
         } catch (Exception ignored) {}
@@ -632,7 +695,7 @@ public class MainActivity extends AppCompatActivity {
     private void saveGrpNames() {
         try {
             JSONArray arr = new JSONArray();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < GRP_ROW_COUNT; i++)
                 arr.put(etGroupNames[i] != null ? etGroupNames[i].getText().toString() : DEFAULT_GRP_NAMES[i]);
             getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                     .putString(KEY_GROUP_NAMES_P2, arr.toString()).apply();
@@ -654,6 +717,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String buildGroupCsvHeader() {
+        if (isGroupPresetMode()) {
+            String castName = (mGroupPresetMode == GRP_PRESET_2) ? "" : "Část";
+            return "\uFEFFID_RFID;EPC;TID;Rok;TUDU 1;TUDU 2;Výhybka;" + castName + "\n";
+        }
         String[] names = new String[6];
         String[] defaults = {"Skupina_1","Skupina_2","Skupina_3","Skupina_4","Skupina_5","ID_RFID"};
         for (int i = 0; i < 6; i++) {
@@ -661,7 +728,6 @@ public class MainActivity extends AppCompatActivity {
             if (names[i].isEmpty() || names[i].equals("—") || names[i].equals("-"))
                 names[i] = defaults[i];
         }
-        // Groups 5 and 6 are merged into ID_RFID; only groups 1-4 appear as separate columns
         return "\uFEFFID_RFID;EPC;TID;"
                 + names[0] + ";" + names[1] + ";" + names[2] + ";"
                 + names[3] + "\n";
@@ -767,33 +833,63 @@ public class MainActivity extends AppCompatActivity {
             toast("EPC příliš krátké pro analýzu");
             return;
         }
-        String g1 = epc.substring(0, 4);
-        String g2 = epc.substring(4, 8);
-        String g3 = epc.substring(8, 12);
-        String g4 = epc.substring(12, 16);
-        String g5 = epc.substring(16, 20);
-        String g6 = epc.substring(20, 24);
 
-        tvVerifyG1.setText(g1); tvVerifyG2.setText(g2);
-        tvVerifyG3.setText(g3); tvVerifyG4.setText(g4);
-        tvVerifyG5.setText(g5); tvVerifyG6.setText(g6);
+        if (isGroupPresetMode()) {
+            String[] vals = parsePresetFieldsFromEpc(epc);
+            displayPresetVerify(epc, tid);
+            String idRfid = vals[6] + vals[7];
+            appendToGroupCsv(idRfid, epc, tid,
+                    vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]);
+        } else {
+            String g1 = epc.substring(0, 4);
+            String g2 = epc.substring(4, 8);
+            String g3 = epc.substring(8, 12);
+            String g4 = epc.substring(12, 16);
+            String g5 = epc.substring(16, 20);
+            String g6 = epc.substring(20, 24);
 
-        String fmtEpc = g1+"-"+g2+"-"+g3+"-"+g4+"-"+g5+"-"+g6;
-        tvVerifyEpc.setText(fmtEpc);
-        tvVerifyTid.setText(tid.isEmpty() ? "—" : tid);
+            tvVerifyG[0].setText(g1); tvVerifyG[1].setText(g2);
+            tvVerifyG[2].setText(g3); tvVerifyG[3].setText(g4);
+            tvVerifyG[4].setText(g5); tvVerifyG[5].setText(g6);
+            updateVerifyLabels();
+
+            String fmtEpc = g1+"-"+g2+"-"+g3+"-"+g4+"-"+g5+"-"+g6;
+            tvVerifyEpc.setText(fmtEpc);
+            tvVerifyTid.setText(tid.isEmpty() ? "—" : tid);
+
+            appendToGroupCsv(g5 + g6, epc, tid, g1, g2, g3, g4, g5, g6);
+        }
 
         llVerifyDisplay.setVisibility(View.VISIBLE);
 
-        // Save to CSV
-        appendToGroupCsv(g5 + g6, epc, tid, g1, g2, g3, g4, g5, g6);
-
-        // Auto-fill lock pwd from write step
         String writePwd = readPassword(etGroupAccessPwd);
         if (!writePwd.equals("00000000")) etGroupLockPwd.setText(writePwd);
 
-        // Advance to lock step
         setGroupStep(STEP_LOCK);
         toast("✅ Uloženo do CSV — pokračujte LOCK");
+    }
+
+    private void displayPresetVerify(String epc, String tid) {
+        String[] vals = parsePresetFieldsFromEpc(epc);
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+            if (tvVerifyG[i] != null) tvVerifyG[i].setText(vals[i]);
+        }
+        updateVerifyLabels();
+        tvVerifyEpc.setText(formatEpcDashed(epc));
+        tvVerifyTid.setText(tid.isEmpty() ? "—" : tid);
+    }
+
+    private String[] parsePresetFieldsFromEpc(String epc) {
+        String[] vals = new String[GRP_ROW_COUNT];
+        vals[0] = epc.substring(0, 4);
+        vals[1] = epc.substring(4, 8);
+        vals[2] = epc.substring(8, 10);
+        vals[3] = epc.substring(10, 12);
+        vals[4] = epc.substring(12, 15);
+        vals[5] = epc.substring(15, 16);
+        vals[6] = epc.substring(16, 20);
+        vals[7] = epc.substring(20, 24);
+        return vals;
     }
 
     // ── Group workflow steps ───────────────────────────────────────────────
@@ -1057,15 +1153,59 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Page 2 — EPC template ─────────────────────────────────────────────
 
+    private String padGroupField(int rowIdx, String raw) {
+        int len = isGroupPresetMode() ? PRESET_FIELD_LENS[rowIdx] : 4;
+        String v = raw.toUpperCase(Locale.ROOT).trim();
+        if (isGroupPresetMode() && rowIdx == 5) {
+            if (v.isEmpty()) return "0";
+            return v.substring(0, 1);
+        }
+        if (!isGroupPresetMode() && rowIdx == 5) {
+            try { return String.format("%04d", Integer.parseInt(v)); }
+            catch (NumberFormatException e) { return "0001"; }
+        }
+        while (v.length() < len) v = "0" + v;
+        if (v.length() > len) v = v.substring(v.length() - len);
+        return v;
+    }
+
     private String buildGroupEpc() {
+        if (isGroupPresetMode()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < GRP_ROW_COUNT; i++)
+                sb.append(padGroupField(i, etGroups[i].getText().toString()));
+            return sb.toString();
+        }
         StringBuilder sb = new StringBuilder();
-        for (EditText et : etGroups) {
-            String v = et.getText().toString().toUpperCase(Locale.ROOT).trim();
-            while (v.length() < 4) v = "0" + v;
-            if (v.length() > 4) v = v.substring(0, 4);
+        for (int i = 0; i < 6; i++) {
+            String v = etGroups[i].getText().toString().toUpperCase(Locale.ROOT).trim();
+            if (i == 5) {
+                try { v = String.format("%04d", Integer.parseInt(v)); }
+                catch (NumberFormatException e) { v = "0001"; }
+            } else {
+                while (v.length() < 4) v = "0" + v;
+                if (v.length() > 4) v = v.substring(0, 4);
+            }
             sb.append(v);
         }
         return sb.toString();
+    }
+
+    private String formatTudu2Csv(String asciiHex, String numPart) {
+        try {
+            char c = (char) Integer.parseInt(asciiHex, 16);
+            int n = Integer.parseInt(numPart, 16);
+            return "" + c + n;
+        } catch (NumberFormatException e) {
+            return asciiHex + numPart;
+        }
+    }
+
+    private String formatEpcDashed(String epc) {
+        if (epc.length() < 24) return epc;
+        return epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
+                epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
+                epc.substring(16,20)+"-"+epc.substring(20,24);
     }
 
     private void updateGroupEpcPreview() {
@@ -1074,10 +1214,39 @@ public class MainActivity extends AppCompatActivity {
         if (epc.length() != 24) return;
 
         if (mGroupWriteBank == 1) {
-            if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText("náhled EPC");
-            tvEpcPreview.setText(epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+
-                epc.substring(8,12)+"-"+epc.substring(12,16)+"-"+
-                epc.substring(16,20)+"-"+epc.substring(20,24));
+            if (tvGrpPreviewLabel != null) {
+                if (isGroupPresetMode()) {
+                    tvGrpPreviewLabel.setText("náhled EPC (preset)");
+                } else {
+                    tvGrpPreviewLabel.setText("náhled EPC");
+                }
+            }
+            if (isGroupPresetMode()) {
+                StringBuilder detail = new StringBuilder(formatEpcDashed(epc));
+                detail.append("\n");
+                int rows = getActiveGroupRowCount();
+                for (int i = 0; i < rows; i++) {
+                    if (i > 0) detail.append("  ·  ");
+                    String name = getGroupRowLabel(i);
+                    String val = etGroups[i] != null ? etGroups[i].getText().toString().trim() : "";
+                    if (val.isEmpty()) val = "—";
+                    detail.append(name).append(": ").append(val);
+                }
+                tvEpcPreview.setText(detail.toString());
+                tvEpcPreview.setTextSize(13);
+            } else {
+                StringBuilder detail = new StringBuilder(formatEpcDashed(epc));
+                detail.append("\n");
+                for (int i = 0; i < 6; i++) {
+                    if (i > 0) detail.append("  ·  ");
+                    String name = getGroupRowLabel(i);
+                    String val = etGroups[i] != null ? etGroups[i].getText().toString().trim() : "";
+                    if (val.isEmpty()) val = "—";
+                    detail.append(name).append(": ").append(val);
+                }
+                tvEpcPreview.setText(detail.toString());
+                tvEpcPreview.setTextSize(13);
+            }
         } else {
             String label = (mGroupWriteBank == 3) ? "náhled USER" : "náhled RESERVED";
             if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText(label);
@@ -1092,7 +1261,126 @@ public class MainActivity extends AppCompatActivity {
                 preview.append(epc, i * 4, i * 4 + 4);
             }
             tvEpcPreview.setText(preview.toString());
+            tvEpcPreview.setTextSize(16);
         }
+    }
+
+    private String getGroupRowLabel(int idx) {
+        if (etGroupNames[idx] == null) return "Řádek " + (idx + 1);
+        String name = etGroupNames[idx].getText().toString().trim();
+        if (name.isEmpty() || name.equals("-") || name.equals("—")) return "Řádek " + (idx + 1);
+        return name;
+    }
+
+    private void updateVerifyLabels() {
+        int rows = getActiveGroupRowCount();
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+            if (llVerifyRows[i] != null)
+                llVerifyRows[i].setVisibility(i < rows ? View.VISIBLE : View.GONE);
+            if (tvVerifyLbl[i] != null && i < rows) {
+                String label = getGroupRowLabel(i);
+                boolean isIdRow = isGroupPresetMode() ? (i >= 6) : (i == 5);
+                tvVerifyLbl[i].setText(label.isEmpty() ? ("(" + (i + 1) + "):") : (label + " (" + (i + 1) + "):"));
+                int color = isIdRow ? Color.parseColor("#d2a8ff") : Color.parseColor("#888888");
+                tvVerifyLbl[i].setTextColor(color);
+                if (tvVerifyG[i] != null) {
+                    tvVerifyG[i].setTextColor(color);
+                    tvVerifyG[i].setTypeface(null, isIdRow ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+                }
+            }
+        }
+    }
+
+    private void setGroupPresetMode(int mode) {
+        if (mGroupPresetMode == mode) return;
+        mGroupPresetMode = mode;
+        applyGroupPresetUi(true);
+        if (mGroupOutputFile != null && mGroupRecordCount == 0) {
+            try {
+                File file = new File(mGroupOutputFile);
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    fos.write(buildGroupCsvHeader().getBytes("UTF-8"));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "rewrite CSV header on preset change: " + e.getMessage());
+            }
+        }
+        saveGroupSettings();
+    }
+
+    private void applyGroupPresetUi() {
+        applyGroupPresetUi(false);
+    }
+
+    private void applyGroupPresetUi(boolean resetValues) {
+        int active = Color.parseColor("#00BCD4");
+        int inactive = Color.parseColor("#2E2E2E");
+        int activeFg = Color.parseColor("#121212");
+        int inactiveFg = Color.parseColor("#E0E0E0");
+
+        btnGrpPresetStd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                mGroupPresetMode == GRP_PRESET_STANDARD ? active : inactive));
+        btnGrpPresetStd.setTextColor(mGroupPresetMode == GRP_PRESET_STANDARD ? activeFg : inactiveFg);
+        btnGrpPreset1.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                mGroupPresetMode == GRP_PRESET_1 ? active : inactive));
+        btnGrpPreset1.setTextColor(mGroupPresetMode == GRP_PRESET_1 ? activeFg : inactiveFg);
+        btnGrpPreset2.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                mGroupPresetMode == GRP_PRESET_2 ? active : inactive));
+        btnGrpPreset2.setTextColor(mGroupPresetMode == GRP_PRESET_2 ? activeFg : inactiveFg);
+
+        cbPresetAuto56.setVisibility(mGroupPresetMode == GRP_PRESET_1 ? View.VISIBLE : View.GONE);
+
+        String[] presetNames = (mGroupPresetMode == GRP_PRESET_2) ? PRESET2_NAMES : PRESET1_NAMES;
+        boolean preset = isGroupPresetMode();
+
+        for (int i = 0; i < GRP_ROW_COUNT; i++) {
+            if (llGrpRows[i] != null)
+                llGrpRows[i].setVisibility((!preset && i >= 6) ? View.GONE : View.VISIBLE);
+            if (etGroups[i] != null) {
+                int maxLen = preset ? PRESET_FIELD_LENS[i] : 4;
+                if (!preset && i == 5) {
+                    etGroups[i].setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+                } else {
+                    etGroups[i].setInputType(android.text.InputType.TYPE_CLASS_TEXT
+                            | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                            | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+                }
+                etGroups[i].setFilters(new android.text.InputFilter[]{
+                        new android.text.InputFilter.LengthFilter(maxLen)});
+            }
+            if (preset && etGroupNames[i] != null) {
+                etGroupNames[i].setText(presetNames[i]);
+                etGroupNames[i].setEnabled(mGroupPresetMode != GRP_PRESET_2 || i != 5);
+            } else if (!preset && etGroupNames[i] != null) {
+                etGroupNames[i].setEnabled(true);
+            }
+            if (preset && resetValues) {
+                if (etGroups[i] != null) etGroups[i].setText("");
+                groupAutoInc[i] = (i == 7);
+                if (cbGroups[i] != null) {
+                    cbGroups[i].setChecked(i == 7);
+                    cbGroups[i].setEnabled(i >= 6);
+                    cbGroups[i].setVisibility(i >= 6 ? View.VISIBLE : View.INVISIBLE);
+                }
+            } else if (preset) {
+                if (cbGroups[i] != null) {
+                    cbGroups[i].setEnabled(i >= 6);
+                    cbGroups[i].setVisibility(i >= 6 ? View.VISIBLE : View.INVISIBLE);
+                }
+            } else if (cbGroups[i] != null) {
+                cbGroups[i].setEnabled(true);
+                cbGroups[i].setVisibility(View.VISIBLE);
+            }
+        }
+
+        if (preset && resetValues) {
+            mPresetAuto56 = false;
+            cbPresetAuto56.setChecked(false);
+        }
+
+        updateVerifyLabels();
+        updateGroupEpcPreview();
+        onGroupNameChanged();
     }
 
     private void selectGroupWriteBank(int bank) {
@@ -1139,22 +1427,64 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void autoIncrementGroups() {
-        for (int i = 0; i < 6; i++) {
+        if (isGroupPresetMode() && mGroupPresetMode == GRP_PRESET_1 && mPresetAuto56) {
+            autoIncrementPreset56();
+            if (groupAutoInc[7]) incrementGroupRow(7);
+            updateGroupEpcPreview();
+            saveGroupSettings();
+            return;
+        }
+
+        int count = getActiveGroupRowCount();
+        for (int i = 0; i < count; i++) {
             if (!groupAutoInc[i]) continue;
-            String val = etGroups[i].getText().toString().toUpperCase(Locale.ROOT).trim();
-            String next;
-            if (i == 5) {
-                try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 1000); }
-                catch (NumberFormatException e) { next = "0001"; }
-                etChipNum.setText(next);
-            } else {
-                try { next = String.format("%04X", (Integer.parseInt(val, 16) + 1) & 0xFFFF); }
-                catch (NumberFormatException e) { next = "0001"; }
-            }
-            etGroups[i].setText(next);
+            incrementGroupRow(i);
         }
         updateGroupEpcPreview();
         saveGroupSettings();
+    }
+
+    private void autoIncrementPreset56() {
+        String val6 = etGroups[5].getText().toString().trim();
+        int cur;
+        try { cur = Integer.parseInt(val6); } catch (NumberFormatException e) { cur = 0; }
+        if (cur < 1 || cur > 3) cur = 1;
+        if (cur >= 3) {
+            etGroups[5].setText("1");
+            String val5 = etGroups[4].getText().toString().trim();
+            try {
+                int v5 = Integer.parseInt(val5);
+                etGroups[4].setText(String.format("%03d", v5 + 1));
+            } catch (NumberFormatException e) {
+                etGroups[4].setText("001");
+            }
+        } else {
+            etGroups[5].setText(String.valueOf(cur + 1));
+        }
+    }
+
+    private void incrementGroupRow(int i) {
+        String val = etGroups[i].getText().toString().toUpperCase(Locale.ROOT).trim();
+        String next;
+        if (!isGroupPresetMode() && i == 5) {
+            try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 1000); }
+            catch (NumberFormatException e) { next = "0001"; }
+            etChipNum.setText(next.replaceFirst("^0+", "").isEmpty() ? "0"
+                    : next.replaceFirst("^0+", ""));
+        } else if (isGroupPresetMode() && i == 7) {
+            try { next = String.format("%04d", (Integer.parseInt(val) + 1) % 10000); }
+            catch (NumberFormatException e) { next = "0001"; }
+            etChipNum.setText(next.replaceFirst("^0+", "").isEmpty() ? "0"
+                    : next.replaceFirst("^0+", ""));
+        } else if (isGroupPresetMode() && i == 5) {
+            try { next = String.valueOf((Integer.parseInt(val) + 1)); }
+            catch (NumberFormatException e) { next = "1"; }
+        } else {
+            try { next = String.format("%0" + (isGroupPresetMode() ? PRESET_FIELD_LENS[i] : 4) + "X",
+                    (Integer.parseInt(val, 16) + 1) & 0xFFFF); }
+            catch (NumberFormatException e) { next = "0001"; }
+        }
+        etGroups[i].setText(next);
     }
 
     // ── Group Write — Step 1 ──────────────────────────────────────────────
@@ -1303,29 +1633,81 @@ public class MainActivity extends AppCompatActivity {
                                    String g1, String g2, String g3, String g4,
                                    String g5, String g6) {
         if (mGroupOutputFile == null) { toast("⚠️ Nastavte výstupní soubor"); return; }
-        mGroupRecordCount++;
-        // ID_RFID = decimal value of groups 5+6 combined, leading zeros stripped
+
         String strippedId = idRfid.replaceFirst("^0+", "");
         if (strippedId.isEmpty()) strippedId = "0";
-        // Format EPC and TID with dashes between 4-digit groups
-        String fmtEpc = epc.length() >= 24
-                ? epc.substring(0,4)+"-"+epc.substring(4,8)+"-"+epc.substring(8,12)
-                  +"-"+epc.substring(12,16)+"-"+epc.substring(16,20)+"-"+epc.substring(20,24)
-                : epc;
+        String fmtEpc = formatEpcDashed(epc.length() >= 24 ? epc : epc);
         String fmtTid = tid.isEmpty() ? "" : formatHexWithDashes(tid);
-        // Groups 5 and 6 are encoded in ID_RFID; only groups 1-4 appear as separate columns
-        String line = escCsv(strippedId) + ";" + fmtEpc + ";" + fmtTid + ";"
-                + g1 + ";" + g2 + ";" + g3 + ";" + g4 + "\n";
-        try (FileOutputStream fos = new FileOutputStream(mGroupOutputFile, true)) {
-            fos.write(line.getBytes("UTF-8"));
-        } catch (Exception e) {
-            toast("Chyba zápisu: " + e.getMessage());
-            mGroupRecordCount--;
-            return;
+
+        String line;
+        if (isGroupPresetMode()) {
+            String tudu2 = formatTudu2Csv(g3, g4);
+            String cast = g6;
+            line = escCsv(strippedId) + ";" + fmtEpc + ";" + fmtTid + ";"
+                    + escCsv(g1) + ";" + escCsv(g2) + ";" + escCsv(tudu2) + ";"
+                    + escCsv(g5) + ";" + escCsv(cast) + "\n";
+        } else {
+            line = escCsv(strippedId) + ";" + fmtEpc + ";" + fmtTid + ";"
+                    + g1 + ";" + g2 + ";" + g3 + ";" + g4 + "\n";
         }
+
+        boolean overwritten = upsertGroupCsvLine(fmtTid, line);
+        if (!overwritten) mGroupRecordCount++;
+
         tvGroupRecordCount.setText(String.valueOf(mGroupRecordCount));
         tvGroupLastEpc.setText(fmtEpc);
         saveGroupSettings();
+        if (overwritten) toast("✅ CSV řádek přepsán (stejné TID)");
+    }
+
+    private boolean upsertGroupCsvLine(String fmtTid, String newLine) {
+        if (fmtTid.isEmpty()) return false;
+        try {
+            java.util.List<String> lines = new java.util.ArrayList<>();
+            String header = null;
+            boolean found = false;
+            String tidKey = fmtTid.replace("-", "").toUpperCase(Locale.ROOT);
+
+            java.io.BufferedReader br = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(new java.io.FileInputStream(mGroupOutputFile), "UTF-8"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (header == null) {
+                    header = line;
+                    lines.add(line);
+                    continue;
+                }
+                if (line.trim().isEmpty()) continue;
+                String[] cols = line.split(";", -1);
+                if (cols.length >= 3) {
+                    String rowTid = cols[2].trim().replace("-", "").toUpperCase(Locale.ROOT);
+                    if (!rowTid.isEmpty() && rowTid.equals(tidKey)) {
+                        lines.add(newLine.trim());
+                        found = true;
+                        continue;
+                    }
+                }
+                lines.add(line);
+            }
+            br.close();
+
+            if (!found) lines.add(newLine.trim());
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < lines.size(); i++) {
+                if (i > 0) sb.append("\n");
+                sb.append(lines.get(i));
+            }
+            if (!sb.toString().endsWith("\n")) sb.append("\n");
+
+            try (FileOutputStream fos = new FileOutputStream(mGroupOutputFile)) {
+                fos.write(sb.toString().getBytes("UTF-8"));
+            }
+            return found;
+        } catch (Exception e) {
+            toast("Chyba zápisu: " + e.getMessage());
+            return false;
+        }
     }
 
     // ── Group settings persistence ────────────────────────────────────────
@@ -1333,18 +1715,21 @@ public class MainActivity extends AppCompatActivity {
     private void loadGroupSettings() {
         mGroupOutputFile  = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("group_file", null);
         mGroupRecordCount = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("group_count", 0);
+        mGroupPresetMode  = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("group_preset", GRP_PRESET_STANDARD);
+        mPresetAuto56     = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("group_preset_auto56", false);
         try {
             String vJson = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("group_values", null);
             if (vJson != null) {
                 JSONArray arr = new JSONArray(vJson);
-                for (int i = 0; i < 6 && i < arr.length(); i++) etGroups[i].setText(arr.getString(i));
+                for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++)
+                    if (etGroups[i] != null) etGroups[i].setText(arr.getString(i));
             }
             String iJson = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("group_autoinc", null);
             if (iJson != null) {
                 JSONArray arr = new JSONArray(iJson);
-                for (int i = 0; i < 6 && i < arr.length(); i++) {
+                for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++) {
                     groupAutoInc[i] = arr.getBoolean(i);
-                    cbGroups[i].setChecked(groupAutoInc[i]);
+                    if (cbGroups[i] != null) cbGroups[i].setChecked(groupAutoInc[i]);
                 }
             }
         } catch (Exception ignored) {}
@@ -1355,18 +1740,26 @@ public class MainActivity extends AppCompatActivity {
             etGroupFileName.setText(f.getName().replace(".csv", ""));
         }
         loadGrpNames();
+        if (cbPresetAuto56 != null) cbPresetAuto56.setChecked(mPresetAuto56);
+        applyGroupPresetUi();
         selectGroupWriteBank(mGroupWriteBank);
         updateGrpTemplateBtnText();
+        updateVerifyLabels();
         setGroupStep(STEP_WRITE);
     }
 
     private void saveGroupSettings() {
         try {
             JSONArray vArr = new JSONArray(); JSONArray iArr = new JSONArray();
-            for (int i = 0; i < 6; i++) { vArr.put(etGroups[i].getText().toString()); iArr.put(groupAutoInc[i]); }
+            for (int i = 0; i < GRP_ROW_COUNT; i++) {
+                vArr.put(etGroups[i] != null ? etGroups[i].getText().toString() : "");
+                iArr.put(groupAutoInc[i]);
+            }
             getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
                     .putString("group_file",   mGroupOutputFile)
                     .putInt("group_count",      mGroupRecordCount)
+                    .putInt("group_preset",     mGroupPresetMode)
+                    .putBoolean("group_preset_auto56", mPresetAuto56)
                     .putString("group_values",  vArr.toString())
                     .putString("group_autoinc", iArr.toString()).apply();
         } catch (Exception e) { Log.e(TAG, "saveGroup: " + e.getMessage()); }
