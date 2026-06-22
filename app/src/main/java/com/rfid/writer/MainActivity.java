@@ -521,6 +521,16 @@ public class MainActivity extends AppCompatActivity {
         btnGrpPreset2.setOnClickListener(v -> setGroupPresetMode(GRP_PRESET_2));
         cbPresetAuto56.setOnCheckedChangeListener((b, checked) -> {
             mPresetAuto56 = checked;
+            if (checked && mGroupPresetMode == GRP_PRESET_1) {
+                groupAutoInc[4] = false;
+                groupAutoInc[5] = false;
+                if (cbGroups[4] != null) cbGroups[4].setChecked(false);
+                if (cbGroups[5] != null) cbGroups[5].setChecked(false);
+                if (etGroups[5] != null) {
+                    String cast = etGroups[5].getText().toString().trim();
+                    if (cast.isEmpty() || cast.equals("0")) etGroups[5].setText("1");
+                }
+            }
             saveGroupSettings();
         });
 
@@ -549,7 +559,10 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < GRP_ROW_COUNT; i++) {
             final int idx = i;
             if (cbGroups[i] != null)
-                cbGroups[i].setOnCheckedChangeListener((b, checked) -> groupAutoInc[idx] = checked);
+                cbGroups[i].setOnCheckedChangeListener((b, checked) -> {
+                    groupAutoInc[idx] = checked;
+                    saveGroupSettings();
+                });
         }
         btnGroupWrite.setOnClickListener(v -> groupWrite());
         btnGroupScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startGroupScan(); });
@@ -644,6 +657,13 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isGroupPresetMode() {
         return mGroupPresetMode == GRP_PRESET_1 || mGroupPresetMode == GRP_PRESET_2;
+    }
+
+    /** Which template rows show the +1 checkbox in preset mode. */
+    private boolean isPresetPlusOneRow(int rowIdx) {
+        if (mGroupPresetMode == GRP_PRESET_1) return rowIdx == 6;
+        if (mGroupPresetMode == GRP_PRESET_2) return rowIdx == 4 || rowIdx == 6;
+        return false;
     }
 
     private void loadWrtGroupNames() {
@@ -1244,32 +1264,8 @@ public class MainActivity extends AppCompatActivity {
                     tvGrpPreviewLabel.setText("náhled EPC");
                 }
             }
-            if (isGroupPresetMode()) {
-                StringBuilder detail = new StringBuilder(formatEpcDashed(epc));
-                detail.append("\n");
-                int rows = getActiveGroupRowCount();
-                for (int i = 0; i < rows; i++) {
-                    if (i > 0) detail.append("  ·  ");
-                    String name = getGroupRowLabel(i);
-                    String val = etGroups[i] != null ? etGroups[i].getText().toString().trim() : "";
-                    if (val.isEmpty()) val = "—";
-                    detail.append(name).append(": ").append(val);
-                }
-                tvEpcPreview.setText(detail.toString());
-                tvEpcPreview.setTextSize(13);
-            } else {
-                StringBuilder detail = new StringBuilder(formatEpcDashed(epc));
-                detail.append("\n");
-                for (int i = 0; i < 6; i++) {
-                    if (i > 0) detail.append("  ·  ");
-                    String name = getGroupRowLabel(i);
-                    String val = etGroups[i] != null ? etGroups[i].getText().toString().trim() : "";
-                    if (val.isEmpty()) val = "—";
-                    detail.append(name).append(": ").append(val);
-                }
-                tvEpcPreview.setText(detail.toString());
-                tvEpcPreview.setTextSize(13);
-            }
+            tvEpcPreview.setText(formatEpcDashed(epc));
+            tvEpcPreview.setTextSize(16);
         } else {
             String label = (mGroupWriteBank == 3) ? "náhled USER" : "náhled RESERVED";
             if (tvGrpPreviewLabel != null) tvGrpPreviewLabel.setText(label);
@@ -1394,13 +1390,17 @@ public class MainActivity extends AppCompatActivity {
                 etGroupNames[i].setEnabled(true);
             }
             if (preset && resetValues) {
-                if (etGroups[i] != null) etGroups[i].setText("");
+                if (etGroups[i] != null) {
+                    if (i == 5 && mGroupPresetMode == GRP_PRESET_1) etGroups[i].setText("1");
+                    else etGroups[i].setText("");
+                }
                 if (i < GRP_PRESET_ROW_COUNT) {
-                    groupAutoInc[i] = (i == 6);
+                    boolean plusOne = isPresetPlusOneRow(i);
+                    groupAutoInc[i] = plusOne;
                     if (cbGroups[i] != null) {
-                        cbGroups[i].setChecked(i == 6);
-                        cbGroups[i].setEnabled(i == 6);
-                        cbGroups[i].setVisibility(i == 6 ? View.VISIBLE : View.INVISIBLE);
+                        cbGroups[i].setChecked(plusOne);
+                        cbGroups[i].setEnabled(plusOne);
+                        cbGroups[i].setVisibility(plusOne ? View.VISIBLE : View.INVISIBLE);
                     }
                 } else if (cbGroups[i] != null) {
                     cbGroups[i].setVisibility(View.GONE);
@@ -1408,8 +1408,11 @@ public class MainActivity extends AppCompatActivity {
             } else if (preset) {
                 if (cbGroups[i] != null) {
                     if (i < GRP_PRESET_ROW_COUNT) {
-                        cbGroups[i].setEnabled(i == 6);
-                        cbGroups[i].setVisibility(i == 6 ? View.VISIBLE : View.INVISIBLE);
+                        boolean plusOne = isPresetPlusOneRow(i);
+                        if (!plusOne) groupAutoInc[i] = false;
+                        cbGroups[i].setEnabled(plusOne);
+                        cbGroups[i].setVisibility(plusOne ? View.VISIBLE : View.INVISIBLE);
+                        if (!plusOne) cbGroups[i].setChecked(false);
                     } else {
                         cbGroups[i].setVisibility(View.GONE);
                     }
@@ -1423,6 +1426,11 @@ public class MainActivity extends AppCompatActivity {
         if (preset && resetValues) {
             mPresetAuto56 = false;
             cbPresetAuto56.setChecked(false);
+        }
+
+        if (preset && mGroupPresetMode == GRP_PRESET_1 && mPresetAuto56 && etGroups[5] != null) {
+            String cast = etGroups[5].getText().toString().trim();
+            if (cast.isEmpty() || cast.equals("0")) etGroups[5].setText("1");
         }
 
         updateVerifyLabels();
@@ -1484,6 +1492,7 @@ public class MainActivity extends AppCompatActivity {
 
         int count = getActiveGroupRowCount();
         for (int i = 0; i < count; i++) {
+            if (isGroupPresetMode() && !isPresetPlusOneRow(i)) continue;
             if (!groupAutoInc[i]) continue;
             incrementGroupRow(i);
         }
@@ -1498,15 +1507,19 @@ public class MainActivity extends AppCompatActivity {
         if (cur < 1 || cur > 3) cur = 1;
         if (cur >= 3) {
             etGroups[5].setText("1");
-            String val5 = etGroups[4].getText().toString().trim();
-            try {
-                int v5 = Integer.parseInt(val5);
-                etGroups[4].setText(String.format("%03d", v5 + 1));
-            } catch (NumberFormatException e) {
-                etGroups[4].setText("001");
-            }
+            incrementVhybkaRow();
         } else {
             etGroups[5].setText(String.valueOf(cur + 1));
+        }
+    }
+
+    private void incrementVhybkaRow() {
+        String val5 = etGroups[4].getText().toString().trim();
+        try {
+            int v5 = Integer.parseInt(val5);
+            etGroups[4].setText(String.format("%03d", v5 + 1));
+        } catch (NumberFormatException e) {
+            etGroups[4].setText("001");
         }
     }
 
@@ -1525,8 +1538,17 @@ public class MainActivity extends AppCompatActivity {
             next = incrementMergedIdRfid(val);
             syncChipNumFromMergedIdRfid(next);
         } else if (isGroupPresetMode() && i == 5) {
-            try { next = String.valueOf((Integer.parseInt(val) + 1)); }
-            catch (NumberFormatException e) { next = "1"; }
+            int cur;
+            try { cur = Integer.parseInt(val); } catch (NumberFormatException e) { cur = 0; }
+            if (cur < 1 || cur > 3) cur = 1;
+            next = (cur >= 3) ? "1" : String.valueOf(cur + 1);
+        } else if (isGroupPresetMode() && i == 4) {
+            try {
+                int v5 = Integer.parseInt(val);
+                next = String.format("%03d", v5 + 1);
+            } catch (NumberFormatException e) {
+                next = "001";
+            }
         } else {
             try { next = String.format("%0" + (isGroupPresetMode() ? PRESET_FIELD_LENS[i] : 4) + "X",
                     (Integer.parseInt(val, 16) + 1) & 0xFFFF); }
