@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -166,8 +165,31 @@ public final class TuduDataParser {
             else if (matches(h, "cast", "part")) idx[6] = i;
             else if (matches(h, "idrfid", "id_rfid")) idx[7] = i;
         }
-        if (idx[0] < 0 && headers.length > 0) idx[0] = 0;
+        // Fallback pouze pokud sloupce nejsou pojmenované — nikdy nezaměňovat ID_RFID za TUDU
+        if (idx[0] < 0 && idx[7] < 0 && headers.length > 0) {
+            String h0 = normHeader(headers[0]);
+            if (!matches(h0, "idrfid", "id_rfid")) idx[0] = 0;
+        }
         if (idx[1] < 0 && headers.length > 1) idx[1] = 1;
+        // Oprava prohozených sloupců: první sloupec je ID_RFID, TUDU je jinde
+        if (idx[0] < 0 && idx[7] >= 0) {
+            for (int i = 0; i < headers.length; i++) {
+                String h = normHeader(headers[i]);
+                if (matches(h, "tudu", "kategorie", "tudukategorie", "tudu_kategorie")) {
+                    idx[0] = i;
+                    break;
+                }
+            }
+        }
+        if (idx[7] < 0 && idx[0] >= 0) {
+            for (int i = 0; i < headers.length; i++) {
+                String h = normHeader(headers[i]);
+                if (matches(h, "idrfid", "id_rfid")) {
+                    idx[7] = i;
+                    break;
+                }
+            }
+        }
         return idx;
     }
 
@@ -229,7 +251,7 @@ public final class TuduDataParser {
         return cols[idx] != null ? cols[idx].trim() : "";
     }
 
-    /** Split e.g. 1501J1 -> tudu1=1501, tudu2Ascii=4A, tudu2=1 */
+    /** Split e.g. 1501J1 -> tudu1=1501, tudu2Ascii=4A, tudu2=01 */
     public static String[] deriveFromTuduKey(String key) {
         String[] out = {"", "", ""};
         if (key == null || key.isEmpty()) return out;
@@ -237,7 +259,12 @@ public final class TuduDataParser {
         if (m.matches()) {
             out[0] = m.group(1);
             out[1] = String.format(Locale.ROOT, "%02X", (int) m.group(2).charAt(0));
-            out[2] = m.group(3);
+            String num = m.group(3);
+            try {
+                out[2] = String.format(Locale.ROOT, "%02d", Integer.parseInt(num));
+            } catch (NumberFormatException e) {
+                out[2] = num.length() == 1 ? "0" + num : num;
+            }
             return out;
         }
         if (key.matches("\\d+")) {
@@ -304,8 +331,34 @@ public final class TuduDataParser {
         String q = query.trim().toUpperCase(Locale.ROOT);
         List<String> out = new ArrayList<>();
         for (String key : sortedTuduKeys(data)) {
-            if (key.toUpperCase(Locale.ROOT).contains(q)) out.add(key);
+            if (key.toUpperCase(Locale.ROOT).contains(q)) {
+                out.add(key);
+                continue;
+            }
+            // Vyhledávání i podle ID_RFID v rámci kategorie
+            List<VyhybkaEntry> entries = data.get(key);
+            if (entries == null) continue;
+            for (VyhybkaEntry e : entries) {
+                if (e.idRfid != null && e.idRfid.toUpperCase(Locale.ROOT).contains(q)) {
+                    out.add(key);
+                    break;
+                }
+            }
         }
         return out;
+    }
+
+    /** Formátuje TUDU pro zobrazení: 1501 + J + 1 -> 1501J1 */
+    public static String formatTuduDisplay(String tudu1, String tudu2Ascii, String tudu2) {
+        if (tudu1 == null || tudu1.isEmpty()) return "—";
+        if (tudu2Ascii == null || tudu2Ascii.isEmpty()) return tudu1;
+        try {
+            char c = (char) Integer.parseInt(tudu2Ascii, 16);
+            String num = tudu2 != null ? tudu2.replaceFirst("^0+", "") : "";
+            if (num.isEmpty() && tudu2 != null && !tudu2.isEmpty()) num = "0";
+            return tudu1 + c + num;
+        } catch (NumberFormatException e) {
+            return tudu1;
+        }
     }
 }
