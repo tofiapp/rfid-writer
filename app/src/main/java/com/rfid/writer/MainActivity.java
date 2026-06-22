@@ -79,7 +79,8 @@ public class MainActivity extends AppCompatActivity {
     // ── Tabs ──────────────────────────────────────────────────────────────
     private TabLayout tabLayout;
     private View      pageTag, pageWriteEpc, pageGroupWrite, pageLock;
-    private View      pageTuduWrapper, pageTuduHeader, workflowHostTudu, frameTabContent;
+    private View      pageTuduWrapper, pageTuduHeader;
+    private android.view.ViewGroup workflowHostTudu, frameTabContent;
     private android.widget.ScrollView svGroupPage;
     private int       mCurrentTab = 0;
 
