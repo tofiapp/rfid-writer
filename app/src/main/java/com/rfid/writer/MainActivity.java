@@ -1428,6 +1428,11 @@ public class MainActivity extends AppCompatActivity {
             cbPresetAuto56.setChecked(false);
         }
 
+        if (preset && mGroupPresetMode == GRP_PRESET_1 && mPresetAuto56 && etGroups[5] != null) {
+            String cast = etGroups[5].getText().toString().trim();
+            if (cast.isEmpty() || cast.equals("0")) etGroups[5].setText("1");
+        }
+
         updateVerifyLabels();
         updateGroupEpcPreview();
         onGroupNameChanged();
