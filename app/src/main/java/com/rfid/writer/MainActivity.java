@@ -214,7 +214,22 @@ public class MainActivity extends AppCompatActivity {
         loadGroupSettings();
         loadWrtGroupSettings();
         loadLupaSettings();
+        cleanupLegacyTuduPrefs();
         initReader();
+    }
+
+    /** Odstraní uložená nastavení ze zrušené záložky/karty TUDU. */
+    private void cleanupLegacyTuduPrefs() {
+        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .remove("tudu_source")
+                .remove("tudu_file_name")
+                .remove("tudu_selected")
+                .remove("tudu_vyhybka_idx")
+                .remove("tudu_wf_values")
+                .remove("tudu_wf_autoinc")
+                .remove("tudu_wf_file")
+                .remove("tudu_wf_count")
+                .apply();
     }
 
     @Override
