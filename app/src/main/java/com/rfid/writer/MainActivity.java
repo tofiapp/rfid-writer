@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,14 +17,20 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AdapterView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -39,8 +47,10 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -170,9 +180,32 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Nastavení ─────────────────────────────────────────────────────────
     private com.google.android.material.button.MaterialButton btnToggleSettings;
+    private com.google.android.material.button.MaterialButton btnToggleTuduMode;
     private View     llSettings;
     private SeekBar  sbOutputPower;
     private TextView tvOutputPowerValue;
+
+    // ── TUDU režim (skupinový zápis ze souboru) ───────────────────────────
+    private View     cardTuduModePanel;
+    private View     llTuduModePanel;
+    private View     llGrpPresetSelector;
+    private EditText etTuduFileName;
+    private Button   btnTuduPickFile;
+    private Button   btnTuduLoadFile;
+    private TextView tvTuduFileInfo;
+    private AutoCompleteTextView actTuduSearch;
+    private Spinner  spTuduVyhybka;
+    private TextView tvTuduVyhybkaInfo;
+    private boolean  mTuduMode = false;
+    private int      mSavedTabBeforeTudu = 0;
+    private String   mTuduSourceFile = null;
+    private String   mSelectedTuduKey = "";
+    private int      mSelectedVyhybkaIdx = 0;
+    private final Map<String, List<TuduDataParser.VyhybkaEntry>> mTuduData = new LinkedHashMap<>();
+    private List<TuduDataParser.VyhybkaEntry> mCurrentVyhybky = new ArrayList<>();
+    private ArrayAdapter<String> mTuduSearchAdapter;
+    private ArrayAdapter<String> mVyhybkaSpinnerAdapter;
+    private ActivityResultLauncher<String[]> mTuduFilePicker;
 
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying    = false;
@@ -202,6 +235,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mTuduFilePicker = registerForActivityResult(
+                new ActivityResultContracts.OpenDocument(),
+                uri -> { if (uri != null) loadTuduFileFromUri(uri); });
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bindViews();
@@ -214,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
         loadGroupSettings();
         loadWrtGroupSettings();
         loadLupaSettings();
+        loadTuduSettings();
         initReader();
     }
 
@@ -238,6 +275,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onTriggerDown() {
+        if (mTuduMode) {
+            onGroupTrigger();
+            return;
+        }
         switch (tabLayout.getSelectedTabPosition()) {
             case 0: if (mInventorying) stopScan(); else startScan(); break;
             case 1: writeEpc(); break;
@@ -408,9 +449,22 @@ public class MainActivity extends AppCompatActivity {
 
         // Nastavení
         btnToggleSettings  = (com.google.android.material.button.MaterialButton) findViewById(R.id.btnToggleSettings);
+        btnToggleTuduMode  = (com.google.android.material.button.MaterialButton) findViewById(R.id.btnToggleTuduMode);
         llSettings         = findViewById(R.id.llSettings);
         sbOutputPower      = findViewById(R.id.sbOutputPower);
         tvOutputPowerValue = findViewById(R.id.tvOutputPowerValue);
+
+        // TUDU režim
+        cardTuduModePanel  = findViewById(R.id.cardTuduModePanel);
+        llTuduModePanel    = findViewById(R.id.llTuduModePanel);
+        llGrpPresetSelector = findViewById(R.id.llGrpPresetSelector);
+        etTuduFileName     = findViewById(R.id.etTuduFileName);
+        btnTuduPickFile    = findViewById(R.id.btnTuduPickFile);
+        btnTuduLoadFile    = findViewById(R.id.btnTuduLoadFile);
+        tvTuduFileInfo     = findViewById(R.id.tvTuduFileInfo);
+        actTuduSearch      = findViewById(R.id.actTuduSearch);
+        spTuduVyhybka      = findViewById(R.id.spTuduVyhybka);
+        tvTuduVyhybkaInfo  = findViewById(R.id.tvTuduVyhybkaInfo);
     }
 
     private void setupTabs() {
@@ -423,6 +477,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPage(int index) {
+        if (mTuduMode) {
+            pageTag.setVisibility(View.GONE);
+            pageWriteEpc.setVisibility(View.GONE);
+            pageLock.setVisibility(View.GONE);
+            pageGroupWrite.setVisibility(View.VISIBLE);
+            updateGroupEpcPreview();
+            return;
+        }
         pageTag.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         pageWriteEpc.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
         pageLock.setVisibility(index == 2 ? View.VISIBLE : View.GONE);          // tab 2 = Zamčení
@@ -440,6 +502,31 @@ public class MainActivity extends AppCompatActivity {
             int tint = android.graphics.Color.parseColor(visible ? "#888888" : "#00BCD4");
             ((com.google.android.material.button.MaterialButton) btnToggleSettings)
                     .setIconTint(android.content.res.ColorStateList.valueOf(tint));
+        });
+
+        btnToggleTuduMode.setOnClickListener(v -> setTuduMode(!mTuduMode));
+        btnTuduPickFile.setOnClickListener(v ->
+                mTuduFilePicker.launch(new String[]{"text/*", "application/sql", "*/*"}));
+        btnTuduLoadFile.setOnClickListener(v -> loadTuduFileByName());
+        actTuduSearch.setOnItemClickListener((parent, view, position, id) -> {
+            String key = (String) parent.getItemAtPosition(position);
+            selectTuduCategory(key, true);
+        });
+        actTuduSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateTuduSearchSuggestions(s != null ? s.toString() : "");
+            }
+            @Override public void afterTextChanged(Editable s) {}
+        });
+        spTuduVyhybka.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (!mTuduMode || mCurrentVyhybky.isEmpty()) return;
+                mSelectedVyhybkaIdx = position;
+                applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(position));
+                saveTuduSettings();
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         sbOutputPower.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1347,7 +1434,11 @@ public class MainActivity extends AppCompatActivity {
                 mGroupPresetMode == GRP_PRESET_2 ? active : inactive));
         btnGrpPreset2.setTextColor(mGroupPresetMode == GRP_PRESET_2 ? activeFg : inactiveFg);
 
-        cbPresetAuto56.setVisibility(mGroupPresetMode == GRP_PRESET_1 ? View.VISIBLE : View.GONE);
+        cbPresetAuto56.setVisibility(
+                mGroupPresetMode == GRP_PRESET_1 && !mTuduMode ? View.VISIBLE : View.GONE);
+
+        if (llGrpPresetSelector != null)
+            llGrpPresetSelector.setVisibility(mTuduMode ? View.GONE : View.VISIBLE);
 
         String[] presetNames = (mGroupPresetMode == GRP_PRESET_2) ? PRESET2_NAMES : PRESET1_NAMES;
         boolean preset = isGroupPresetMode();
@@ -1373,6 +1464,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 etGroups[i].setFilters(new android.text.InputFilter[]{
                         new android.text.InputFilter.LengthFilter(maxLen)});
+                if (mTuduMode && preset && i < 5) {
+                    etGroups[i].setEnabled(false);
+                } else {
+                    etGroups[i].setEnabled(true);
+                }
                 if (preset && i == 6) {
                     android.view.ViewGroup.LayoutParams lp = etGroups[i].getLayoutParams();
                     lp.width = (int) (120 * getResources().getDisplayMetrics().density);
@@ -1665,7 +1761,8 @@ public class MainActivity extends AppCompatActivity {
                     toast("✅ Tag zaheslován — připraven další");
                     // Reset for next tag
                     llVerifyDisplay.setVisibility(View.GONE);
-                    autoIncrementGroups();
+                    if (mTuduMode) advanceTuduVyhybka();
+                    else autoIncrementGroups();
                     setGroupStep(STEP_WRITE);
                 } else {
                     setStatus("● Lock selhal", "#F44336");
@@ -2249,5 +2346,210 @@ public class MainActivity extends AppCompatActivity {
                 mLupaInputFile = null;
             }
         }
+    }
+
+    // ── TUDU režim ────────────────────────────────────────────────────────
+
+    private void setTuduMode(boolean enabled) {
+        if (mTuduMode == enabled) return;
+        mTuduMode = enabled;
+        if (enabled) {
+            mSavedTabBeforeTudu = tabLayout.getSelectedTabPosition();
+            if (mGroupPresetMode != GRP_PRESET_1) {
+                mGroupPresetMode = GRP_PRESET_1;
+                applyGroupPresetUi(false);
+            }
+            if (llTemplateGroups != null) llTemplateGroups.setVisibility(View.VISIBLE);
+            updateGrpTemplateBtnText();
+            tabLayout.setVisibility(View.GONE);
+            showPage(3);
+            cardTuduModePanel.setVisibility(View.VISIBLE);
+            setGroupStep(STEP_WRITE);
+        } else {
+            tabLayout.setVisibility(View.VISIBLE);
+            cardTuduModePanel.setVisibility(View.GONE);
+            applyGroupPresetUi(false);
+            showPage(mSavedTabBeforeTudu);
+        }
+        btnToggleTuduMode.setTextColor(Color.parseColor(enabled ? "#121212" : "#888888"));
+        btnToggleTuduMode.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                Color.parseColor(enabled ? "#00BCD4" : "#1A1A1A")));
+        saveTuduSettings();
+    }
+
+    private void loadTuduFileByName() {
+        String name = etTuduFileName.getText().toString().trim();
+        if (name.isEmpty()) { toast("Zadejte název souboru"); return; }
+        File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        if (dir == null) dir = getFilesDir();
+        File csv = new File(dir, name + ".csv");
+        File sql = new File(dir, name + ".sql");
+        File file = csv.exists() ? csv : (sql.exists() ? sql : null);
+        if (file == null) {
+            toast("Soubor nenalezen v Documents");
+            return;
+        }
+        loadTuduFile(file);
+    }
+
+    private void loadTuduFileFromUri(Uri uri) {
+        try {
+            getContentResolver().takePersistableUriPermission(uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (Exception ignored) {}
+        try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
+            if (in == null) { toast("Nelze otevřít soubor"); return; }
+            String name = queryDisplayName(uri);
+            String lower = name.toLowerCase(Locale.ROOT);
+            String type = lower.endsWith(".sql") ? "sql" : "csv";
+            mTuduData.clear();
+            mTuduData.putAll(TuduDataParser.parse(in, type));
+            mTuduSourceFile = uri.toString();
+            etTuduFileName.setText(name.replaceAll("(?i)\\.(csv|sql)$", ""));
+            onTuduDataLoaded(name);
+            saveTuduSettings();
+        } catch (Exception e) {
+            toast("Chyba načtení: " + e.getMessage());
+        }
+    }
+
+    private void loadTuduFile(File file) {
+        try {
+            mTuduData.clear();
+            mTuduData.putAll(TuduDataParser.parse(file));
+            mTuduSourceFile = file.getAbsolutePath();
+            onTuduDataLoaded(file.getName());
+            saveTuduSettings();
+        } catch (Exception e) {
+            toast("Chyba načtení: " + e.getMessage());
+        }
+    }
+
+    private void onTuduDataLoaded(String fileName) {
+        int total = 0;
+        for (List<TuduDataParser.VyhybkaEntry> list : mTuduData.values()) total += list.size();
+        tvTuduFileInfo.setText(fileName + " — " + mTuduData.size() + " TUDU, " + total + " výhybek");
+        updateTuduSearchSuggestions("");
+        toast("✅ Načteno " + mTuduData.size() + " TUDU kategorií");
+        if (!mSelectedTuduKey.isEmpty() && mTuduData.containsKey(mSelectedTuduKey)) {
+            selectTuduCategory(mSelectedTuduKey, false);
+        }
+    }
+
+    private void updateTuduSearchSuggestions(String query) {
+        if (mTuduData.isEmpty()) return;
+        List<String> keys = TuduDataParser.filterTuduKeys(mTuduData, query);
+        mTuduSearchAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, keys);
+        actTuduSearch.setAdapter(mTuduSearchAdapter);
+    }
+
+    private void selectTuduCategory(String key, boolean resetIdx) {
+        if (key == null || !mTuduData.containsKey(key)) return;
+        mSelectedTuduKey = key;
+        mCurrentVyhybky = mTuduData.get(key);
+        actTuduSearch.setText(key);
+        List<String> labels = new ArrayList<>();
+        for (TuduDataParser.VyhybkaEntry e : mCurrentVyhybky) {
+            labels.add(e.vyhybka.isEmpty() ? "—" : e.vyhybka);
+        }
+        mVyhybkaSpinnerAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, labels);
+        mVyhybkaSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spTuduVyhybka.setAdapter(mVyhybkaSpinnerAdapter);
+        if (resetIdx) mSelectedVyhybkaIdx = 0;
+        if (mSelectedVyhybkaIdx < 0 || mSelectedVyhybkaIdx >= mCurrentVyhybky.size())
+            mSelectedVyhybkaIdx = 0;
+        if (!mCurrentVyhybky.isEmpty()) {
+            spTuduVyhybka.setSelection(mSelectedVyhybkaIdx);
+            applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(mSelectedVyhybkaIdx));
+            tvTuduVyhybkaInfo.setText(mCurrentVyhybky.size() + " výhybek v kategorii " + key);
+        }
+        saveTuduSettings();
+    }
+
+    private void applyVyhybkaEntryToTemplate(TuduDataParser.VyhybkaEntry e) {
+        if (e == null) return;
+        if (etGroups[0] != null) etGroups[0].setText(padField(e.rok, 4));
+        if (etGroups[1] != null) etGroups[1].setText(padField(e.tudu1, 4));
+        if (etGroups[2] != null) etGroups[2].setText(padField(e.tudu2Ascii, 2));
+        if (etGroups[3] != null) etGroups[3].setText(padField(e.tudu2, 2));
+        if (etGroups[4] != null) etGroups[4].setText(padField(e.vyhybka, 3));
+        if (etGroups[5] != null) etGroups[5].setText(e.cast.isEmpty() ? "1" : e.cast.substring(0, 1));
+        if (etGroups[6] != null) etGroups[6].setText(padField(e.idRfid, 8));
+        updateGroupEpcPreview();
+        saveGroupSettings();
+    }
+
+    private String padField(String raw, int len) {
+        String v = raw != null ? raw.toUpperCase(Locale.ROOT).trim() : "";
+        while (v.length() < len) v = "0" + v;
+        if (v.length() > len) v = v.substring(v.length() - len);
+        return v;
+    }
+
+    private void advanceTuduVyhybka() {
+        if (mCurrentVyhybky.isEmpty()) return;
+        int next = mSelectedVyhybkaIdx + 1;
+        if (next >= mCurrentVyhybky.size()) next = 0;
+        mSelectedVyhybkaIdx = next;
+        spTuduVyhybka.setSelection(next);
+        applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(next));
+    }
+
+    private String queryDisplayName(Uri uri) {
+        String name = null;
+        try (android.database.Cursor c = getContentResolver().query(
+                uri, null, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0) name = c.getString(idx);
+            }
+        } catch (Exception ignored) {}
+        if (name == null) name = uri.getLastPathSegment();
+        return name != null ? name : "soubor";
+    }
+
+    private void saveTuduSettings() {
+        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+                .putBoolean("tudu_mode", mTuduMode)
+                .putString("tudu_source", mTuduSourceFile)
+                .putString("tudu_file_name", etTuduFileName != null
+                        ? etTuduFileName.getText().toString() : "")
+                .putString("tudu_selected", mSelectedTuduKey)
+                .putInt("tudu_vyhybka_idx", mSelectedVyhybkaIdx)
+                .apply();
+    }
+
+    private void loadTuduSettings() {
+        boolean wantTudu = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean("tudu_mode", false);
+        mTuduSourceFile = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_source", null);
+        mSelectedTuduKey = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_selected", "");
+        mSelectedVyhybkaIdx = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("tudu_vyhybka_idx", 0);
+        String fileName = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_file_name", "");
+        if (etTuduFileName != null && !fileName.isEmpty()) etTuduFileName.setText(fileName);
+        if (mTuduSourceFile != null) {
+            try {
+                if (mTuduSourceFile.startsWith("content:")) {
+                    Uri uri = Uri.parse(mTuduSourceFile);
+                    try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
+                        if (in != null) {
+                            String type = fileName.toLowerCase(Locale.ROOT).endsWith(".sql") ? "sql" : "csv";
+                            mTuduData.putAll(TuduDataParser.parse(in, type));
+                        }
+                    }
+                } else {
+                    File f = new File(mTuduSourceFile);
+                    if (f.exists()) mTuduData.putAll(TuduDataParser.parse(f));
+                }
+                if (!mTuduData.isEmpty()) {
+                    String infoName = fileName.isEmpty() ? "soubor" : fileName;
+                    onTuduDataLoaded(infoName);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "loadTuduSettings: " + e.getMessage());
+            }
+        }
+        if (wantTudu) setTuduMode(true);
     }
 }
