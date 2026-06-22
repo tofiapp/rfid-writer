@@ -4,9 +4,7 @@ import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -17,20 +15,14 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -47,10 +39,8 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,9 +51,6 @@ public class MainActivity extends AppCompatActivity {
     // scan context: which tab triggered the scan
     private static final int SCAN_CTX_TAG   = 0;
     private static final int SCAN_CTX_GROUP = 1;
-
-    private static final int TAB_SKUPINOVY = 3;
-    private static final int TAB_TUDU      = 4;
 
     // workflow steps for Tab 2
     private static final int STEP_WRITE = 0;
@@ -79,10 +66,7 @@ public class MainActivity extends AppCompatActivity {
     // ── Tabs ──────────────────────────────────────────────────────────────
     private TabLayout tabLayout;
     private View      pageTag, pageWriteEpc, pageGroupWrite, pageLock;
-    private View      pageTuduWrapper, pageTuduHeader;
-    private android.view.ViewGroup workflowHostTudu, frameTabContent;
     private android.widget.ScrollView svGroupPage;
-    private int       mCurrentTab = 0;
 
     // ── Page 0: Načítání tagů ─────────────────────────────────────────────
     private EditText etChipNum;
@@ -148,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean mPresetAuto56    = false;
     private Button  btnGrpPresetStd, btnGrpPreset1, btnGrpPreset2;
     private CheckBox cbPresetAuto56;
-    private View     llGrpPresetSelector;
     private TextView tvEpcPreview;
     private TextView tvGrpPreviewLabel;
     private Button   btnToggleTemplate;
@@ -191,32 +174,6 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar  sbOutputPower;
     private TextView tvOutputPowerValue;
 
-    // ── TUDU záložka (nezávislá na skupinovém) ────────────────────────────
-    private Button   btnToggleTuduSource;
-    private View     cardTuduSourcePanel;
-    private View     llTuduSourcePanel;
-    private View     llTuduPreview;
-    private TextView tvTuduPreviewEpc, tvTuduPreviewRok, tvTuduPreviewTudu;
-    private TextView tvTuduPreviewVyhybka, tvTuduPreviewCast, tvTuduPreviewTid;
-    private EditText etTuduFileName;
-    private Button   btnTuduPickFile;
-    private Button   btnTuduLoadFile;
-    private TextView tvTuduFileInfo;
-    private AutoCompleteTextView actTuduSearch;
-    private Spinner  spTuduVyhybka;
-    private TextView tvTuduVyhybkaInfo;
-    private boolean  mTuduWorkflowLoaded = false;
-    private JSONObject mSkupWorkflowSnap = null;
-    private JSONObject mTuduWorkflowSnap = null;
-    private String   mTuduSourceFile = null;
-    private String   mSelectedTuduKey = "";
-    private int      mSelectedVyhybkaIdx = 0;
-    private final Map<String, List<TuduDataParser.VyhybkaEntry>> mTuduData = new LinkedHashMap<>();
-    private List<TuduDataParser.VyhybkaEntry> mCurrentVyhybky = new ArrayList<>();
-    private ArrayAdapter<String> mTuduSearchAdapter;
-    private ArrayAdapter<String> mVyhybkaSpinnerAdapter;
-    private ActivityResultLauncher<String[]> mTuduFilePicker;
-
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying    = false;
     private boolean mRecordMode      = false;
@@ -245,9 +202,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mTuduFilePicker = registerForActivityResult(
-                new ActivityResultContracts.OpenDocument(),
-                uri -> { if (uri != null) loadTuduFileFromUri(uri); });
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         bindViews();
@@ -260,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
         loadGroupSettings();
         loadWrtGroupSettings();
         loadLupaSettings();
-        loadTuduSettings();
         initReader();
     }
 
@@ -290,9 +243,7 @@ public class MainActivity extends AppCompatActivity {
             case 1: writeEpc(); break;
             case 2: // Zamčení: sub-step 0 = ZÁPIS HESLA, sub-step 1 = ZAMČENÍ
                 if (mLockSubStep == 0) writePwd(); else lockTag(); break;
-            case TAB_SKUPINOVY:
-            case TAB_TUDU:
-                onGroupTrigger(); break;
+            case 3: onGroupTrigger(); break;  // Skupinový
         }
     }
 
@@ -316,10 +267,6 @@ public class MainActivity extends AppCompatActivity {
         pageWriteEpc = findViewById(R.id.pageWriteEpc);
         pageGroupWrite = findViewById(R.id.pageGroupWrite);
         pageLock = findViewById(R.id.pageLock);
-        pageTuduWrapper = findViewById(R.id.pageTuduWrapper);
-        pageTuduHeader = findViewById(R.id.pageTuduHeader);
-        workflowHostTudu = findViewById(R.id.workflowHostTudu);
-        frameTabContent = findViewById(R.id.frameTabContent);
         svGroupPage = (android.widget.ScrollView) pageGroupWrite;
 
         // Page 0
@@ -404,7 +351,6 @@ public class MainActivity extends AppCompatActivity {
         btnGrpPreset1   = findViewById(R.id.btnGrpPreset1);
         btnGrpPreset2   = findViewById(R.id.btnGrpPreset2);
         cbPresetAuto56  = findViewById(R.id.cbPresetAuto56);
-        llGrpPresetSelector = findViewById(R.id.llGrpPresetSelector);
         tvEpcPreview           = findViewById(R.id.tvEpcPreview);
         tvGrpPreviewLabel      = findViewById(R.id.tvGrpPreviewLabel);
         btnToggleTemplate      = findViewById(R.id.btnToggleTemplate);
@@ -465,25 +411,6 @@ public class MainActivity extends AppCompatActivity {
         llSettings         = findViewById(R.id.llSettings);
         sbOutputPower      = findViewById(R.id.sbOutputPower);
         tvOutputPowerValue = findViewById(R.id.tvOutputPowerValue);
-
-        // TUDU záložka
-        btnToggleTuduSource = findViewById(R.id.btnToggleTuduSource);
-        cardTuduSourcePanel = findViewById(R.id.cardTuduSourcePanel);
-        llTuduSourcePanel   = findViewById(R.id.llTuduSourcePanel);
-        llTuduPreview       = findViewById(R.id.llTuduPreview);
-        tvTuduPreviewEpc    = findViewById(R.id.tvTuduPreviewEpc);
-        tvTuduPreviewRok    = findViewById(R.id.tvTuduPreviewRok);
-        tvTuduPreviewTudu   = findViewById(R.id.tvTuduPreviewTudu);
-        tvTuduPreviewVyhybka = findViewById(R.id.tvTuduPreviewVyhybka);
-        tvTuduPreviewCast   = findViewById(R.id.tvTuduPreviewCast);
-        tvTuduPreviewTid    = findViewById(R.id.tvTuduPreviewTid);
-        etTuduFileName     = findViewById(R.id.etTuduFileName);
-        btnTuduPickFile    = findViewById(R.id.btnTuduPickFile);
-        btnTuduLoadFile    = findViewById(R.id.btnTuduLoadFile);
-        tvTuduFileInfo     = findViewById(R.id.tvTuduFileInfo);
-        actTuduSearch      = findViewById(R.id.actTuduSearch);
-        spTuduVyhybka      = findViewById(R.id.spTuduVyhybka);
-        tvTuduVyhybkaInfo  = findViewById(R.id.tvTuduVyhybkaInfo);
     }
 
     private void setupTabs() {
@@ -495,35 +422,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private boolean isTuduTab() {
-        return mCurrentTab == TAB_TUDU;
-    }
-
     private void showPage(int index) {
-        if (mCurrentTab == TAB_TUDU && index != TAB_TUDU) leaveTuduTab();
-        if (mCurrentTab == TAB_SKUPINOVY && index == TAB_TUDU) {
-            mSkupWorkflowSnap = captureWorkflowSnapshot();
-        }
-        mCurrentTab = index;
-
         pageTag.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
         pageWriteEpc.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
-        pageLock.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
-
-        if (index == TAB_TUDU) {
-            enterTuduTab();
-            pageTuduWrapper.setVisibility(View.VISIBLE);
-        } else {
-            pageTuduWrapper.setVisibility(View.GONE);
-            if (pageGroupWrite.getParent() == workflowHostTudu) {
-                reparentWorkflow(false);
-            }
-            pageGroupWrite.setVisibility(index == TAB_SKUPINOVY ? View.VISIBLE : View.GONE);
-            if (index == TAB_SKUPINOVY) applySkupinovyTabUi();
-        }
+        pageLock.setVisibility(index == 2 ? View.VISIBLE : View.GONE);          // tab 2 = Zamčení
+        pageGroupWrite.setVisibility(index == 3 ? View.VISIBLE : View.GONE);   // tab 3 = Skupinový
 
         if (index == 1) updateWrtEpcPreview();
-        if (index == TAB_SKUPINOVY || index == TAB_TUDU) updateGroupEpcPreview();
+        if (index == 3) updateGroupEpcPreview();
     }
 
     private void bindButtons() {
@@ -534,37 +440,6 @@ public class MainActivity extends AppCompatActivity {
             int tint = android.graphics.Color.parseColor(visible ? "#888888" : "#00BCD4");
             ((com.google.android.material.button.MaterialButton) btnToggleSettings)
                     .setIconTint(android.content.res.ColorStateList.valueOf(tint));
-        });
-
-        btnToggleTuduSource.setOnClickListener(v -> {
-            boolean visible = cardTuduSourcePanel.getVisibility() == View.VISIBLE;
-            cardTuduSourcePanel.setVisibility(visible ? View.GONE : View.VISIBLE);
-            updateTuduSourceBtnText();
-        });
-        btnTuduPickFile.setOnClickListener(v ->
-                mTuduFilePicker.launch(new String[]{"text/*", "application/sql", "*/*"}));
-        btnTuduLoadFile.setOnClickListener(v -> loadTuduFileByName());
-        actTuduSearch.setOnItemClickListener((parent, view, position, id) -> {
-            String key = (String) parent.getItemAtPosition(position);
-            String query = actTuduSearch.getText().toString();
-            selectTuduCategory(key, true);
-            selectVyhybkaBySearchQuery(query);
-        });
-        actTuduSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                updateTuduSearchSuggestions(s != null ? s.toString() : "");
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
-        spTuduVyhybka.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (!isTuduTab() || mCurrentVyhybky.isEmpty()) return;
-                mSelectedVyhybkaIdx = position;
-                applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(position));
-                saveTuduSettings();
-            }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         sbOutputPower.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -994,9 +869,6 @@ public class MainActivity extends AppCompatActivity {
             String fmtEpc = g1+"-"+g2+"-"+g3+"-"+g4+"-"+g5+"-"+g6;
             tvVerifyEpc.setText(fmtEpc);
             tvVerifyTid.setText(tid.isEmpty() ? "—" : tid);
-            if (isTuduTab() && tvTuduPreviewTid != null) {
-                tvTuduPreviewTid.setText(tid.isEmpty() ? "—" : formatHexWithDashes(tid));
-            }
 
             appendToGroupCsv(g5 + g6, epc, tid, g1, g2, g3, g4, g5, g6);
         }
@@ -1019,9 +891,6 @@ public class MainActivity extends AppCompatActivity {
         updateVerifyLabels();
         tvVerifyEpc.setText(formatEpcDashed(epc));
         tvVerifyTid.setText(tid.isEmpty() ? "—" : tid);
-        if (isTuduTab() && tvTuduPreviewTid != null) {
-            tvTuduPreviewTid.setText(tid.isEmpty() ? "—" : formatHexWithDashes(tid));
-        }
     }
 
     private String[] parsePresetFieldsFromEpc(String epc) {
@@ -1413,7 +1282,6 @@ public class MainActivity extends AppCompatActivity {
             tvEpcPreview.setText(preview.toString());
             tvEpcPreview.setTextSize(16);
         }
-        if (isTuduTab()) updateTuduPreviewFields();
     }
 
     private String getGroupRowLabel(int idx) {
@@ -1479,11 +1347,7 @@ public class MainActivity extends AppCompatActivity {
                 mGroupPresetMode == GRP_PRESET_2 ? active : inactive));
         btnGrpPreset2.setTextColor(mGroupPresetMode == GRP_PRESET_2 ? activeFg : inactiveFg);
 
-        cbPresetAuto56.setVisibility(
-                mGroupPresetMode == GRP_PRESET_1 && !isTuduTab() ? View.VISIBLE : View.GONE);
-
-        if (llGrpPresetSelector != null)
-            llGrpPresetSelector.setVisibility(isTuduTab() ? View.GONE : View.VISIBLE);
+        cbPresetAuto56.setVisibility(mGroupPresetMode == GRP_PRESET_1 ? View.VISIBLE : View.GONE);
 
         String[] presetNames = (mGroupPresetMode == GRP_PRESET_2) ? PRESET2_NAMES : PRESET1_NAMES;
         boolean preset = isGroupPresetMode();
@@ -1509,11 +1373,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 etGroups[i].setFilters(new android.text.InputFilter[]{
                         new android.text.InputFilter.LengthFilter(maxLen)});
-                if (isTuduTab() && preset && i < 5) {
-                    etGroups[i].setEnabled(false);
-                } else {
-                    etGroups[i].setEnabled(true);
-                }
                 if (preset && i == 6) {
                     android.view.ViewGroup.LayoutParams lp = etGroups[i].getLayoutParams();
                     lp.width = (int) (120 * getResources().getDisplayMetrics().density);
@@ -1806,8 +1665,7 @@ public class MainActivity extends AppCompatActivity {
                     toast("✅ Tag zaheslován — připraven další");
                     // Reset for next tag
                     llVerifyDisplay.setVisibility(View.GONE);
-                    if (isTuduTab()) advanceTuduVyhybka();
-                    else autoIncrementGroups();
+                    autoIncrementGroups();
                     setGroupStep(STEP_WRITE);
                 } else {
                     setStatus("● Lock selhal", "#F44336");
@@ -1972,10 +1830,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveGroupSettings() {
-        if (isTuduTab()) {
-            saveTuduWorkflowSettings();
-            return;
-        }
         try {
             JSONArray vArr = new JSONArray(); JSONArray iArr = new JSONArray();
             for (int i = 0; i < GRP_ROW_COUNT; i++) {
@@ -2393,406 +2247,6 @@ public class MainActivity extends AppCompatActivity {
                 etLupaFileName.setText(f.getName().replace(".csv", ""));
             } else {
                 mLupaInputFile = null;
-            }
-        }
-    }
-
-    // ── TUDU záložka ──────────────────────────────────────────────────────
-
-    private void enterTuduTab() {
-        if (mCurrentTab != TAB_TUDU) return;
-        reparentWorkflow(true);
-        if (llTuduPreview != null) llTuduPreview.setVisibility(View.VISIBLE);
-
-        if (mTuduWorkflowSnap != null) {
-            applyWorkflowSnapshot(mTuduWorkflowSnap);
-        } else if (!mTuduWorkflowLoaded) {
-            loadTuduWorkflowSettings();
-            mTuduWorkflowLoaded = true;
-        } else {
-            if (mGroupPresetMode != GRP_PRESET_1) {
-                mGroupPresetMode = GRP_PRESET_1;
-                applyGroupPresetUi(false);
-            }
-        }
-        applyTuduTabUi();
-        if (llTemplateGroups != null) llTemplateGroups.setVisibility(View.VISIBLE);
-        updateGrpTemplateBtnText();
-        setGroupStep(STEP_WRITE);
-        updateTuduPreviewFields();
-    }
-
-    private void leaveTuduTab() {
-        mTuduWorkflowSnap = captureWorkflowSnapshot();
-        saveTuduWorkflowSettings();
-        if (llTuduPreview != null) llTuduPreview.setVisibility(View.GONE);
-    }
-
-    private void applyTuduTabUi() {
-        if (mGroupPresetMode != GRP_PRESET_1) {
-            mGroupPresetMode = GRP_PRESET_1;
-            applyGroupPresetUi(false);
-        }
-        applyGroupPresetUi(false);
-        updateTuduSourceBtnText();
-    }
-
-    private void applySkupinovyTabUi() {
-        if (mSkupWorkflowSnap != null) {
-            applyWorkflowSnapshot(mSkupWorkflowSnap);
-            mSkupWorkflowSnap = null;
-        }
-        applyGroupPresetUi(false);
-        if (llTuduPreview != null) llTuduPreview.setVisibility(View.GONE);
-    }
-
-    private void reparentWorkflow(boolean toTudu) {
-        android.view.ViewGroup parent = (android.view.ViewGroup) pageGroupWrite.getParent();
-        if (parent != null) parent.removeView(pageGroupWrite);
-        if (toTudu) {
-            workflowHostTudu.addView(pageGroupWrite, new android.widget.FrameLayout.LayoutParams(
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                    android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-        } else {
-            int insertIdx = frameTabContent.indexOfChild(pageTuduWrapper);
-            if (insertIdx < 0) insertIdx = frameTabContent.getChildCount();
-            frameTabContent.addView(pageGroupWrite, insertIdx,
-                    new android.widget.FrameLayout.LayoutParams(
-                            android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                            android.view.ViewGroup.LayoutParams.MATCH_PARENT));
-        }
-        pageGroupWrite.setVisibility(View.VISIBLE);
-    }
-
-    private JSONObject captureWorkflowSnapshot() {
-        JSONObject snap = new JSONObject();
-        try {
-            JSONArray vArr = new JSONArray();
-            JSONArray iArr = new JSONArray();
-            for (int i = 0; i < GRP_ROW_COUNT; i++) {
-                vArr.put(etGroups[i] != null ? etGroups[i].getText().toString() : "");
-                iArr.put(groupAutoInc[i]);
-            }
-            snap.put("values", vArr);
-            snap.put("autoinc", iArr);
-            snap.put("preset", mGroupPresetMode);
-            snap.put("step", mGroupStep);
-            snap.put("auto56", mPresetAuto56);
-            snap.put("file", mGroupOutputFile != null ? mGroupOutputFile : "");
-            snap.put("count", mGroupRecordCount);
-        } catch (Exception e) {
-            Log.e(TAG, "captureWorkflowSnapshot: " + e.getMessage());
-        }
-        return snap;
-    }
-
-    private void applyWorkflowSnapshot(JSONObject snap) {
-        if (snap == null) return;
-        try {
-            mGroupPresetMode = snap.optInt("preset", GRP_PRESET_STANDARD);
-            mPresetAuto56 = snap.optBoolean("auto56", false);
-            mGroupStep = snap.optInt("step", STEP_WRITE);
-            mGroupOutputFile = snap.optString("file", null);
-            if (mGroupOutputFile != null && mGroupOutputFile.isEmpty()) mGroupOutputFile = null;
-            mGroupRecordCount = snap.optInt("count", 0);
-            JSONArray vArr = snap.optJSONArray("values");
-            if (vArr != null) {
-                for (int i = 0; i < GRP_ROW_COUNT && i < vArr.length(); i++)
-                    if (etGroups[i] != null) etGroups[i].setText(vArr.getString(i));
-            }
-            JSONArray iArr = snap.optJSONArray("autoinc");
-            if (iArr != null) {
-                for (int i = 0; i < GRP_ROW_COUNT && i < iArr.length(); i++) {
-                    groupAutoInc[i] = iArr.getBoolean(i);
-                    if (cbGroups[i] != null) cbGroups[i].setChecked(groupAutoInc[i]);
-                }
-            }
-            if (mGroupOutputFile != null) {
-                File f = new File(mGroupOutputFile);
-                tvGroupFilePath.setText(f.getName() + "\n" + f.getParent());
-                tvGroupRecordCount.setText(String.valueOf(mGroupRecordCount));
-                etGroupFileName.setText(f.getName().replace(".csv", ""));
-            }
-            if (cbPresetAuto56 != null) cbPresetAuto56.setChecked(mPresetAuto56);
-            applyGroupPresetUi(false);
-            setGroupStep(mGroupStep);
-            updateGroupEpcPreview();
-        } catch (Exception e) {
-            Log.e(TAG, "applyWorkflowSnapshot: " + e.getMessage());
-        }
-    }
-
-    private void updateTuduSourceBtnText() {
-        if (btnToggleTuduSource == null) return;
-        boolean visible = cardTuduSourcePanel != null
-                && cardTuduSourcePanel.getVisibility() == View.VISIBLE;
-        btnToggleTuduSource.setText(visible ? "▼  ZDROJ DAT (CSV / SQL)" : "▶  ZDROJ DAT (CSV / SQL)");
-    }
-
-    private void updateTuduPreviewFields() {
-        if (!isTuduTab() || llTuduPreview == null) return;
-        String epc = buildGroupEpc();
-        if (tvTuduPreviewEpc != null) {
-            tvTuduPreviewEpc.setText(epc.length() == 24 ? formatEpcDashed(epc) : "—");
-        }
-        if (tvTuduPreviewRok != null && etGroups[0] != null) {
-            String rok = etGroups[0].getText().toString().trim();
-            tvTuduPreviewRok.setText(rok.isEmpty() ? "2026" : rok.replaceFirst("^0+", ""));
-        }
-        if (tvTuduPreviewTudu != null && etGroups[1] != null) {
-            String tudu1 = etGroups[1].getText().toString().trim();
-            String tudu2Ascii = etGroups[2] != null ? etGroups[2].getText().toString().trim() : "";
-            String tudu2 = etGroups[3] != null ? etGroups[3].getText().toString().trim() : "";
-            tvTuduPreviewTudu.setText(TuduDataParser.formatTuduDisplay(tudu1, tudu2Ascii, tudu2));
-        }
-        if (tvTuduPreviewVyhybka != null && etGroups[4] != null) {
-            String v = etGroups[4].getText().toString().trim().replaceFirst("^0+", "");
-            tvTuduPreviewVyhybka.setText(v.isEmpty() ? "—" : v);
-        }
-        if (tvTuduPreviewCast != null && etGroups[5] != null) {
-            String c = etGroups[5].getText().toString().trim();
-            tvTuduPreviewCast.setText(c.isEmpty() ? "—" : c);
-        }
-    }
-
-    private void loadTuduWorkflowSettings() {
-        try {
-            String vJson = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_wf_values", null);
-            mGroupPresetMode = GRP_PRESET_1;
-            mPresetAuto56 = false;
-            if (vJson != null) {
-                JSONArray arr = new JSONArray(vJson);
-                for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++)
-                    if (etGroups[i] != null) etGroups[i].setText(arr.getString(i));
-            }
-            String iJson = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_wf_autoinc", null);
-            if (iJson != null) {
-                JSONArray arr = new JSONArray(iJson);
-                for (int i = 0; i < GRP_ROW_COUNT && i < arr.length(); i++) {
-                    groupAutoInc[i] = arr.getBoolean(i);
-                    if (cbGroups[i] != null) cbGroups[i].setChecked(groupAutoInc[i]);
-                }
-            }
-            mGroupOutputFile = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_wf_file", null);
-            mGroupRecordCount = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("tudu_wf_count", 0);
-            if (mGroupOutputFile != null && !mGroupOutputFile.isEmpty()) {
-                File f = new File(mGroupOutputFile);
-                tvGroupFilePath.setText(f.getName() + "\n" + f.getParent());
-                tvGroupRecordCount.setText(String.valueOf(mGroupRecordCount));
-                etGroupFileName.setText(f.getName().replace(".csv", ""));
-            }
-        } catch (Exception ignored) {}
-        applyGroupPresetUi(false);
-        updateVerifyLabels();
-    }
-
-    private void saveTuduWorkflowSettings() {
-        try {
-            JSONArray vArr = new JSONArray();
-            JSONArray iArr = new JSONArray();
-            for (int i = 0; i < GRP_ROW_COUNT; i++) {
-                vArr.put(etGroups[i] != null ? etGroups[i].getText().toString() : "");
-                iArr.put(groupAutoInc[i]);
-            }
-            getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                    .putString("tudu_wf_values", vArr.toString())
-                    .putString("tudu_wf_autoinc", iArr.toString())
-                    .putString("tudu_wf_file", mGroupOutputFile)
-                    .putInt("tudu_wf_count", mGroupRecordCount)
-                    .apply();
-        } catch (Exception e) {
-            Log.e(TAG, "saveTuduWorkflow: " + e.getMessage());
-        }
-    }
-
-    private void loadTuduFileByName() {
-        String name = etTuduFileName.getText().toString().trim();
-        if (name.isEmpty()) { toast("Zadejte název souboru"); return; }
-        File dir = getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-        if (dir == null) dir = getFilesDir();
-        File csv = new File(dir, name + ".csv");
-        File sql = new File(dir, name + ".sql");
-        File file = csv.exists() ? csv : (sql.exists() ? sql : null);
-        if (file == null) {
-            toast("Soubor nenalezen v Documents");
-            return;
-        }
-        loadTuduFile(file);
-    }
-
-    private void loadTuduFileFromUri(Uri uri) {
-        try {
-            getContentResolver().takePersistableUriPermission(uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        } catch (Exception ignored) {}
-        try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
-            if (in == null) { toast("Nelze otevřít soubor"); return; }
-            String name = queryDisplayName(uri);
-            String lower = name.toLowerCase(Locale.ROOT);
-            String type = lower.endsWith(".sql") ? "sql" : "csv";
-            mTuduData.clear();
-            mTuduData.putAll(TuduDataParser.parse(in, type));
-            mTuduSourceFile = uri.toString();
-            etTuduFileName.setText(name.replaceAll("(?i)\\.(csv|sql)$", ""));
-            onTuduDataLoaded(name);
-            saveTuduSettings();
-        } catch (Exception e) {
-            toast("Chyba načtení: " + e.getMessage());
-        }
-    }
-
-    private void loadTuduFile(File file) {
-        try {
-            mTuduData.clear();
-            mTuduData.putAll(TuduDataParser.parse(file));
-            mTuduSourceFile = file.getAbsolutePath();
-            onTuduDataLoaded(file.getName());
-            saveTuduSettings();
-        } catch (Exception e) {
-            toast("Chyba načtení: " + e.getMessage());
-        }
-    }
-
-    private void onTuduDataLoaded(String fileName) {
-        int total = 0;
-        for (List<TuduDataParser.VyhybkaEntry> list : mTuduData.values()) total += list.size();
-        tvTuduFileInfo.setText(fileName + " — " + mTuduData.size() + " TUDU, " + total + " výhybek");
-        updateTuduSearchSuggestions("");
-        toast("✅ Načteno " + mTuduData.size() + " TUDU kategorií");
-        if (!mSelectedTuduKey.isEmpty() && mTuduData.containsKey(mSelectedTuduKey)) {
-            selectTuduCategory(mSelectedTuduKey, false);
-        }
-    }
-
-    private void updateTuduSearchSuggestions(String query) {
-        if (mTuduData.isEmpty()) return;
-        List<String> keys = TuduDataParser.filterTuduKeys(mTuduData, query);
-        mTuduSearchAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, keys);
-        actTuduSearch.setAdapter(mTuduSearchAdapter);
-    }
-
-    private void selectTuduCategory(String key, boolean resetIdx) {
-        if (key == null || !mTuduData.containsKey(key)) return;
-        mSelectedTuduKey = key;
-        mCurrentVyhybky = mTuduData.get(key);
-        actTuduSearch.setText(key);
-        List<String> labels = new ArrayList<>();
-        for (TuduDataParser.VyhybkaEntry e : mCurrentVyhybky) {
-            labels.add(e.vyhybka.isEmpty() ? "—" : e.vyhybka);
-        }
-        mVyhybkaSpinnerAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, labels);
-        mVyhybkaSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spTuduVyhybka.setAdapter(mVyhybkaSpinnerAdapter);
-        if (resetIdx) mSelectedVyhybkaIdx = 0;
-        if (mSelectedVyhybkaIdx < 0 || mSelectedVyhybkaIdx >= mCurrentVyhybky.size())
-            mSelectedVyhybkaIdx = 0;
-        if (!mCurrentVyhybky.isEmpty()) {
-            spTuduVyhybka.setSelection(mSelectedVyhybkaIdx);
-            applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(mSelectedVyhybkaIdx));
-            tvTuduVyhybkaInfo.setText(mCurrentVyhybky.size() + " výhybek v kategorii " + key);
-        }
-        saveTuduSettings();
-    }
-
-    private void selectVyhybkaBySearchQuery(String query) {
-        if (query == null || query.trim().isEmpty() || mCurrentVyhybky.isEmpty()) return;
-        String q = query.trim().toUpperCase(Locale.ROOT);
-        for (int i = 0; i < mCurrentVyhybky.size(); i++) {
-            TuduDataParser.VyhybkaEntry e = mCurrentVyhybky.get(i);
-            if (e.idRfid != null && e.idRfid.toUpperCase(Locale.ROOT).contains(q)) {
-                mSelectedVyhybkaIdx = i;
-                spTuduVyhybka.setSelection(i);
-                applyVyhybkaEntryToTemplate(e);
-                saveTuduSettings();
-                return;
-            }
-        }
-    }
-
-    private void applyVyhybkaEntryToTemplate(TuduDataParser.VyhybkaEntry e) {
-        if (e == null) return;
-        if (etGroups[0] != null) etGroups[0].setText(padField(e.rok, 4));
-        if (etGroups[1] != null) etGroups[1].setText(padField(e.tudu1, 4));
-        if (etGroups[2] != null) etGroups[2].setText(padField(e.tudu2Ascii, 2));
-        if (etGroups[3] != null) etGroups[3].setText(padField(e.tudu2, 2));
-        if (etGroups[4] != null) etGroups[4].setText(padField(e.vyhybka, 3));
-        if (etGroups[5] != null) etGroups[5].setText(e.cast.isEmpty() ? "1" : e.cast.substring(0, 1));
-        if (etGroups[6] != null) etGroups[6].setText(padField(e.idRfid, 8));
-        if (tvTuduPreviewTid != null) tvTuduPreviewTid.setText("—");
-        updateGroupEpcPreview();
-        updateTuduPreviewFields();
-        saveGroupSettings();
-    }
-
-    private String padField(String raw, int len) {
-        String v = raw != null ? raw.toUpperCase(Locale.ROOT).trim() : "";
-        while (v.length() < len) v = "0" + v;
-        if (v.length() > len) v = v.substring(v.length() - len);
-        return v;
-    }
-
-    private void advanceTuduVyhybka() {
-        if (mCurrentVyhybky.isEmpty()) return;
-        int next = mSelectedVyhybkaIdx + 1;
-        if (next >= mCurrentVyhybky.size()) next = 0;
-        mSelectedVyhybkaIdx = next;
-        spTuduVyhybka.setSelection(next);
-        applyVyhybkaEntryToTemplate(mCurrentVyhybky.get(next));
-        if (tvTuduPreviewTid != null) tvTuduPreviewTid.setText("—");
-    }
-
-    private String queryDisplayName(Uri uri) {
-        String name = null;
-        try (android.database.Cursor c = getContentResolver().query(
-                uri, null, null, null, null)) {
-            if (c != null && c.moveToFirst()) {
-                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
-                if (idx >= 0) name = c.getString(idx);
-            }
-        } catch (Exception ignored) {}
-        if (name == null) name = uri.getLastPathSegment();
-        return name != null ? name : "soubor";
-    }
-
-    private void saveTuduSettings() {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-                .putString("tudu_source", mTuduSourceFile)
-                .putString("tudu_file_name", etTuduFileName != null
-                        ? etTuduFileName.getText().toString() : "")
-                .putString("tudu_selected", mSelectedTuduKey)
-                .putInt("tudu_vyhybka_idx", mSelectedVyhybkaIdx)
-                .apply();
-        if (isTuduTab()) saveTuduWorkflowSettings();
-    }
-
-    private void loadTuduSettings() {
-        mTuduSourceFile = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_source", null);
-        mSelectedTuduKey = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_selected", "");
-        mSelectedVyhybkaIdx = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt("tudu_vyhybka_idx", 0);
-        String fileName = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString("tudu_file_name", "");
-        if (etTuduFileName != null && !fileName.isEmpty()) etTuduFileName.setText(fileName);
-        if (mTuduSourceFile != null) {
-            try {
-                if (mTuduSourceFile.startsWith("content:")) {
-                    Uri uri = Uri.parse(mTuduSourceFile);
-                    try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
-                        if (in != null) {
-                            String type = fileName.toLowerCase(Locale.ROOT).endsWith(".sql") ? "sql" : "csv";
-                            mTuduData.putAll(TuduDataParser.parse(in, type));
-                        }
-                    }
-                } else {
-                    File f = new File(mTuduSourceFile);
-                    if (f.exists()) mTuduData.putAll(TuduDataParser.parse(f));
-                }
-                if (!mTuduData.isEmpty()) {
-                    String infoName = fileName.isEmpty() ? "soubor" : fileName;
-                    onTuduDataLoaded(infoName);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "loadTuduSettings: " + e.getMessage());
             }
         }
     }
