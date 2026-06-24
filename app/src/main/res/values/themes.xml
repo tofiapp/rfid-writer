@@ -2,9 +2,10 @@
 <resources>
     <style name="Theme.RFIDWriter" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/text_on_primary</item>
         <item name="colorPrimaryContainer">@color/primary_container</item>
         <item name="colorSecondary">@color/accent</item>
+        <item name="colorOnSecondary">@color/text_on_primary</item>
         <item name="colorSecondaryContainer">@color/accent_container</item>
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:statusBarColor">@color/primary_dark</item>
