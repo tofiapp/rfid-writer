@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#121212">
+    android:background="@color/bg">
 
     <!-- ── Global header ─────────────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#1A1A1A"
+        android:background="@color/card"
         android:paddingStart="16dp"
         android:paddingEnd="8dp"
         android:paddingTop="10dp"
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="RFID Writer"
-            android:textColor="#E0E0E0"
+            android:textColor="@color/primary_dark"
             android:textSize="18sp"
             android:textStyle="bold"/>
 
@@ -32,7 +32,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:text=""
-            android:backgroundTint="#1A1A1A"
+            android:backgroundTint="@color/card"
             android:padding="0dp"
             android:insetTop="0dp"
             android:insetBottom="0dp"
@@ -41,7 +41,7 @@
             android:layout_marginEnd="6dp"
             app:icon="@drawable/ic_settings"
             app:iconSize="22dp"
-            app:iconTint="#888888"
+            app:iconTint="@color/text_muted"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             style="@style/Widget.MaterialComponents.Button.TextButton"/>
@@ -51,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="● Inicializace..."
-            android:textColor="#FF9800"
+            android:textColor="@color/accent"
             android:textSize="12sp"/>
 
     </LinearLayout>
@@ -62,7 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#161b22"
+        android:background="@color/card"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingTop="14dp"
@@ -73,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="NASTAVENÍ"
-            android:textColor="#00BCD4"
+            android:textColor="@color/primary"
             android:textSize="11sp"
             android:textStyle="bold"
             android:letterSpacing="0.12"
@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Výstupní výkon:"
-                android:textColor="#E0E0E0"
+                android:textColor="@color/text"
                 android:textSize="13sp"
                 android:layout_marginEnd="10dp"/>
 
@@ -101,15 +101,15 @@
                 android:min="1"
                 android:max="30"
                 android:progress="20"
-                android:progressTint="#00BCD4"
-                android:thumbTint="#00BCD4"/>
+                android:progressTint="@color/primary"
+                android:thumbTint="@color/primary"/>
 
             <TextView
                 android:id="@+id/tvOutputPowerValue"
                 android:layout_width="54dp"
                 android:layout_height="wrap_content"
                 android:text="20 dBm"
-                android:textColor="#00BCD4"
+                android:textColor="@color/primary"
                 android:textSize="13sp"
                 android:textStyle="bold"
                 android:textAlignment="center"
@@ -123,17 +123,17 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:background="#00BCD4"/>
+        android:background="@color/primary"/>
 
     <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1A1A1A"
-        app:tabTextColor="#888888"
-        app:tabSelectedTextColor="#00BCD4"
-        app:tabIndicatorColor="#00BCD4"
+        android:background="@color/card"
+        app:tabTextColor="@color/text_muted"
+        app:tabSelectedTextColor="@color/primary"
+        app:tabIndicatorColor="@color/primary"
         app:tabIndicatorHeight="3dp"
         app:tabMode="fixed"
         app:tabGravity="fill"
@@ -182,7 +182,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="#0d1117"
+                android:background="@color/bg"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
                 android:paddingTop="8dp"
@@ -206,7 +206,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ID_RFID:"
-                        android:textColor="#d2a8ff"
+                        android:textColor="@color/vyhybka_accent"
                         android:textStyle="bold"
                         android:textSize="12sp"
                         android:letterSpacing="0.03"
@@ -218,8 +218,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:hint="405"
-                        android:textColorHint="#666666"
-                        android:textColor="#d2a8ff"
+                        android:textColorHint="@color/text_muted"
+                        android:textColor="@color/vyhybka_accent"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:fontFamily="monospace"
@@ -249,7 +249,7 @@
                     android:layout_height="38dp"
                     android:text="📝"
                     android:textSize="16sp"
-                    android:backgroundTint="#2E2E2E"
+                    android:backgroundTint="@color/step_pending"
                     android:layout_marginStart="8dp"
                     android:padding="0dp"
                     android:insetTop="0dp"
@@ -263,7 +263,7 @@
                     android:layout_height="38dp"
                     android:text="🔍"
                     android:textSize="16sp"
-                    android:backgroundTint="#00BCD4"
+                    android:backgroundTint="@color/primary"
                     android:layout_marginStart="5dp"
                     android:padding="0dp"
                     android:insetTop="0dp"
@@ -286,7 +286,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="— čekám —"
-                    android:textColor="#58a6ff"
+                    android:textColor="@color/primary"
                     android:textSize="13sp"
                     android:fontFamily="monospace"/>
 
@@ -296,7 +296,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="— čekám —"
-                    android:textColor="#3fb950"
+                    android:textColor="@color/success"
                     android:textSize="13sp"
                     android:fontFamily="monospace"/>
 
@@ -313,8 +313,8 @@
                 android:text="📡  SKENOVAT TAG"
                 android:textSize="15sp"
                 android:textStyle="bold"
-                android:textColor="#121212"
-                android:backgroundTint="#00BCD4"
+                android:textColor="@color/text_on_primary"
+                android:backgroundTint="@color/primary"
                 android:enabled="false"
                 android:insetTop="0dp"
                 android:insetBottom="0dp"/>
@@ -325,7 +325,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#1E1E1E"
+                android:background="@color/card"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
                 android:paddingTop="8dp"
@@ -339,7 +339,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="VSTUPNÍ SOUBOR CSV"
-                    android:textColor="#888888"
+                    android:textColor="@color/text_muted"
                     android:textSize="11sp"
                     android:letterSpacing="0.1"
                     android:paddingBottom="6dp"/>
@@ -356,8 +356,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:hint="rfid_instalace_2026"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
+                        android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text"
                         android:textSize="14sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions"
@@ -370,8 +370,8 @@
                         android:layout_height="40dp"
                         android:text="Načíst"
                         android:textSize="12sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#1f6feb"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/primary"
                         android:layout_marginStart="8dp"
                         android:padding="0dp"
                         android:paddingStart="12dp"
@@ -386,7 +386,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="— soubor není načten —"
-                    android:textColor="#888888"
+                    android:textColor="@color/text_muted"
                     android:textSize="11sp"
                     android:fontFamily="monospace"
                     android:paddingTop="4dp"/>
@@ -410,7 +410,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="#161b22"
+                    android:background="@color/card"
                     android:padding="8dp"
                     android:gravity="center">
 
@@ -419,7 +419,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textColor="#58a6ff"
+                        android:textColor="@color/primary"
                         android:textSize="22sp"
                         android:textStyle="bold"/>
 
@@ -427,7 +427,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="PÁRŮ"
-                        android:textColor="#8b949e"
+                        android:textColor="@color/text_muted"
                         android:textSize="9sp"
                         android:letterSpacing="0.05"/>
 
@@ -438,7 +438,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="#161b22"
+                    android:background="@color/card"
                     android:padding="8dp"
                     android:gravity="center"
                     android:layout_marginStart="4dp">
@@ -448,7 +448,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textColor="#3fb950"
+                        android:textColor="@color/success"
                         android:textSize="22sp"
                         android:textStyle="bold"/>
 
@@ -456,7 +456,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="KOMPLETNÍ"
-                        android:textColor="#8b949e"
+                        android:textColor="@color/text_muted"
                         android:textSize="9sp"
                         android:letterSpacing="0.05"/>
 
@@ -467,7 +467,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="#161b22"
+                    android:background="@color/card"
                     android:padding="8dp"
                     android:gravity="center"
                     android:layout_marginStart="4dp">
@@ -477,7 +477,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textColor="#e3b341"
+                        android:textColor="@color/accent_stroke"
                         android:textSize="22sp"
                         android:textStyle="bold"/>
 
@@ -485,7 +485,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="NEÚPLNÉ"
-                        android:textColor="#8b949e"
+                        android:textColor="@color/text_muted"
                         android:textSize="9sp"
                         android:letterSpacing="0.05"/>
 
@@ -509,7 +509,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ZÁZNAMY"
-                    android:textColor="#8b949e"
+                    android:textColor="@color/text_muted"
                     android:textSize="11sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.07"
@@ -528,8 +528,8 @@
                         android:layout_weight="1"
                         android:text="📋 Kopírovat"
                         android:textSize="11sp"
-                        android:textColor="#E0E0E0"
-                        android:backgroundTint="#21262d"
+                        android:textColor="@color/text"
+                        android:backgroundTint="@color/border"
                         android:layout_marginEnd="4dp"
                         android:padding="0dp"
                         android:insetTop="0dp"
@@ -542,8 +542,8 @@
                         android:layout_weight="1"
                         android:text="📊 CSV"
                         android:textSize="11sp"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#1f6feb"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/primary"
                         android:layout_marginEnd="4dp"
                         android:padding="0dp"
                         android:insetTop="0dp"
@@ -556,8 +556,8 @@
                         android:layout_weight="1"
                         android:text="🗑 Smazat"
                         android:textSize="11sp"
-                        android:textColor="#f85149"
-                        android:backgroundTint="#3d1a1a"
+                        android:textColor="@color/error_runtime"
+                        android:backgroundTint="@color/accent_container"
                         android:padding="0dp"
                         android:insetTop="0dp"
                         android:insetBottom="0dp"/>
@@ -572,7 +572,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:background="#0d1117"
+                android:background="@color/bg"
                 android:visibility="gone">
 
                 <LinearLayout
@@ -601,7 +601,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Žádné záznamy.\nZadejte ID_RFID a skenujte."
-                            android:textColor="#8b949e"
+                            android:textColor="@color/text_muted"
                             android:textSize="12sp"
                             android:gravity="center"
                             android:lineSpacingMultiplier="1.4"/>
@@ -630,10 +630,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        app:cardBackgroundColor="#161b22"
+                        app:cardBackgroundColor="@color/summary_bg"
                         app:cardCornerRadius="10dp"
-                        app:strokeColor="#58a6ff"
-                        app:strokeWidth="2dp"
+                        app:strokeColor="@color/divider"
+                        app:strokeWidth="1dp"
                         app:cardElevation="0dp">
 
                         <LinearLayout
@@ -646,7 +646,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="EPC"
-                                android:textColor="#58a6ff"
+                                android:textColor="@color/primary_dark"
                                 android:textSize="9sp"
                                 android:textStyle="bold"
                                 android:letterSpacing="0.08"/>
@@ -656,7 +656,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="—"
-                                android:textColor="#58a6ff"
+                                android:textColor="@color/primary"
                                 android:textSize="16sp"
                                 android:fontFamily="monospace"
                                 android:paddingTop="5dp"/>
@@ -668,10 +668,10 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:cardBackgroundColor="#161b22"
+                        app:cardBackgroundColor="@color/summary_bg"
                         app:cardCornerRadius="10dp"
-                        app:strokeColor="#3fb950"
-                        app:strokeWidth="2dp"
+                        app:strokeColor="@color/divider"
+                        app:strokeWidth="1dp"
                         app:cardElevation="0dp">
 
                         <LinearLayout
@@ -684,7 +684,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="TID"
-                                android:textColor="#3fb950"
+                                android:textColor="@color/success"
                                 android:textSize="9sp"
                                 android:textStyle="bold"
                                 android:letterSpacing="0.08"/>
@@ -694,7 +694,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="—"
-                                android:textColor="#3fb950"
+                                android:textColor="@color/success"
                                 android:textSize="16sp"
                                 android:fontFamily="monospace"
                                 android:paddingTop="5dp"/>
@@ -716,7 +716,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Z CSV"
-                            android:textColor="#888888"
+                            android:textColor="@color/text_muted"
                             android:textSize="10sp"
                             android:letterSpacing="0.1"
                             android:paddingBottom="8dp"/>
@@ -758,8 +758,8 @@
                     android:text="▶  EPC ŠABLONA"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#00BCD4"
-                    android:backgroundTint="#1E1E1E"
+                    android:textColor="@color/primary"
+                    android:backgroundTint="@color/card"
                     android:gravity="start|center_vertical"
                     android:paddingStart="12dp"
                     android:insetTop="0dp"
@@ -772,7 +772,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp"
                     android:visibility="gone">
@@ -788,7 +788,7 @@
                             android:layout_width="22dp"
                             android:layout_height="wrap_content"
                             android:text="#"
-                            android:textColor="#888888"
+                            android:textColor="@color/text_muted"
                             android:textSize="10sp"/>
 
                         <TextView
@@ -796,7 +796,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="SKUPINA"
-                            android:textColor="#888888"
+                            android:textColor="@color/text_muted"
                             android:textSize="10sp"
                             android:letterSpacing="0.07"/>
 
@@ -804,7 +804,7 @@
                             android:layout_width="76dp"
                             android:layout_height="wrap_content"
                             android:text="HODNOTA"
-                            android:textColor="#888888"
+                            android:textColor="@color/text_muted"
                             android:textSize="10sp"
                             android:textAlignment="center"
                             android:letterSpacing="0.07"/>
@@ -813,7 +813,7 @@
                             android:layout_width="52dp"
                             android:layout_height="wrap_content"
                             android:text="+1"
-                            android:textColor="#888888"
+                            android:textColor="@color/text_muted"
                             android:textSize="10sp"
                             android:textAlignment="center"/>
 
@@ -822,7 +822,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#2E2E2E"
+                        android:background="@color/step_pending"
                         android:layout_marginBottom="4dp"/>
 
                     <!-- Row 1: Rok -->
@@ -836,19 +836,19 @@
                         android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="1" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="1" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName1"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt1" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
@@ -856,8 +856,8 @@
 
                         <CheckBox android:id="@+id/cbWrt1" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -867,19 +867,19 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="2" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="2" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName2"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt2" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
@@ -887,8 +887,8 @@
 
                         <CheckBox android:id="@+id/cbWrt2" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -898,19 +898,19 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="3" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="3" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName3"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt3" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
@@ -918,8 +918,8 @@
 
                         <CheckBox android:id="@+id/cbWrt3" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -929,19 +929,19 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="4" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="4" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName4"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt4" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
@@ -949,8 +949,8 @@
 
                         <CheckBox android:id="@+id/cbWrt4" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -960,19 +960,19 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="5" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="5" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName5"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt5" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
@@ -980,8 +980,8 @@
 
                         <CheckBox android:id="@+id/cbWrt5" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -991,27 +991,27 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp">
 
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="6" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="6" android:textColor="@color/text_muted" android:textSize="11sp"/>
 
                         <EditText android:id="@+id/etWrtGrpName6"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="ID_RFID"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
 
                         <EditText android:id="@+id/etWrt6" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0001"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace" android:inputType="number"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
 
                         <CheckBox android:id="@+id/cbWrt6" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="true" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="true" android:buttonTint="@color/primary"/>
 
                     </LinearLayout>
 
@@ -1022,9 +1022,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    app:cardBackgroundColor="#161b22"
+                    app:cardBackgroundColor="@color/epc_bg"
                     app:cardCornerRadius="10dp"
-                    app:strokeColor="#00BCD4"
+                    app:strokeColor="@color/divider"
                     app:strokeWidth="2dp"
                     app:cardElevation="0dp">
 
@@ -1036,14 +1036,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="náhled EPC"
-                            android:textColor="#888888" android:textSize="10sp"
+                            android:textColor="@color/text_muted" android:textSize="10sp"
                             android:letterSpacing="0.1"/>
 
                         <TextView android:id="@+id/tvWrtEpcPreview"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="2026-0000-0000-0000-0000-0001"
-                            android:textColor="#00BCD4" android:textSize="16sp"
+                            android:textColor="@color/epc_text" android:textSize="16sp"
                             android:fontFamily="monospace" android:paddingTop="5dp"/>
 
                     </LinearLayout>
@@ -1055,19 +1055,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="PARAMETRY" android:textColor="#888888"
+                        android:text="PARAMETRY" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
 
                     <!-- Bank selection -->
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Bank"
-                        android:textColor="#888888" android:textSize="11sp"
+                        android:textColor="@color/text_muted" android:textSize="11sp"
                         android:paddingBottom="6dp"/>
 
                     <LinearLayout android:layout_width="match_parent"
@@ -1078,8 +1078,8 @@
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="EPC"
-                            android:textSize="12sp" android:textColor="#121212"
-                            android:backgroundTint="#00BCD4"
+                            android:textSize="12sp" android:textColor="@color/text_on_primary"
+                            android:backgroundTint="@color/primary"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
                             android:layout_marginEnd="4dp"/>
 
@@ -1087,8 +1087,8 @@
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="USER"
-                            android:textSize="12sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E"
+                            android:textSize="12sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
                             android:layout_marginEnd="4dp"/>
 
@@ -1096,8 +1096,8 @@
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="RESERVED"
-                            android:textSize="11sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E"
+                            android:textSize="11sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"/>
 
                     </LinearLayout>
@@ -1110,10 +1110,10 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" android:text="Prt"
-                                android:textColor="#888888" android:textSize="11sp"/>
+                                android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <EditText android:id="@+id/etWritePrt"
                                 android:layout_width="56dp" android:layout_height="wrap_content"
-                                android:text="2" android:textColor="#E0E0E0"
+                                android:text="2" android:textColor="@color/text"
                                 android:textSize="18sp" android:fontFamily="monospace"
                                 android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
@@ -1124,10 +1124,10 @@
                             android:paddingStart="8dp">
                             <TextView android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" android:text="Len"
-                                android:textColor="#888888" android:textSize="11sp"/>
+                                android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <EditText android:id="@+id/etWriteLen"
                                 android:layout_width="56dp" android:layout_height="wrap_content"
-                                android:text="6" android:textColor="#E0E0E0"
+                                android:text="6" android:textColor="@color/text"
                                 android:textSize="18sp" android:fontFamily="monospace"
                                 android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
@@ -1145,18 +1145,18 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="14dp">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="ACCESS PWD" android:textColor="#888888"
+                        android:text="ACCESS PWD" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
 
                     <EditText android:id="@+id/etWriteAccessPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:hint="00000000" android:textColorHint="#555555"
-                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:hint="00000000" android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1170,8 +1170,8 @@
                     android:layout_height="56dp"
                     android:text="✏️  WRITE"
                     android:textSize="16sp"
-                    android:textColor="#121212"
-                    android:backgroundTint="#4CAF50"/>
+                    android:textColor="@color/text_on_primary"
+                    android:backgroundTint="@color/accent"/>
 
             </LinearLayout>
 
@@ -1207,11 +1207,11 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:text="1"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
+                        android:background="@drawable/step_circle_active"/>
 
                     <TextView
                         android:id="@+id/tvStep1Label"
@@ -1219,7 +1219,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="  ZÁPIS EPC"
-                        android:textColor="#00BCD4"
+                        android:textColor="@color/primary"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.08"/>
@@ -1234,8 +1234,8 @@
                     android:text="▶  EPC ŠABLONA"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#00BCD4"
-                    android:backgroundTint="#1E1E1E"
+                    android:textColor="@color/primary"
+                    android:backgroundTint="@color/card"
                     android:gravity="start|center_vertical"
                     android:paddingStart="12dp"
                     android:insetTop="0dp"
@@ -1248,7 +1248,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="8dp"
                     android:visibility="gone">
@@ -1256,50 +1256,50 @@
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="6dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="#" android:textColor="#888888" android:textSize="10sp"/>
+                            android:text="#" android:textColor="@color/text_muted" android:textSize="10sp"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="SKUPINA"
-                            android:textColor="#888888" android:textSize="10sp" android:letterSpacing="0.07"/>
+                            android:textColor="@color/text_muted" android:textSize="10sp" android:letterSpacing="0.07"/>
                         <TextView android:layout_width="76dp" android:layout_height="wrap_content"
-                            android:text="HODNOTA" android:textColor="#888888" android:textSize="10sp"
+                            android:text="HODNOTA" android:textColor="@color/text_muted" android:textSize="10sp"
                             android:textAlignment="center"/>
                         <TextView android:layout_width="52dp" android:layout_height="wrap_content"
-                            android:text="+1" android:textColor="#888888" android:textSize="10sp"
+                            android:text="+1" android:textColor="@color/text_muted" android:textSize="10sp"
                             android:textAlignment="center"/>
                     </LinearLayout>
 
                     <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#2E2E2E" android:layout_marginBottom="4dp"/>
+                        android:background="@color/step_pending" android:layout_marginBottom="4dp"/>
 
                     <!-- Preset mode selector -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingBottom="8dp">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="Režim:" android:textColor="#888888" android:textSize="11sp"
+                            android:text="Režim:" android:textColor="@color/text_muted" android:textSize="11sp"
                             android:layout_marginEnd="6dp"/>
                         <Button android:id="@+id/btnGrpPresetStd"
                             android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1"
-                            android:text="Výchozí" android:textSize="10sp" android:textColor="#121212"
-                            android:backgroundTint="#00BCD4" android:padding="0dp"
+                            android:text="Výchozí" android:textSize="10sp" android:textColor="@color/text_on_primary"
+                            android:backgroundTint="@color/primary" android:padding="0dp"
                             android:insetTop="0dp" android:insetBottom="0dp" android:layout_marginEnd="3dp"/>
                         <Button android:id="@+id/btnGrpPreset1"
                             android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1"
-                            android:text="Preset 1" android:textSize="10sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E" android:padding="0dp"
+                            android:text="Preset 1" android:textSize="10sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending" android:padding="0dp"
                             android:insetTop="0dp" android:insetBottom="0dp" android:layout_marginEnd="3dp"/>
                         <Button android:id="@+id/btnGrpPreset2"
                             android:layout_width="0dp" android:layout_height="34dp" android:layout_weight="1"
-                            android:text="Preset 2" android:textSize="10sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E" android:padding="0dp"
+                            android:text="Preset 2" android:textSize="10sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending" android:padding="0dp"
                             android:insetTop="0dp" android:insetBottom="0dp"/>
                     </LinearLayout>
 
                     <CheckBox android:id="@+id/cbPresetAuto56"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:text="Auto — řádek 6: 1→2→3, řádek 5: +1 po cyklu"
-                        android:textColor="#888888" android:textSize="11sp"
-                        android:checked="false" android:buttonTint="#00BCD4"
+                        android:textColor="@color/text_muted" android:textSize="11sp"
+                        android:checked="false" android:buttonTint="@color/primary"
                         android:visibility="gone" android:layout_marginBottom="4dp"/>
 
                     <!-- Row 1 -->
@@ -1307,25 +1307,25 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="1" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="1" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName1"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup1" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup1" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 2 -->
@@ -1333,25 +1333,25 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="2" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="2" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName2"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup2" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup2" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 3 -->
@@ -1359,25 +1359,25 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="3" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="3" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName3"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup3" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup3" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 4 -->
@@ -1385,25 +1385,25 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="4" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="4" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName4"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup4" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup4" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 5: Prefix -->
@@ -1411,25 +1411,25 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="5" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="5" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName5"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="-"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup5" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0000"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup5" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 6: ID_RFID (editable name, same style as rows 1-5) -->
@@ -1437,24 +1437,24 @@
                         android:orientation="horizontal" android:gravity="center_vertical"
                         android:paddingTop="5dp" android:paddingBottom="5dp">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="6" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="6" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName6"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="ID_RFID"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup6" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text="0001"
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace" android:inputType="number"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup6" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="true" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="true" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 7: ID_RFID (preset only) -->
@@ -1463,25 +1463,25 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp"
                         android:visibility="gone">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="7" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="7" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName7"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="ID_RFID"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup7" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text=""
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace"
                             android:inputType="textNoSuggestions|textCapCharacters"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup7" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="false" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="false" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                     <!-- Row 8: ID_RFID (preset only) -->
@@ -1490,24 +1490,24 @@
                         android:paddingTop="5dp" android:paddingBottom="5dp"
                         android:visibility="gone">
                         <TextView android:layout_width="22dp" android:layout_height="wrap_content"
-                            android:text="8" android:textColor="#888888" android:textSize="11sp"/>
+                            android:text="8" android:textColor="@color/text_muted" android:textSize="11sp"/>
                         <EditText android:id="@+id/etGrpName8"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="ID_RFID"
-                            android:textColor="#888888" android:textSize="13sp"
-                            android:hint="název skupiny" android:textColorHint="#555555"
+                            android:textColor="@color/text_muted" android:textSize="13sp"
+                            android:hint="název skupiny" android:textColorHint="@color/text_muted"
                             android:inputType="text" android:background="@null"
                             android:singleLine="true" android:maxLength="20"/>
                         <EditText android:id="@+id/etGroup8" android:layout_width="76dp"
                             android:layout_height="wrap_content" android:text=""
-                            android:textColor="#E0E0E0" android:textSize="16sp"
+                            android:textColor="@color/text" android:textSize="16sp"
                             android:fontFamily="monospace" android:inputType="number"
                             android:background="@null" android:maxLength="4"
                             android:textAlignment="center"/>
                         <CheckBox android:id="@+id/cbGroup8" android:layout_width="52dp"
                             android:layout_height="wrap_content" android:text="+1"
-                            android:textColor="#888888" android:textSize="11sp"
-                            android:checked="true" android:buttonTint="#00BCD4"/>
+                            android:textColor="@color/text_muted" android:textSize="11sp"
+                            android:checked="true" android:buttonTint="@color/primary"/>
                     </LinearLayout>
 
                 </LinearLayout>
@@ -1517,9 +1517,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    app:cardBackgroundColor="#161b22"
+                    app:cardBackgroundColor="@color/epc_bg"
                     app:cardCornerRadius="10dp"
-                    app:strokeColor="#00BCD4"
+                    app:strokeColor="@color/divider"
                     app:strokeWidth="2dp"
                     app:cardElevation="0dp">
                     <LinearLayout android:layout_width="match_parent"
@@ -1528,26 +1528,26 @@
                         <TextView android:id="@+id/tvGrpPreviewLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" android:text="náhled EPC"
-                            android:textColor="#888888" android:textSize="10sp"
+                            android:textColor="@color/text_muted" android:textSize="10sp"
                             android:letterSpacing="0.1"/>
                         <TextView android:id="@+id/tvEpcPreview"
                             android:layout_width="match_parent" android:layout_height="wrap_content"
                             android:text="2026-0000-0000-0000-0000-0001"
-                            android:textColor="#00BCD4" android:textSize="16sp"
+                            android:textColor="@color/epc_text" android:textSize="16sp"
                             android:fontFamily="monospace" android:paddingTop="5dp"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
                 <!-- Interactive PARAMETRY (Bank / Prt / Len) -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="PARAMETRY" android:textColor="#888888" android:textSize="11sp"
+                        android:text="PARAMETRY" android:textColor="@color/text_muted" android:textSize="11sp"
                         android:letterSpacing="0.1" android:paddingBottom="10dp"/>
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                         android:text="Bank"
-                        android:textColor="#888888" android:textSize="11sp"
+                        android:textColor="@color/text_muted" android:textSize="11sp"
                         android:paddingBottom="6dp"/>
                     <LinearLayout android:layout_width="match_parent"
                         android:layout_height="wrap_content" android:orientation="horizontal"
@@ -1556,24 +1556,24 @@
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="EPC"
-                            android:textSize="12sp" android:textColor="#121212"
-                            android:backgroundTint="#00BCD4"
+                            android:textSize="12sp" android:textColor="@color/text_on_primary"
+                            android:backgroundTint="@color/primary"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
                             android:layout_marginEnd="4dp"/>
                         <Button android:id="@+id/btnGrpBankUser"
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="USER"
-                            android:textSize="12sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E"
+                            android:textSize="12sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"
                             android:layout_marginEnd="4dp"/>
                         <Button android:id="@+id/btnGrpBankReserved"
                             android:layout_width="0dp" android:layout_height="34dp"
                             android:layout_weight="1"
                             android:text="RESERVED"
-                            android:textSize="11sp" android:textColor="#E0E0E0"
-                            android:backgroundTint="#2E2E2E"
+                            android:textSize="11sp" android:textColor="@color/text"
+                            android:backgroundTint="@color/step_pending"
                             android:padding="0dp" android:insetTop="0dp" android:insetBottom="0dp"/>
                     </LinearLayout>
                     <LinearLayout android:layout_width="match_parent"
@@ -1582,10 +1582,10 @@
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" android:text="Prt"
-                                android:textColor="#888888" android:textSize="11sp"/>
+                                android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <EditText android:id="@+id/etGroupPrt"
                                 android:layout_width="56dp" android:layout_height="wrap_content"
-                                android:text="2" android:textColor="#E0E0E0"
+                                android:text="2" android:textColor="@color/text"
                                 android:textSize="18sp" android:fontFamily="monospace"
                                 android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
@@ -1595,10 +1595,10 @@
                             android:paddingStart="8dp">
                             <TextView android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" android:text="Len"
-                                android:textColor="#888888" android:textSize="11sp"/>
+                                android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <EditText android:id="@+id/etGroupLen"
                                 android:layout_width="56dp" android:layout_height="wrap_content"
-                                android:text="6" android:textColor="#E0E0E0"
+                                android:text="6" android:textColor="@color/text"
                                 android:textSize="18sp" android:fontFamily="monospace"
                                 android:inputType="number" android:background="@null"
                                 android:paddingTop="4dp"/>
@@ -1610,15 +1610,15 @@
 
                 <!-- Access Pwd (Krok 1) -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="12dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="ACCESS PWD" android:textColor="#888888" android:textSize="11sp"
+                        android:text="ACCESS PWD" android:textColor="@color/text_muted" android:textSize="11sp"
                         android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupAccessPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:hint="00000000" android:textColorHint="#555555"
-                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:hint="00000000" android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1627,12 +1627,12 @@
                 <Button android:id="@+id/btnGroupWrite"
                     android:layout_width="match_parent" android:layout_height="56dp"
                     android:text="✏️  WRITE" android:textSize="16sp"
-                    android:textColor="#121212" android:backgroundTint="#4CAF50"
+                    android:textColor="@color/text_on_primary" android:backgroundTint="@color/accent"
                     android:layout_marginBottom="20dp"/>
 
                 <!-- ══ KROK 2: OVĚŘENÍ + CSV ════════════════════════════ -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#2E2E2E" android:layout_marginBottom="16dp"/>
+                    android:background="@color/step_pending" android:layout_marginBottom="16dp"/>
 
                 <LinearLayout
                     android:id="@+id/llStep2Header"
@@ -1644,14 +1644,14 @@
 
                     <TextView android:id="@+id/tvStep2Num"
                         android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="2" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:text="2" android:textColor="@color/white" android:textSize="14sp"
                         android:textStyle="bold" android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
+                        android:background="@drawable/step_circle_active"/>
 
                     <TextView android:id="@+id/tvStep2Label"
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:text="  OVĚŘENÍ + CSV"
-                        android:textColor="#888888" android:textSize="13sp"
+                        android:textColor="@color/text_muted" android:textSize="13sp"
                         android:textStyle="bold" android:letterSpacing="0.08"/>
 
                 </LinearLayout>
@@ -1660,19 +1660,19 @@
                 <Button android:id="@+id/btnGroupScan"
                     android:layout_width="match_parent" android:layout_height="56dp"
                     android:text="📡  NAČÍST TAG"
-                    android:textSize="16sp" android:textColor="#121212"
-                    android:backgroundTint="#2E2E2E"
+                    android:textSize="16sp" android:textColor="@color/text_on_primary"
+                    android:backgroundTint="@color/step_pending"
                     android:layout_marginBottom="10dp"/>
 
                 <!-- Verification display (hidden until scan succeeds) -->
                 <LinearLayout android:id="@+id/llVerifyDisplay"
                     android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#161b22"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp"
                     android:visibility="gone">
 
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="VÝSLEDEK OVĚŘENÍ" android:textColor="#888888"
+                        android:text="VÝSLEDEK OVĚŘENÍ" android:textColor="@color/text_muted"
                         android:textSize="10sp" android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
 
@@ -1680,61 +1680,61 @@
                     <LinearLayout android:id="@+id/llVerifyRow1" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl1" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="Rok (1):" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="Rok (1):" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyG1" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/text" android:textSize="12sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/llVerifyRow2" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl2" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="Nede. (2):" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="Nede. (2):" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyG2" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/text" android:textSize="12sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/llVerifyRow3" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl3" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="Nede. (3):" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="Nede. (3):" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyG3" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/text" android:textSize="12sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/llVerifyRow4" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl4" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="Nede. (4):" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="Nede. (4):" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyG4" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/text" android:textSize="12sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/llVerifyRow5" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl5" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="Prefix (5):" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="Prefix (5):" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyG5" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#E0E0E0" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/text" android:textSize="12sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:id="@+id/llVerifyRow6" android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:id="@+id/tvVerifyLbl6" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="ID_RFID (6):" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="ID_RFID (6):" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:textStyle="bold"/>
                         <TextView android:id="@+id/tvVerifyG6" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:fontFamily="monospace" android:textStyle="bold"/>
                     </LinearLayout>
 
@@ -1742,11 +1742,11 @@
                         android:orientation="horizontal" android:paddingBottom="4dp"
                         android:visibility="gone">
                         <TextView android:id="@+id/tvVerifyLbl7" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="ID_RFID (7):" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="ID_RFID (7):" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:textStyle="bold"/>
                         <TextView android:id="@+id/tvVerifyG7" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:fontFamily="monospace" android:textStyle="bold"/>
                     </LinearLayout>
 
@@ -1754,31 +1754,31 @@
                         android:orientation="horizontal" android:paddingBottom="4dp"
                         android:visibility="gone">
                         <TextView android:id="@+id/tvVerifyLbl8" android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="ID_RFID (8):" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="ID_RFID (8):" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:textStyle="bold"/>
                         <TextView android:id="@+id/tvVerifyG8" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#d2a8ff" android:textSize="12sp"
+                            android:text="—" android:textColor="@color/vyhybka_accent" android:textSize="12sp"
                             android:fontFamily="monospace" android:textStyle="bold"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="EPC:" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="EPC:" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyEpc" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#00BCD4" android:textSize="11sp"
+                            android:text="—" android:textColor="@color/primary" android:textSize="11sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal">
                         <TextView android:layout_width="90dp" android:layout_height="wrap_content"
-                            android:text="TID:" android:textColor="#888888" android:textSize="12sp"/>
+                            android:text="TID:" android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvVerifyTid" android:layout_width="0dp"
                             android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="—" android:textColor="#4CAF50" android:textSize="11sp"
+                            android:text="—" android:textColor="@color/success" android:textSize="11sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
 
@@ -1786,10 +1786,10 @@
 
                 <!-- Output file -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="SOUBOR CSV" android:textColor="#888888"
+                        android:text="SOUBOR CSV" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingTop="8dp"
@@ -1797,21 +1797,21 @@
                         <EditText android:id="@+id/etGroupFileName"
                             android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:hint="rfid_instalace_2026"
-                            android:textColorHint="#555555" android:textColor="#E0E0E0"
+                            android:textColorHint="@color/text_muted" android:textColor="@color/text"
                             android:textSize="14sp" android:fontFamily="monospace"
                             android:inputType="textNoSuggestions" android:background="@null"
                             android:singleLine="true"/>
                         <Button android:id="@+id/btnGroupSetFile"
                             android:layout_width="wrap_content" android:layout_height="40dp"
                             android:text="Nastavit" android:textSize="12sp"
-                            android:textColor="#FFFFFF" android:backgroundTint="#1f6feb"
+                            android:textColor="@color/white" android:backgroundTint="@color/primary"
                             android:layout_marginStart="8dp" android:padding="0dp"
                             android:paddingStart="12dp" android:paddingEnd="12dp"
                             android:insetTop="0dp" android:insetBottom="0dp"/>
                     </LinearLayout>
                     <TextView android:id="@+id/tvGroupFilePath"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="— soubor není nastaven —" android:textColor="#888888"
+                        android:text="— soubor není nastaven —" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:fontFamily="monospace"
                         android:paddingTop="6dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -1819,10 +1819,10 @@
                         android:gravity="center_vertical">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="Záznamy:"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvGroupRecordCount"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="0" android:textColor="#00BCD4" android:textSize="16sp"
+                            android:text="0" android:textColor="@color/primary" android:textSize="16sp"
                             android:textStyle="bold" android:fontFamily="monospace"/>
                     </LinearLayout>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -1830,17 +1830,17 @@
                         android:gravity="center_vertical">
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="Poslední EPC:"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                         <TextView android:id="@+id/tvGroupLastEpc"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="—" android:textColor="#888888" android:textSize="11sp"
+                            android:text="—" android:textColor="@color/text_muted" android:textSize="11sp"
                             android:fontFamily="monospace"/>
                     </LinearLayout>
                 </LinearLayout>
 
                 <!-- ══ KROK 3: ZAHESLOVÁNÍ + ZÁPIS HESLA ═══════════════ -->
                 <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:background="#2E2E2E" android:layout_marginBottom="16dp"
+                    android:background="@color/step_pending" android:layout_marginBottom="16dp"
                     android:layout_marginTop="6dp"/>
 
                 <!-- Step 3 header moved above ZÁPIS HESLA -->
@@ -1854,14 +1854,14 @@
 
                     <TextView android:id="@+id/tvStep3Num"
                         android:layout_width="28dp" android:layout_height="28dp"
-                        android:text="3" android:textColor="#FFFFFF" android:textSize="14sp"
+                        android:text="3" android:textColor="@color/white" android:textSize="14sp"
                         android:textStyle="bold" android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
+                        android:background="@drawable/step_circle_active"/>
 
                     <TextView android:id="@+id/tvStep3Label"
                         android:layout_width="0dp" android:layout_height="wrap_content"
                         android:layout_weight="1" android:text="  ZAHESLOVÁNÍ"
-                        android:textColor="#888888" android:textSize="13sp"
+                        android:textColor="@color/text_muted" android:textSize="13sp"
                         android:textStyle="bold" android:letterSpacing="0.08"/>
 
                 </LinearLayout>
@@ -1871,7 +1871,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="ZÁPIS HESLA"
-                    android:textColor="#00BCD4"
+                    android:textColor="@color/primary"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:letterSpacing="0.15"
@@ -1879,10 +1879,10 @@
 
                 <!-- Parametry: Bank=RESERVED, Prt=2, Len=2 -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="PARAMETRY" android:textColor="#888888"
+                        android:text="PARAMETRY" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -1890,25 +1890,25 @@
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Bank" android:textColor="#888888" android:textSize="11sp"/>
+                                android:text="Bank" android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="RESERVED" android:textColor="#00BCD4" android:textSize="15sp"
+                                android:text="RESERVED" android:textColor="@color/primary" android:textSize="15sp"
                                 android:textStyle="bold" android:fontFamily="monospace" android:paddingTop="6dp"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Prt" android:textColor="#888888" android:textSize="11sp"/>
+                                android:text="Prt" android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="2" android:textColor="#E0E0E0" android:textSize="18sp"
+                                android:text="2" android:textColor="@color/text" android:textSize="18sp"
                                 android:fontFamily="monospace" android:paddingTop="4dp"/>
                         </LinearLayout>
                         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:orientation="vertical" android:paddingStart="8dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="Len" android:textColor="#888888" android:textSize="11sp"/>
+                                android:text="Len" android:textColor="@color/text_muted" android:textSize="11sp"/>
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                                android:text="2" android:textColor="#E0E0E0" android:textSize="18sp"
+                                android:text="2" android:textColor="@color/text" android:textSize="18sp"
                                 android:fontFamily="monospace" android:paddingTop="4dp"/>
                         </LinearLayout>
                     </LinearLayout>
@@ -1916,15 +1916,15 @@
 
                 <!-- Current pwd -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="ACCESS PWD" android:textColor="#888888"
+                        android:text="ACCESS PWD" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupPwdCurrentPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:hint="00000000" android:textColorHint="#555555"
-                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:hint="00000000" android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1932,15 +1932,15 @@
 
                 <!-- New pwd -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="14dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="NEW PWD" android:textColor="#888888"
+                        android:text="NEW PWD" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupNewPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:hint="" android:textColorHint="#555555"
-                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:hint="" android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1949,20 +1949,20 @@
                 <Button android:id="@+id/btnGroupWritePwd"
                     android:layout_width="match_parent" android:layout_height="56dp"
                     android:text="✏️  WRITE" android:textSize="16sp"
-                    android:textColor="#E0E0E0" android:backgroundTint="#2E2E2E"
+                    android:textColor="@color/text" android:backgroundTint="@color/step_pending"
                     android:layout_marginBottom="20dp"/>
 
                 <!-- Lock New Pwd (password just written in ZÁPIS HESLA step) -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="10dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="NEW PWD" android:textColor="#888888"
+                        android:text="NEW PWD" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupLockPwd"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:hint="00000000" android:textColorHint="#555555"
-                        android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:hint="00000000" android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1970,14 +1970,14 @@
 
                 <!-- Lock Code -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:orientation="vertical" android:background="#1E1E1E"
+                    android:orientation="vertical" android:background="@color/card"
                     android:padding="12dp" android:layout_marginBottom="14dp">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:text="LOCK KÓD" android:textColor="#888888"
+                        android:text="LOCK KÓD" android:textColor="@color/text_muted"
                         android:textSize="11sp" android:letterSpacing="0.1"/>
                     <EditText android:id="@+id/etGroupLockCode"
                         android:layout_width="match_parent" android:layout_height="wrap_content"
-                        android:text="008020" android:textColor="#E0E0E0" android:textSize="18sp"
+                        android:text="008020" android:textColor="@color/text" android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
                         android:background="@null" android:paddingTop="8dp" android:maxLength="8"/>
@@ -1986,7 +1986,7 @@
                 <Button android:id="@+id/btnGroupLock"
                     android:layout_width="match_parent" android:layout_height="56dp"
                     android:text="🔒  LOCK" android:textSize="16sp"
-                    android:textColor="#121212" android:backgroundTint="#FF9800"
+                    android:textColor="@color/text_on_primary" android:backgroundTint="@color/lock"
                     android:layout_marginBottom="16dp"/>
 
             </LinearLayout>
@@ -2021,18 +2021,18 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:text="1"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
+                        android:background="@drawable/step_circle_active"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="  ZÁPIS HESLA"
-                        android:textColor="#00BCD4"
+                        android:textColor="@color/primary"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.08"/>
@@ -2044,7 +2044,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp">
 
@@ -2052,7 +2052,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="PARAMETRY"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
@@ -2072,14 +2072,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Bank"
-                                android:textColor="#888888"
+                                android:textColor="@color/text_muted"
                                 android:textSize="11sp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="RESERVED"
-                                android:textColor="#00BCD4"
+                                android:textColor="@color/primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:fontFamily="monospace"
@@ -2098,14 +2098,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Prt"
-                                android:textColor="#888888"
+                                android:textColor="@color/text_muted"
                                 android:textSize="11sp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="2"
-                                android:textColor="#E0E0E0"
+                                android:textColor="@color/text"
                                 android:textSize="18sp"
                                 android:fontFamily="monospace"
                                 android:paddingTop="4dp"/>
@@ -2123,14 +2123,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Len"
-                                android:textColor="#888888"
+                                android:textColor="@color/text_muted"
                                 android:textSize="11sp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="2"
-                                android:textColor="#E0E0E0"
+                                android:textColor="@color/text"
                                 android:textSize="18sp"
                                 android:fontFamily="monospace"
                                 android:paddingTop="4dp"/>
@@ -2146,7 +2146,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp">
 
@@ -2154,7 +2154,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ACCESS PWD"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"/>
 
@@ -2163,8 +2163,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="00000000"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
+                        android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text"
                         android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
@@ -2179,7 +2179,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="14dp">
 
@@ -2187,7 +2187,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="NEW PWD"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"/>
 
@@ -2196,8 +2196,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint=""
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
+                        android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text"
                         android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
@@ -2214,15 +2214,15 @@
                     android:layout_height="56dp"
                     android:text="✏️  WRITE"
                     android:textSize="16sp"
-                    android:textColor="#121212"
-                    android:backgroundTint="#4CAF50"
+                    android:textColor="@color/text_on_primary"
+                    android:backgroundTint="@color/accent"
                     android:layout_marginBottom="20dp"/>
 
                 <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#2E2E2E"
+                    android:background="@color/step_pending"
                     android:layout_marginBottom="16dp"
                     android:layout_marginTop="4dp"/>
 
@@ -2238,18 +2238,18 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:text="2"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
-                        android:background="@drawable/chip_bar_bg"/>
+                        android:background="@drawable/step_circle_active"/>
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="  ZAMČENÍ"
-                        android:textColor="#FF9800"
+                        android:textColor="@color/accent"
                         android:textSize="13sp"
                         android:textStyle="bold"
                         android:letterSpacing="0.08"/>
@@ -2261,7 +2261,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="10dp">
 
@@ -2269,7 +2269,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="NEW PWD"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"/>
 
@@ -2278,8 +2278,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="00000000"
-                        android:textColorHint="#555555"
-                        android:textColor="#E0E0E0"
+                        android:textColorHint="@color/text_muted"
+                        android:textColor="@color/text"
                         android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
@@ -2294,7 +2294,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="12dp"
                     android:layout_marginBottom="14dp">
 
@@ -2302,7 +2302,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="LOCK KÓD"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="11sp"
                         android:letterSpacing="0.1"/>
 
@@ -2311,7 +2311,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="008020"
-                        android:textColor="#E0E0E0"
+                        android:textColor="@color/text"
                         android:textSize="18sp"
                         android:fontFamily="monospace"
                         android:inputType="textNoSuggestions|textCapCharacters"
@@ -2328,8 +2328,8 @@
                     android:layout_height="56dp"
                     android:text="🔒  LOCK"
                     android:textSize="16sp"
-                    android:textColor="#121212"
-                    android:backgroundTint="#FF9800"
+                    android:textColor="@color/text_on_primary"
+                    android:backgroundTint="@color/lock"
                     android:layout_marginBottom="16dp"/>
 
                 <!-- ── Přehled lock kódů ─────────────────────────────────── -->
@@ -2340,8 +2340,8 @@
                     android:text="▶  PŘEHLED LOCK KÓDŮ"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textColor="#888888"
-                    android:backgroundTint="#1E1E1E"
+                    android:textColor="@color/text_muted"
+                    android:backgroundTint="@color/card"
                     android:gravity="start|center_vertical"
                     android:paddingStart="12dp"
                     android:insetTop="0dp"
@@ -2353,7 +2353,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="#1E1E1E"
+                    android:background="@color/card"
                     android:padding="14dp"
                     android:layout_marginBottom="16dp"
                     android:visibility="gone">
@@ -2362,7 +2362,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="PŘEHLED LOCK KÓDŮ"
-                        android:textColor="#888888"
+                        android:textColor="@color/text_muted"
                         android:textSize="10sp"
                         android:letterSpacing="0.1"
                         android:paddingBottom="10dp"/>
@@ -2371,91 +2371,91 @@
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="6dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="KÓD" android:textColor="#00BCD4" android:textSize="11sp"
+                            android:text="KÓD" android:textColor="@color/primary" android:textSize="11sp"
                             android:textStyle="bold" android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1" android:text="POPIS"
-                            android:textColor="#00BCD4" android:textSize="11sp" android:textStyle="bold"/>
+                            android:textColor="@color/primary" android:textSize="11sp" android:textStyle="bold"/>
                     </LinearLayout>
                     <View android:layout_width="match_parent" android:layout_height="1dp"
-                        android:background="#2E2E2E" android:layout_marginBottom="6dp"/>
+                        android:background="@color/step_pending" android:layout_marginBottom="6dp"/>
 
                     <!-- Code rows -->
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="000000" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="000000" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Bez zámku — výchozí stav"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="008020" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="008020" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="EPC zamčena (přístupovým heslem) ← doporučeno"
-                            android:textColor="#4CAF50" android:textSize="12sp"/>
+                            android:textColor="@color/success" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="00C030" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="00C030" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="EPC trvale zamčena — nelze odemknout (permalock)"
-                            android:textColor="#e3b341" android:textSize="12sp"/>
+                            android:textColor="@color/accent_stroke" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="002008" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="002008" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="User paměť zamčena (přístupovým heslem)"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="200000" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="200000" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Access heslo zamčeno (zápis vyžaduje heslo)"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="8dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="800000" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="800000" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Kill heslo zamčeno"
-                            android:textColor="#888888" android:textSize="12sp"/>
+                            android:textColor="@color/text_muted" android:textSize="12sp"/>
                     </LinearLayout>
 
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                         android:orientation="horizontal" android:paddingBottom="4dp">
                         <TextView android:layout_width="80dp" android:layout_height="wrap_content"
-                            android:text="A08020" android:textColor="#E0E0E0" android:textSize="13sp"
+                            android:text="A08020" android:textColor="@color/text" android:textSize="13sp"
                             android:fontFamily="monospace"/>
                         <TextView android:layout_width="0dp" android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Vše zamčeno (EPC + Access heslo + Kill heslo)"
-                            android:textColor="#f85149" android:textSize="12sp"/>
+                            android:textColor="@color/error_runtime" android:textSize="12sp"/>
                     </LinearLayout>
 
                 </LinearLayout>

@@ -1,11 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00BCD4</color>
-    <color name="colorBackground">#121212</color>
-    <color name="colorSurface">#1E1E1E</color>
-    <color name="colorSuccess">#4CAF50</color>
-    <color name="colorWarning">#FF9800</color>
-    <color name="colorError">#F44336</color>
-    <color name="colorText">#E0E0E0</color>
-    <color name="colorMuted">#888888</color>
+    <!-- Brand -->
+    <color name="primary">#006494</color>
+    <color name="primary_dark">#004B71</color>
+    <color name="primary_container">#C8E6FF</color>
+    <color name="accent">#E65100</color>
+    <color name="accent_container">#FFDBCC</color>
+    <color name="vyhybka_accent">#1565C0</color>
+    <color name="vyhybka_accent_container">#BBDEFB</color>
+
+    <!-- Surfaces -->
+    <color name="bg">#F4F6F8</color>
+    <color name="card">#FFFFFF</color>
+    <color name="summary_bg">#E8F4FD</color>
+    <color name="epc_bg">#0D2A4A</color>
+    <color name="table_header">#E8EEF6</color>
+    <color name="table_row_alt">#F5F8FC</color>
+    <color name="ic_launcher_background">#E8E8E8</color>
+
+    <!-- Text -->
+    <color name="text">#1B1B1F</color>
+    <color name="text_muted">#5C6670</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="epc_text">#7FE0FF</color>
+
+    <!-- Semantic -->
+    <color name="ok">#1B5E20</color>
+    <color name="success">#2E7D32</color>
+    <color name="success_glow">#662E7D32</color>
+    <color name="err">#B71C1C</color>
+    <color name="error_runtime">#C62828</color>
+    <color name="neutral">#5F6A76</color>
+    <color name="lock">#4A148C</color>
+
+    <!-- Borders & dividers -->
+    <color name="border">#E2E6EB</color>
+    <color name="divider">#90CAF9</color>
+    <color name="divider_mid">#D0D5DC</color>
+    <color name="divider_dark">#B0BEC5</color>
+    <color name="accent_stroke">#FFB74D</color>
+
+    <!-- Overlay -->
+    <color name="scrim">#B3000000</color>
+
+    <!-- Workflow steps -->
+    <color name="step_pending">#E2E6EB</color>
+    <color name="step_active">#006494</color>
+    <color name="step_done">#2E7D32</color>
+
+    <!-- Snackbar (light theme) -->
+    <color name="snackbar_success_bg">#E8F5E9</color>
+    <color name="snackbar_error_bg">#FFEBEE</color>
+    <color name="snackbar_info_bg">#C8E6FF</color>
+
+    <!-- Highlights -->
+    <color name="dup_row_bg">#FFDBCC</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Theme aliases -->
+    <color name="colorPrimary">@color/primary</color>
+    <color name="colorPrimaryDark">@color/primary_dark</color>
+    <color name="colorPrimaryContainer">@color/primary_container</color>
+    <color name="colorSecondary">@color/accent</color>
+    <color name="colorSecondaryContainer">@color/accent_container</color>
+    <color name="colorBackground">@color/bg</color>
+    <color name="colorSurface">@color/card</color>
+    <color name="colorSuccess">@color/success</color>
+    <color name="colorWarning">@color/accent</color>
+    <color name="colorError">@color/err</color>
+    <color name="colorText">@color/text</color>
+    <color name="colorMuted">@color/text_muted</color>
 </resources>
