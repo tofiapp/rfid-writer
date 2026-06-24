@@ -69,10 +69,13 @@
   }
 
   .app-title {
-    color: var(--color-primary-dark);
-    font-size: 22px;
-    font-weight: bold;
     padding-bottom: 2px;
+  }
+
+  .app-title img {
+    height: 32px;
+    width: auto;
+    display: block;
   }
 
   .app-status {
@@ -223,7 +226,7 @@
 
     <div class="app-content">
 
-      <div class="app-title">RFID Writer</div>
+      <div class="app-title"><img src="app/src/main/res/drawable/ic_app_logo.png" alt="RFID Writer"></div>
       <div class="app-status" id="statusText" style="color:#E65100">● Inicializace...</div>
 
       <!-- Scan button -->

@@ -18,14 +18,15 @@
         android:paddingBottom="10dp"
         android:gravity="center_vertical">
 
-        <TextView
+        <ImageView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="RFID Writer"
-            android:textColor="@color/primary_dark"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:src="@drawable/ic_app_logo"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:contentDescription="@string/app_name"
+            android:maxHeight="32dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnToggleSettings"
