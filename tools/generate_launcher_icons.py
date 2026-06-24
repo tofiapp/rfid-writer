@@ -122,6 +122,24 @@ def write_preview_png(rsvg: str, svg_path: Path, background: str) -> None:
     )
 
 
+def write_preview_header_logo(rsvg: str, svg_path: Path) -> None:
+    view_box = read_view_box(svg_path)
+    if view_box is None:
+        width = 128
+    else:
+        _, _, vb_width, vb_height = view_box
+        width = max(1, round(32 * (vb_width / vb_height)))
+
+    render_svg(
+        rsvg,
+        svg_path,
+        ROOT / "preview-logo.png",
+        width=width,
+        height=32,
+        background="none",
+    )
+
+
 def read_view_box(svg_path: Path) -> tuple[float, float, float, float] | None:
     try:
         root = ET.parse(svg_path).getroot()
@@ -151,8 +169,11 @@ def main() -> None:
     write_mipmaps(rsvg, SOURCE, background)
     write_header_logo(rsvg, SOURCE, background)
     write_preview_png(rsvg, SOURCE, background)
+    write_preview_header_logo(rsvg, SOURCE)
 
-    print(f"Generated launcher icons, header logo, and preview PNG from {SOURCE}")
+    print(
+        f"Generated launcher icons, header logo, preview PNG, and preview-logo.png from {SOURCE}"
+    )
 
 
 if __name__ == "__main__":

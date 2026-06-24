@@ -60,28 +60,55 @@
     justify-content: space-between;
   }
 
+  .app-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-card);
+    padding: 10px 8px 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .app-header-logo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .app-header-logo img,
+  .app-header-logo object {
+    display: block;
+    height: 32px;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .app-header-settings {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 22px;
+    line-height: 1;
+    cursor: default;
+    padding: 0;
+    flex: 0 0 auto;
+  }
+
+  .app-status {
+    font-size: 12px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
   .app-content {
     padding: 16px;
     display: flex;
     flex-direction: column;
     gap: 0;
     min-height: 720px;
-  }
-
-  .app-title {
-    padding-bottom: 2px;
-  }
-
-  .app-title img {
-    height: 32px;
-    width: auto;
-    display: block;
-  }
-
-  .app-status {
-    font-size: 13px;
-    padding-bottom: 16px;
-    padding-top: 2px;
   }
 
   .btn {
@@ -224,10 +251,18 @@
       <span>▲ ● ■  100%</span>
     </div>
 
-    <div class="app-content">
-
-      <div class="app-title"><img src="app-logo.svg" alt="RFID Writer"></div>
+    <div class="app-header">
+      <div class="app-header-logo">
+        <picture>
+          <source srcset="app-logo.svg" type="image/svg+xml">
+          <img src="preview-logo.png" alt="RFID Writer">
+        </picture>
+      </div>
+      <button class="app-header-settings" type="button" aria-label="Nastavení">⚙</button>
       <div class="app-status" id="statusText" style="color:#E65100">● Inicializace...</div>
+    </div>
+
+    <div class="app-content">
 
       <!-- Scan button -->
       <button class="btn btn-scan" id="btnScan" onclick="toggleScan()">📡&nbsp; SKENOVAT TAG</button>
