@@ -23,6 +23,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -447,8 +448,8 @@ public class MainActivity extends AppCompatActivity {
         if (index == 3) updateGroupEpcPreview();
     }
 
-    private int c(int resId) {
-        return getColor(resId, getTheme());
+    private int colorRes(int resId) {
+        return ContextCompat.getColor(this, resId);
     }
 
     private void applyStepCircle(TextView tv, int state) {
@@ -456,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
                 : state == 1 ? R.drawable.step_circle_active
                 : R.drawable.step_circle_pending;
         tv.setBackgroundResource(bg);
-        tv.setTextColor(state == 0 ? c(R.color.text_muted) : Color.WHITE);
+        tv.setTextColor(state == 0 ? colorRes(R.color.text_muted) : Color.WHITE);
     }
 
     private void bindButtons() {
@@ -464,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
         btnToggleSettings.setOnClickListener(v -> {
             boolean visible = llSettings.getVisibility() == View.VISIBLE;
             llSettings.setVisibility(visible ? View.GONE : View.VISIBLE);
-            int tint = visible ? c(R.color.text_muted) : c(R.color.primary);
+            int tint = visible ? colorRes(R.color.text_muted) : colorRes(R.color.primary);
             ((com.google.android.material.button.MaterialButton) btnToggleSettings)
                     .setIconTint(android.content.res.ColorStateList.valueOf(tint));
         });
@@ -630,16 +631,16 @@ public class MainActivity extends AppCompatActivity {
                 boolean ok = mReader.init(MainActivity.this);
                 mHandler.post(() -> {
                     if (ok) {
-                        setStatus("● Připojeno — Chainway C5", c(R.color.success));
+                        setStatus("● Připojeno — Chainway C5", colorRes(R.color.success));
                         btnScan.setEnabled(true);
                         applyOutputPower(sbOutputPower.getProgress());
                     } else {
-                        setStatus("● Chyba inicializace", c(R.color.err));
+                        setStatus("● Chyba inicializace", colorRes(R.color.err));
                         Log.e(TAG, "init() false");
                     }
                 });
             } catch (Exception e) {
-                mHandler.post(() -> setStatus("● SDK chyba: " + e.getMessage(), c(R.color.err)));
+                mHandler.post(() -> setStatus("● SDK chyba: " + e.getMessage(), colorRes(R.color.err)));
             }
         }).start();
     }
@@ -782,8 +783,8 @@ public class MainActivity extends AppCompatActivity {
         mInventorying = true;
         btnScan.setText("⏹  ZASTAVIT");
         btnScan.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(c(R.color.err)));
-        setStatus("● Skenování...", c(R.color.primary));
+                android.content.res.ColorStateList.valueOf(colorRes(R.color.err)));
+        setStatus("● Skenování...", colorRes(R.color.primary));
         startInventory();
     }
 
@@ -793,8 +794,8 @@ public class MainActivity extends AppCompatActivity {
         mInventorying = true;
         btnGroupScan.setText("⏹  ZASTAVIT");
         btnGroupScan.setBackgroundTintList(
-                android.content.res.ColorStateList.valueOf(c(R.color.err)));
-        setStatus("● Ověřuji tag...", c(R.color.primary));
+                android.content.res.ColorStateList.valueOf(colorRes(R.color.err)));
+        setStatus("● Ověřuji tag...", colorRes(R.color.primary));
         startInventory();
     }
 
@@ -822,13 +823,13 @@ public class MainActivity extends AppCompatActivity {
         if (mScanContext == SCAN_CTX_GROUP) {
             btnGroupScan.setText("📡  NAČÍST TAG");
             btnGroupScan.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(c(R.color.step_pending)));
+                    android.content.res.ColorStateList.valueOf(colorRes(R.color.step_pending)));
         } else {
             btnScan.setText("📡  SKENOVAT TAG");
             btnScan.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(c(R.color.primary)));
+                    android.content.res.ColorStateList.valueOf(colorRes(R.color.primary)));
         }
-        setStatus("● Připojeno — Chainway C5", c(R.color.success));
+        setStatus("● Připojeno — Chainway C5", colorRes(R.color.success));
     }
 
     // ── Tag found — Tab 0 context ─────────────────────────────────────────
@@ -938,12 +939,12 @@ public class MainActivity extends AppCompatActivity {
         mGroupStep = step;
         if (step == STEP_LOCK) mGroupLockSubStep = 0;
 
-        int primary = c(R.color.primary);
-        int success = c(R.color.success);
-        int accent  = c(R.color.accent);
-        int lock    = c(R.color.lock);
-        int muted   = c(R.color.text_muted);
-        int pending = c(R.color.step_pending);
+        int primary = colorRes(R.color.primary);
+        int success = colorRes(R.color.success);
+        int accent  = colorRes(R.color.accent);
+        int lock    = colorRes(R.color.lock);
+        int muted   = colorRes(R.color.text_muted);
+        int pending = colorRes(R.color.step_pending);
 
         applyStepCircle(tvStep1Num, step > STEP_WRITE ? 2 : (step == STEP_WRITE ? 1 : 0));
         applyStepCircle(tvStep2Num, step > STEP_SCAN ? 2 : (step == STEP_SCAN ? 1 : 0));
@@ -964,7 +965,7 @@ public class MainActivity extends AppCompatActivity {
         btnGroupWritePwd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 step == STEP_LOCK ? success : pending));
         btnGroupWritePwd.setTextColor(step == STEP_LOCK
-                ? c(R.color.text_on_primary) : c(R.color.text_muted));
+                ? colorRes(R.color.text_on_primary) : colorRes(R.color.text_muted));
         btnGroupLock.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 step == STEP_LOCK ? lock : pending));
 
@@ -1025,23 +1026,23 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectWriteBank(int bank) {
         mWriteBank = bank;
-        int active   = android.graphics.c(R.color.primary);
-        int inactive = android.graphics.c(R.color.step_pending);
+        int active   = colorRes(R.color.primary);
+        int inactive = colorRes(R.color.step_pending);
         btnBankEpc.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 1 ? active : inactive));
         btnBankEpc.setTextColor(bank == 1
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
         btnBankUser.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 3 ? active : inactive));
         btnBankUser.setTextColor(bank == 3
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
         btnBankReserved.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 0 ? active : inactive));
         btnBankReserved.setTextColor(bank == 0
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
         updateWrtEpcPreview();
         updateWrtTemplateBtnText();
         updateWrtTemplateRows();
@@ -1195,7 +1196,7 @@ public class MainActivity extends AppCompatActivity {
 
         String accessPwd = readPassword(etWriteAccessPwd);
         String bankName = mWriteBank == 1 ? "EPC" : mWriteBank == 3 ? "USER" : "RESERVED";
-        setStatus("● Zapisuji " + bankName + "...", c(R.color.accent));
+        setStatus("● Zapisuji " + bankName + "...", colorRes(R.color.accent));
         btnWrite.setEnabled(false);
 
         final int fp = prt, fl = len, fb = mWriteBank;
@@ -1206,11 +1207,11 @@ public class MainActivity extends AppCompatActivity {
                 btnWrite.setEnabled(true);
                 if (ok) {
                     if (fb == 1) tvScanEpc.setText(fe);
-                    setStatus("● " + bankName + " zapsáno OK", c(R.color.success));
+                    setStatus("● " + bankName + " zapsáno OK", colorRes(R.color.success));
                     toast(bankName + " zapsáno!");
                     if (fb == 1) autoIncrementWrtGroups();
                 } else {
-                    setStatus("● Zápis " + bankName + " selhal", c(R.color.error_runtime));
+                    setStatus("● Zápis " + bankName + " selhal", colorRes(R.color.error_runtime));
                     toast("Zápis selhal");
                 }
             });
@@ -1323,7 +1324,7 @@ public class MainActivity extends AppCompatActivity {
                 String label = getGroupRowLabel(i);
                 boolean isIdRow = isGroupPresetMode() ? (i == 6) : (i == 5);
                 tvVerifyLbl[i].setText(label.isEmpty() ? ("(" + (i + 1) + "):") : (label + " (" + (i + 1) + "):"));
-                int color = isIdRow ? c(R.color.vyhybka_accent) : c(R.color.text_muted);
+                int color = isIdRow ? colorRes(R.color.vyhybka_accent) : colorRes(R.color.text_muted);
                 tvVerifyLbl[i].setTextColor(color);
                 if (tvVerifyG[i] != null) {
                     tvVerifyG[i].setTextColor(color);
@@ -1355,10 +1356,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyGroupPresetUi(boolean resetValues) {
-        int active = c(R.color.primary);
-        int inactive = c(R.color.step_pending);
-        int activeFg = c(R.color.text_on_primary);
-        int inactiveFg = c(R.color.text);
+        int active = colorRes(R.color.primary);
+        int inactive = colorRes(R.color.step_pending);
+        int activeFg = colorRes(R.color.text_on_primary);
+        int inactiveFg = colorRes(R.color.text);
 
         btnGrpPresetStd.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
                 mGroupPresetMode == GRP_PRESET_STANDARD ? active : inactive));
@@ -1463,23 +1464,23 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectGroupWriteBank(int bank) {
         mGroupWriteBank = bank;
-        int active   = android.graphics.c(R.color.primary);
-        int inactive = android.graphics.c(R.color.step_pending);
+        int active   = colorRes(R.color.primary);
+        int inactive = colorRes(R.color.step_pending);
         btnGrpBankEpc.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 1 ? active : inactive));
         btnGrpBankEpc.setTextColor(bank == 1
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
         btnGrpBankUser.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 3 ? active : inactive));
         btnGrpBankUser.setTextColor(bank == 3
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
         btnGrpBankReserved.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(bank == 0 ? active : inactive));
         btnGrpBankReserved.setTextColor(bank == 0
-                ? android.graphics.c(R.color.text_on_primary)
-                : android.graphics.c(R.color.text));
+                ? colorRes(R.color.text_on_primary)
+                : colorRes(R.color.text));
 
         // Update Prt/Len defaults for bank
         if (bank == 1) {
@@ -1608,7 +1609,7 @@ public class MainActivity extends AppCompatActivity {
         mGroupEpcWritten = templateEpc;
 
         String bankName = mGroupWriteBank == 1 ? "EPC" : mGroupWriteBank == 3 ? "USER" : "RESERVED";
-        setStatus("● Skupinový zápis " + bankName + "...", c(R.color.accent));
+        setStatus("● Skupinový zápis " + bankName + "...", colorRes(R.color.accent));
         btnGroupWrite.setEnabled(false);
 
         final int fp = prt, fl = len, fb = mGroupWriteBank;
@@ -1618,7 +1619,7 @@ public class MainActivity extends AppCompatActivity {
             mHandler.post(() -> {
                 btnGroupWrite.setEnabled(true);
                 if (ok) {
-                    setStatus("● " + bankName + " zapsáno — naskenujte tag", c(R.color.success));
+                    setStatus("● " + bankName + " zapsáno — naskenujte tag", colorRes(R.color.success));
                     toast("✅ " + bankName + " zapsáno — stiskněte NAČÍST TAG");
                     if (fb == 1) setGroupStep(STEP_SCAN);
                     else {
@@ -1627,7 +1628,7 @@ public class MainActivity extends AppCompatActivity {
                         setGroupStep(STEP_WRITE);
                     }
                 } else {
-                    setStatus("● Skupinový zápis " + bankName + " selhal", c(R.color.error_runtime));
+                    setStatus("● Skupinový zápis " + bankName + " selhal", colorRes(R.color.error_runtime));
                     toast("Zápis selhal");
                 }
             });
@@ -1643,19 +1644,19 @@ public class MainActivity extends AppCompatActivity {
         if (np.isEmpty() || np.length() != 8 || !np.matches("[0-9A-F]+")) {
             toast("Platné heslo: přesně 8 hex znaků"); return;
         }
-        setStatus("● Zapisuji heslo...", c(R.color.accent));
+        setStatus("● Zapisuji heslo...", colorRes(R.color.accent));
         btnGroupWritePwd.setEnabled(false);
         new Thread(() -> {
             boolean ok = mReader.writeData(cur, 0, 2, 2, np);
             mHandler.post(() -> {
                 btnGroupWritePwd.setEnabled(true);
                 if (ok) {
-                    setStatus("● Heslo zapsáno", c(R.color.success));
+                    setStatus("● Heslo zapsáno", colorRes(R.color.success));
                     etGroupLockPwd.setText(np);
                     mGroupLockSubStep = 1; // advance to LOCK sub-step
                     toast("Heslo zapsáno!");
                 } else {
-                    setStatus("● Zápis hesla selhal", c(R.color.error_runtime));
+                    setStatus("● Zápis hesla selhal", colorRes(R.color.error_runtime));
                     toast("Zápis hesla selhal");
                 }
             });
@@ -1674,7 +1675,7 @@ public class MainActivity extends AppCompatActivity {
         String lockCode  = etGroupLockCode.getText().toString().trim().toUpperCase();
         if (lockCode.isEmpty()) lockCode = "008020";
 
-        setStatus("● Zaheslovávám tag...", c(R.color.accent));
+        setStatus("● Zaheslovávám tag...", colorRes(R.color.accent));
         btnGroupLock.setEnabled(false);
 
         final String fc = lockCode;
@@ -1683,7 +1684,7 @@ public class MainActivity extends AppCompatActivity {
             mHandler.post(() -> {
                 btnGroupLock.setEnabled(true);
                 if (ok) {
-                    setStatus("● Tag zaheslován ✓", c(R.color.success));
+                    setStatus("● Tag zaheslován ✓", colorRes(R.color.success));
                     mGroupLockSubStep = 0; // reset sub-step for next tag
                     toast("✅ Tag zaheslován — připraven další");
                     // Reset for next tag
@@ -1691,7 +1692,7 @@ public class MainActivity extends AppCompatActivity {
                     autoIncrementGroups();
                     setGroupStep(STEP_WRITE);
                 } else {
-                    setStatus("● Lock selhal", c(R.color.error_runtime));
+                    setStatus("● Lock selhal", colorRes(R.color.error_runtime));
                     toast("Lock selhal");
                 }
             });
@@ -1873,7 +1874,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setRecordMode(boolean record) {
         mRecordMode = record;
-        int active = c(R.color.primary), inactive = c(R.color.step_pending);
+        int active = colorRes(R.color.primary), inactive = colorRes(R.color.step_pending);
         btnModeRecord.setBackgroundTintList(android.content.res.ColorStateList.valueOf(record ? active : inactive));
         btnModeRead.setBackgroundTintList(android.content.res.ColorStateList.valueOf(record ? inactive : active));
         int rv = record ? View.VISIBLE : View.GONE;
@@ -1928,14 +1929,14 @@ public class MainActivity extends AppCompatActivity {
             ((TextView) row.findViewById(R.id.tvItemDup)).setText(r.dup ? "⚠ DUP" : "");
             TextView tvE = row.findViewById(R.id.tvItemEpc);
             tvE.setText(r.epc.isEmpty() ? "—" : r.epc);
-            tvE.setTextColor(r.epc.isEmpty() ? c(R.color.accent_stroke) : c(R.color.primary));
+            tvE.setTextColor(r.epc.isEmpty() ? colorRes(R.color.accent_stroke) : colorRes(R.color.primary));
             TextView tvT = row.findViewById(R.id.tvItemTid);
             tvT.setText(r.tid.isEmpty() ? "—" : r.tid);
-            tvT.setTextColor(r.tid.isEmpty() ? c(R.color.accent_stroke) : c(R.color.success));
-            row.setBackgroundColor(r.dup ? c(R.color.dup_row_bg) : c(R.color.card));
+            tvT.setTextColor(r.tid.isEmpty() ? colorRes(R.color.accent_stroke) : colorRes(R.color.success));
+            row.setBackgroundColor(r.dup ? colorRes(R.color.dup_row_bg) : colorRes(R.color.card));
             View div = new View(this);
             div.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
-            div.setBackgroundColor(c(R.color.border));
+            div.setBackgroundColor(colorRes(R.color.border));
             final int oi = i;
             row.findViewById(R.id.btnItemDel).setOnClickListener(v -> deleteRecord(oi));
             llRecords.addView(row); llRecords.addView(div);
@@ -2018,18 +2019,18 @@ public class MainActivity extends AppCompatActivity {
         if (np.isEmpty() || np.length() != 8 || !np.matches("[0-9A-F]+")) {
             toast("Platné heslo: přesně 8 hex znaků"); return;
         }
-        setStatus("● Zapisuji heslo...", c(R.color.accent)); btnWritePwd.setEnabled(false);
+        setStatus("● Zapisuji heslo...", colorRes(R.color.accent)); btnWritePwd.setEnabled(false);
         new Thread(() -> {
             boolean ok = mReader.writeData(cur, 0, 2, 2, np);
             mHandler.post(() -> {
                 btnWritePwd.setEnabled(true);
                 if (ok) {
-                    setStatus("● Heslo zapsáno", c(R.color.success));
+                    setStatus("● Heslo zapsáno", colorRes(R.color.success));
                     etLockAccessPwd.setText(np);
                     mLockSubStep = 1; // advance to ZAMČENÍ sub-step
                     toast("Heslo zapsáno!");
                 } else {
-                    setStatus("● Zápis hesla selhal", c(R.color.error_runtime));
+                    setStatus("● Zápis hesla selhal", colorRes(R.color.error_runtime));
                     toast("Zápis hesla selhal");
                 }
             });
@@ -2041,18 +2042,18 @@ public class MainActivity extends AppCompatActivity {
         String ap = readPassword(etLockAccessPwd);
         String lc = etLockCode.getText().toString().trim().toUpperCase();
         if (lc.isEmpty()) lc = "008020";
-        setStatus("● Zamykám...", c(R.color.lock)); btnLock.setEnabled(false);
+        setStatus("● Zamykám...", colorRes(R.color.lock)); btnLock.setEnabled(false);
         final String fc = lc;
         new Thread(() -> {
             boolean ok = mReader.lockMem(ap, fc);
             mHandler.post(() -> {
                 btnLock.setEnabled(true);
                 if (ok) {
-                    setStatus("● Tag zamčen", c(R.color.success));
+                    setStatus("● Tag zamčen", colorRes(R.color.success));
                     mLockSubStep = 0; // reset to ZÁPIS HESLA sub-step
                     toast("Tag zamčen!");
                 } else {
-                    setStatus("● Lock selhal", c(R.color.error_runtime));
+                    setStatus("● Lock selhal", colorRes(R.color.error_runtime));
                     toast("Lock selhal");
                 }
             });
@@ -2079,15 +2080,15 @@ public class MainActivity extends AppCompatActivity {
         int bg, fg;
         if (msg.contains("✅") || msg.contains("zapsáno") || msg.contains("uložen")
                 || msg.contains("zamčen") || msg.contains("Zkopírováno") || msg.contains("CSV:")) {
-            bg = c(R.color.snackbar_success_bg);
-            fg = c(R.color.success);
+            bg = colorRes(R.color.snackbar_success_bg);
+            fg = colorRes(R.color.success);
         } else if (msg.contains("⚠") || msg.contains("selhal") || msg.contains("Chyba")
                 || msg.contains("Duplikát") || msg.contains("Neplatné") || msg.contains("Platné heslo")) {
-            bg = c(R.color.snackbar_error_bg);
-            fg = c(R.color.err);
+            bg = colorRes(R.color.snackbar_error_bg);
+            fg = colorRes(R.color.err);
         } else {
-            bg = c(R.color.snackbar_info_bg);
-            fg = c(R.color.primary);
+            bg = colorRes(R.color.snackbar_info_bg);
+            fg = colorRes(R.color.primary);
         }
         snackView.setBackgroundColor(bg);
         TextView tv = snackView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -2179,7 +2180,7 @@ public class MainActivity extends AppCompatActivity {
         llLupaGroupsContainer.removeAllViews();
         if (mLupaAttrColumnCount <= 0) return;
 
-        int purple = c(R.color.vyhybka_accent);
+        int purple = colorRes(R.color.vyhybka_accent);
         float density = getResources().getDisplayMetrics().density;
         int pad = (int) (10 * density);
         int margin = (int) (6 * density);
