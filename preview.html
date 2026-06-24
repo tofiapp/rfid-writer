@@ -5,10 +5,29 @@
 <meta name="viewport" content="width=430, initial-scale=1">
 <title>RFID Writer – Preview</title>
 <style>
+  :root {
+    --color-primary: #006494;
+    --color-primary-dark: #004B71;
+    --color-primary-container: #C8E6FF;
+    --color-accent: #E65100;
+    --color-accent-container: #FFDBCC;
+    --color-bg: #F4F6F8;
+    --color-card: #FFFFFF;
+    --color-text: #1B1B1F;
+    --color-text-muted: #5C6670;
+    --color-text-on-primary: #FFFFFF;
+    --color-success: #2E7D32;
+    --color-error: #B71C1C;
+    --color-lock: #4A148C;
+    --color-border: #E2E6EB;
+    --color-epc-text: #7FE0FF;
+    --color-epc-bg: #0D2A4A;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: #2a2a2a;
+    background: #D0D5DC;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -18,23 +37,23 @@
   }
 
   .phone-frame {
-    background: #1a1a1a;
+    background: var(--color-card);
     border-radius: 40px;
     padding: 14px;
-    box-shadow: 0 0 0 2px #444, 0 20px 60px rgba(0,0,0,.7);
+    box-shadow: 0 0 0 2px var(--color-border), 0 20px 60px rgba(0,0,0,.15);
     width: 390px;
   }
 
   .phone-screen {
-    background: #121212;
+    background: var(--color-bg);
     border-radius: 28px;
     overflow: hidden;
     position: relative;
   }
 
   .status-bar {
-    background: #000;
-    color: #ccc;
+    background: var(--color-primary-dark);
+    color: var(--color-text-on-primary);
     font-size: 11px;
     padding: 6px 16px;
     display: flex;
@@ -50,7 +69,7 @@
   }
 
   .app-title {
-    color: #E0E0E0;
+    color: var(--color-primary-dark);
     font-size: 22px;
     font-weight: bold;
     padding-bottom: 2px;
@@ -66,7 +85,7 @@
     width: 100%;
     height: 52px;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -80,20 +99,21 @@
   }
   .btn:active { opacity: .8; transform: scale(.98); }
 
-  .btn-scan  { background: #00BCD4; color: #121212; }
-  .btn-scan.scanning { background: #F44336; }
-  .btn-write { background: #4CAF50; color: #121212; }
-  .btn-write:disabled { background: #2a4a2c; color: #555; cursor: default; }
+  .btn-scan  { background: var(--color-primary); color: var(--color-text-on-primary); }
+  .btn-scan.scanning { background: var(--color-error); }
+  .btn-write { background: var(--color-accent); color: var(--color-text-on-primary); }
+  .btn-write:disabled { background: var(--color-accent-container); color: var(--color-text-muted); cursor: default; }
 
   .card {
-    background: #1E1E1E;
-    border-radius: 6px;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
     padding: 12px;
     margin-bottom: 12px;
   }
 
   .card-label {
-    color: #888;
+    color: var(--color-text-muted);
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -101,17 +121,17 @@
   }
 
   .card-value {
-    color: #00BCD4;
+    color: var(--color-primary);
     font-size: 17px;
     font-family: 'Consolas', monospace;
     word-break: break-all;
     margin-bottom: 2px;
   }
 
-  .card-value.muted { color: #888; font-size: 13px; }
+  .card-value.muted { color: var(--color-success); font-size: 13px; }
 
   .card-sublabel {
-    color: #888;
+    color: var(--color-text-muted);
     font-size: 11px;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -122,8 +142,8 @@
   .input-field {
     background: transparent;
     border: none;
-    border-bottom: 1px solid #333;
-    color: #E0E0E0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
     font-size: 14px;
     font-family: 'Consolas', monospace;
     width: 100%;
@@ -131,8 +151,8 @@
     outline: none;
     margin-top: 6px;
   }
-  .input-field::placeholder { color: #555; }
-  .input-field:focus { border-bottom-color: #00BCD4; }
+  .input-field::placeholder { color: var(--color-text-muted); }
+  .input-field:focus { border-bottom-color: var(--color-primary); }
 
   .lock-row {
     display: flex;
@@ -144,20 +164,21 @@
     flex: 1;
     height: 44px;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: opacity .15s;
+    color: var(--color-text-on-primary);
   }
   .btn-lock:disabled { opacity: .35; cursor: default; }
-  .btn-lock-epc  { background: #FF9800; color: #121212; }
-  .btn-lock-all  { background: #F44336; color: #fff; }
+  .btn-lock-epc  { background: var(--color-lock); }
+  .btn-lock-all  { background: var(--color-error); }
 
   .log-container {
     flex: 1;
-    background: #0D0D0D;
-    border-radius: 6px;
+    background: var(--color-epc-bg);
+    border-radius: 12px;
     padding: 8px;
     overflow-y: auto;
     min-height: 130px;
@@ -166,7 +187,7 @@
   }
 
   .log-line {
-    color: #00FF88;
+    color: var(--color-epc-text);
     font-size: 11px;
     font-family: 'Consolas', monospace;
     line-height: 1.6;
@@ -174,13 +195,12 @@
     word-break: break-all;
   }
 
-  /* demo badge */
   .demo-badge {
     position: fixed;
     top: 12px;
     right: 16px;
-    background: #FF9800;
-    color: #000;
+    background: var(--color-accent);
+    color: var(--color-text-on-primary);
     font-size: 11px;
     font-weight: 700;
     padding: 4px 10px;
@@ -204,7 +224,7 @@
     <div class="app-content">
 
       <div class="app-title">RFID Writer</div>
-      <div class="app-status" id="statusText" style="color:#FF9800">● Inicializace...</div>
+      <div class="app-status" id="statusText" style="color:#E65100">● Inicializace...</div>
 
       <!-- Scan button -->
       <button class="btn btn-scan" id="btnScan" onclick="toggleScan()">📡&nbsp; SKENOVAT TAG</button>
@@ -279,7 +299,7 @@
   // Simulate init
   window.onload = () => {
     setTimeout(() => {
-      setStatus('● Připojeno — Chainway C5', '#4CAF50');
+      setStatus('● Připojeno — Chainway C5', '#2E7D32');
       log('SDK inicializováno OK');
     }, 1200);
   };
@@ -297,7 +317,7 @@
     const btn = document.getElementById('btnScan');
     btn.textContent = '⏹  ZASTAVIT';
     btn.className = 'btn btn-scan scanning';
-    setStatus('● Skenování...', '#00BCD4');
+    setStatus('● Skenování...', '#006494');
     log('Zahájeno skenování...');
 
     // Simulate finding a tag after 1.5s
@@ -314,7 +334,7 @@
     const btn = document.getElementById('btnScan');
     btn.textContent = '📡\u00A0 SKENOVAT TAG';
     btn.className = 'btn btn-scan';
-    setStatus('● Připojeno — Chainway C5', '#4CAF50');
+    setStatus('● Připojeno — Chainway C5', '#2E7D32');
   }
 
   function onTagFound(epc, tid) {
@@ -333,28 +353,28 @@
     if (newEpc.length % 4 !== 0) { log('✗ EPC musí mít délku dělitelnou 4'); return; }
     if (!/^[0-9A-F]+$/.test(newEpc)) { log('✗ EPC smí obsahovat pouze hex znaky'); return; }
 
-    setStatus('● Zapisuji...', '#FF9800');
+    setStatus('● Zapisuji...', '#E65100');
     log('Zapisuji EPC: ' + newEpc);
     document.getElementById('btnWrite').disabled = true;
 
     setTimeout(() => {
       document.getElementById('tvEpc').textContent = newEpc;
       document.getElementById('btnWrite').disabled = false;
-      setStatus('● EPC zapsáno OK', '#4CAF50');
+      setStatus('● EPC zapsáno OK', '#2E7D32');
       log('✓ EPC úspěšně zapsáno: ' + newEpc);
     }, 900);
   }
 
   function doLock(all) {
     const label = all ? '(kompletní lock)' : '(jen EPC)';
-    setStatus('● Zamykám...', '#FF9800');
+    setStatus('● Zamykám...', '#4A148C');
     log('Zamykám tag ' + label + '...');
     document.getElementById('btnLockEpc').disabled = true;
     document.getElementById('btnLockAll').disabled = true;
 
     setTimeout(() => {
       enableActionButtons(true);
-      setStatus('● Tag zamčen', '#4CAF50');
+      setStatus('● Tag zamčen', '#2E7D32');
       log('✓ Tag úspěšně zamčen ' + label);
     }, 900);
   }
