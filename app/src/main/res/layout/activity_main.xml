@@ -20,13 +20,12 @@
 
         <ImageView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:src="@drawable/ic_app_logo"
             android:adjustViewBounds="true"
             android:scaleType="fitStart"
-            android:contentDescription="@string/app_name"
-            android:maxHeight="32dp"/>
+            android:contentDescription="@string/app_name"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnToggleSettings"

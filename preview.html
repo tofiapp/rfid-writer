@@ -76,10 +76,9 @@
     align-items: center;
   }
 
-  .app-header-logo img,
-  .app-header-logo object {
+  .app-header-logo img {
     display: block;
-    height: 32px;
+    height: 48px;
     width: auto;
     max-width: 100%;
   }
@@ -253,10 +252,7 @@
 
     <div class="app-header">
       <div class="app-header-logo">
-        <picture>
-          <source srcset="app-logo.svg" type="image/svg+xml">
-          <img src="preview-logo.png" alt="RFID Writer">
-        </picture>
+        <img src="app-icon-source.png" alt="RFID Writer">
       </div>
       <button class="app-header-settings" type="button" aria-label="Nastavení">⚙</button>
       <div class="app-status" id="statusText" style="color:#E65100">● Inicializace...</div>
