@@ -42,9 +42,11 @@ jobs:
         run: gradle assembleRelease --stacktrace
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk RFIDWriter.apk
+        run: |
+          VERSION=$(grep versionName app/build.gradle | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          cp "app/build/outputs/apk/release/RFIDWriter-${VERSION}.apk" "RFIDWriter-${VERSION}.apk"
 
       - uses: actions/upload-artifact@v4
         with:
           name: RFIDWriter-APK
-          path: RFIDWriter.apk
+          path: RFIDWriter-*.apk
