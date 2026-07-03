@@ -1,8 +1,5 @@
 package com.rfid.writer;
 
-import android.app.AlertDialog;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,7 +10,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -38,9 +34,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,8 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String PREFS           = "rfid_records";
 
     // scan context: which tab triggered the scan
-    private static final int SCAN_CTX_TAG   = 0;
-    private static final int SCAN_CTX_GROUP = 1;
+    private static final int SCAN_CTX_LUPA     = 0;
+    private static final int SCAN_CTX_LUPA_CSV = 1;
+    private static final int SCAN_CTX_GROUP    = 2;
 
     // workflow steps for Tab 2
     private static final int STEP_WRITE = 0;
@@ -66,22 +61,16 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Tabs ──────────────────────────────────────────────────────────────
     private TabLayout tabLayout;
-    private View      pageTag, pageWriteEpc, pageGroupWrite, pageLock;
+    private View      pageLupa, pageLupaCsv, pageWriteEpc, pageGroupWrite, pageLock;
     private android.widget.ScrollView svGroupPage;
 
-    // ── Page 0: Načítání tagů ─────────────────────────────────────────────
-    private EditText etChipNum;
-    private Button btnScan, btnModeRecord, btnModeRead, btnToggleChipNum;
-    private boolean mAutoLoadIdRfid = false;
-    private Button btnCopyRecords, btnExportCsv, btnClearAll;
-    private TextView tvScanEpc, tvScanTid;
-    private TextView tvStatPairs, tvStatOk, tvStatBad;
-    private LinearLayout llRecords;
-    private ScrollView svRecords;
-    private View llStats, llListHeader, llEmptyState, llReadResult;
-    private TextView tvReadEpc, tvReadTid;
+    // ── Page 0: Lupa (info o čipu) ──────────────────────────────────────
+    private Button btnScanLupa;
+    private LinearLayout llChipInfoContainer;
 
-    // ── Page 0: Lupa CSV vstup ────────────────────────────────────────────
+    // ── Page 1: Lupa .CSV ─────────────────────────────────────────────────
+    private Button btnScanCsv;
+    private TextView tvReadEpc, tvReadTid;
     private EditText etLupaFileName;
     private Button   btnLupaSetFile;
     private TextView tvLupaFilePath;
@@ -93,7 +82,9 @@ public class MainActivity extends AppCompatActivity {
     private String[] mLupaColumnNames = new String[0];
     private int      mLupaAttrColumnCount = 0;
 
-    // ── Page 1: Zápis EPC — template ──────────────────────────────────────
+    private TextView tvScanEpc, tvScanTid;
+
+    // ── Page 2: Zápis EPC — template ──────────────────────────────────────
     private final EditText[]  etWrtGroups    = new EditText[6];
     private final EditText[]  etWrtGroupNames = new EditText[6]; // groups 1-6, all editable
     private final CheckBox[]  cbWrtGroups    = new CheckBox[6];
@@ -174,11 +165,11 @@ public class MainActivity extends AppCompatActivity {
     private View     llSettings;
     private SeekBar  sbOutputPower;
     private TextView tvOutputPowerValue;
+    private TextView tvAppVersion;
 
     // ── State ─────────────────────────────────────────────────────────────
     private boolean mInventorying    = false;
-    private boolean mRecordMode      = false;
-    private int     mScanContext     = SCAN_CTX_TAG;
+    private int     mScanContext     = SCAN_CTX_LUPA;
     private int     mGroupStep       = STEP_WRITE;
     // Sub-steps within ZAMČENÍ tab (0=ZÁPIS HESLA, 1=ZAMČENÍ)
     private int     mLockSubStep     = 0;
@@ -188,16 +179,7 @@ public class MainActivity extends AppCompatActivity {
     private String  mGroupOutputFile = null;
     private int     mGroupRecordCount = 0;
     private String  mLastTid         = "";
-    private final List<ScanRecord> mRecords = new ArrayList<>();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-
-    // ── Data model ────────────────────────────────────────────────────────
-
-    static class ScanRecord {
-        int seq;
-        String num, epc, tid, time;
-        boolean complete, dup;
-    }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
 
@@ -208,9 +190,6 @@ public class MainActivity extends AppCompatActivity {
         bindViews();
         setupTabs();
         bindButtons();
-        loadRecords();
-        renderRecordList();
-        updateStats();
         loadSettings();
         loadGroupSettings();
         loadWrtGroupSettings();
@@ -255,11 +234,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void onTriggerDown() {
         switch (tabLayout.getSelectedTabPosition()) {
-            case 0: if (mInventorying) stopScan(); else startScan(); break;
-            case 1: writeEpc(); break;
-            case 2: // Zamčení: sub-step 0 = ZÁPIS HESLA, sub-step 1 = ZAMČENÍ
+            case 0: if (mInventorying) stopScan(); else startLupaScan(); break;
+            case 1: if (mInventorying) stopScan(); else startCsvScan(); break;
+            case 2: writeEpc(); break;
+            case 3: // Zamčení: sub-step 0 = ZÁPIS HESLA, sub-step 1 = ZAMČENÍ
                 if (mLockSubStep == 0) writePwd(); else lockTag(); break;
-            case 3: onGroupTrigger(); break;  // Skupinový
+            case 4: onGroupTrigger(); break;  // Skupinový
         }
     }
 
@@ -279,34 +259,23 @@ public class MainActivity extends AppCompatActivity {
     private void bindViews() {
         tvStatus = findViewById(R.id.tvStatus);
         tabLayout = findViewById(R.id.tabLayout);
-        pageTag = findViewById(R.id.pageTag);
+        pageLupa = findViewById(R.id.pageLupa);
+        pageLupaCsv = findViewById(R.id.pageLupaCsv);
         pageWriteEpc = findViewById(R.id.pageWriteEpc);
         pageGroupWrite = findViewById(R.id.pageGroupWrite);
         pageLock = findViewById(R.id.pageLock);
         svGroupPage = (android.widget.ScrollView) pageGroupWrite;
 
-        // Page 0
-        etChipNum = findViewById(R.id.etChipNum);
-        btnScan = findViewById(R.id.btnScan);
-        btnModeRecord = findViewById(R.id.btnModeRecord);
-        btnModeRead = findViewById(R.id.btnModeRead);
-        btnToggleChipNum = findViewById(R.id.btnToggleChipNum);
+        // Page 0 — Lupa
+        btnScanLupa = findViewById(R.id.btnScanLupa);
+        llChipInfoContainer = findViewById(R.id.llChipInfoContainer);
         tvScanEpc = findViewById(R.id.tvScanEpc);
         tvScanTid = findViewById(R.id.tvScanTid);
-        tvStatPairs = findViewById(R.id.tvStatPairs);
-        tvStatOk = findViewById(R.id.tvStatOk);
-        tvStatBad = findViewById(R.id.tvStatBad);
-        llStats = findViewById(R.id.llStats);
-        llListHeader = findViewById(R.id.llListHeader);
-        llRecords = findViewById(R.id.llRecords);
-        llEmptyState = findViewById(R.id.llEmptyState);
-        svRecords = findViewById(R.id.svRecords);
-        llReadResult = findViewById(R.id.llReadResult);
+
+        // Page 1 — Lupa .CSV
+        btnScanCsv = findViewById(R.id.btnScanCsv);
         tvReadEpc = findViewById(R.id.tvReadEpc);
         tvReadTid = findViewById(R.id.tvReadTid);
-        btnCopyRecords = findViewById(R.id.btnCopyRecords);
-        btnExportCsv = findViewById(R.id.btnExportCsv);
-        btnClearAll = findViewById(R.id.btnClearAll);
         etLupaFileName   = findViewById(R.id.etLupaFileName);
         btnLupaSetFile   = findViewById(R.id.btnLupaSetFile);
         tvLupaFilePath   = findViewById(R.id.tvLupaFilePath);
@@ -427,6 +396,10 @@ public class MainActivity extends AppCompatActivity {
         llSettings         = findViewById(R.id.llSettings);
         sbOutputPower      = findViewById(R.id.sbOutputPower);
         tvOutputPowerValue = findViewById(R.id.tvOutputPowerValue);
+        tvAppVersion = findViewById(R.id.tvAppVersion);
+        if (tvAppVersion != null) {
+            tvAppVersion.setText("Verze " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+        }
     }
 
     private void setupTabs() {
@@ -439,13 +412,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPage(int index) {
-        pageTag.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
-        pageWriteEpc.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
-        pageLock.setVisibility(index == 2 ? View.VISIBLE : View.GONE);          // tab 2 = Zamčení
-        pageGroupWrite.setVisibility(index == 3 ? View.VISIBLE : View.GONE);   // tab 3 = Skupinový
+        pageLupa.setVisibility(index == 0 ? View.VISIBLE : View.GONE);
+        pageLupaCsv.setVisibility(index == 1 ? View.VISIBLE : View.GONE);
+        pageWriteEpc.setVisibility(index == 2 ? View.VISIBLE : View.GONE);
+        pageLock.setVisibility(index == 3 ? View.VISIBLE : View.GONE);
+        pageGroupWrite.setVisibility(index == 4 ? View.VISIBLE : View.GONE);
 
-        if (index == 1) updateWrtEpcPreview();
-        if (index == 3) updateGroupEpcPreview();
+        if (index == 2) updateWrtEpcPreview();
+        if (index == 4) updateGroupEpcPreview();
     }
 
     private int colorRes(int resId) {
@@ -481,18 +455,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Page 0
-        btnScan.setOnClickListener(v -> { if (mInventorying) stopScan(); else startScan(); });
-        btnModeRecord.setOnClickListener(v -> setRecordMode(true));
-        btnModeRead.setOnClickListener(v -> setRecordMode(false));
-        btnToggleChipNum.setOnClickListener(v -> {
-            mAutoLoadIdRfid = !mAutoLoadIdRfid;
-            btnToggleChipNum.setText(mAutoLoadIdRfid ? "🔄" : "🚫");
-            toast(mAutoLoadIdRfid ? "ID_RFID: automatické načítání ZAP" : "ID_RFID: automatické načítání VYP");
-        });
-        btnCopyRecords.setOnClickListener(v -> copyRecords());
-        btnExportCsv.setOnClickListener(v -> exportCsv());
-        btnClearAll.setOnClickListener(v -> clearAll());
+        // Lupa + Lupa .CSV
+        btnScanLupa.setOnClickListener(v -> { if (mInventorying) stopScan(); else startLupaScan(); });
+        btnScanCsv.setOnClickListener(v -> { if (mInventorying) stopScan(); else startCsvScan(); });
         btnLupaSetFile.setOnClickListener(v -> setLupaInputFile());
 
         // Page 1 — template
@@ -632,7 +597,8 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.post(() -> {
                     if (ok) {
                         setStatus("● Připojeno — Chainway C5", colorRes(R.color.success));
-                        btnScan.setEnabled(true);
+                        btnScanLupa.setEnabled(true);
+                        btnScanCsv.setEnabled(true);
                         applyOutputPower(sbOutputPower.getProgress());
                     } else {
                         setStatus("● Chyba inicializace", colorRes(R.color.err));
@@ -651,7 +617,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadSettings() {
         int power = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-                .getInt(KEY_OUTPUT_POWER, 20);
+                .getInt(KEY_OUTPUT_POWER, 1);
         sbOutputPower.setProgress(power);
         tvOutputPowerValue.setText(power + " dBm");
     }
@@ -777,12 +743,23 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Scan helpers ──────────────────────────────────────────────────────
 
-    private void startScan() {
+    private void startLupaScan() {
         if (mReader == null) return;
-        mScanContext = SCAN_CTX_TAG;
+        mScanContext = SCAN_CTX_LUPA;
         mInventorying = true;
-        btnScan.setText("⏹  ZASTAVIT");
-        btnScan.setBackgroundTintList(
+        btnScanLupa.setText("⏹  ZASTAVIT");
+        btnScanLupa.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(colorRes(R.color.err)));
+        setStatus("● Skenování...", colorRes(R.color.primary));
+        startInventory();
+    }
+
+    private void startCsvScan() {
+        if (mReader == null) return;
+        mScanContext = SCAN_CTX_LUPA_CSV;
+        mInventorying = true;
+        btnScanCsv.setText("⏹  ZASTAVIT");
+        btnScanCsv.setBackgroundTintList(
                 android.content.res.ColorStateList.valueOf(colorRes(R.color.err)));
         setStatus("● Skenování...", colorRes(R.color.primary));
         startInventory();
@@ -804,16 +781,34 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void callback(UHFTAGInfo tag) {
                 if (tag == null) return;
-                String epc = tag.getEPC();
-                String tid = tag.getTid();
                 mHandler.post(() -> {
-                    if (mScanContext == SCAN_CTX_GROUP) onGroupTagFound(epc, tid);
-                    else onTagFound(epc, tid);
+                    if (mScanContext == SCAN_CTX_GROUP) {
+                        onGroupTagFound(tag.getEPC(), tag.getTid());
+                    } else if (mScanContext == SCAN_CTX_LUPA) {
+                        onLupaTagFound(tag);
+                    } else {
+                        onCsvTagFound(tag.getEPC(), tag.getTid());
+                    }
                 });
             }
         });
-        mReader.setEPCAndTIDMode();
+        if (mScanContext == SCAN_CTX_LUPA) {
+            try {
+                mReader.setEPCAndTIDUserMode(0, 32);
+            } catch (Exception e) {
+                Log.w(TAG, "setEPCAndTIDUserMode: " + e.getMessage());
+                mReader.setEPCAndTIDMode();
+            }
+        } else {
+            mReader.setEPCAndTIDMode();
+        }
         mReader.startInventoryTag();
+    }
+
+    private void resetScanButton(Button btn) {
+        btn.setText("📡  SKENOVAT TAG");
+        btn.setBackgroundTintList(
+                android.content.res.ColorStateList.valueOf(colorRes(R.color.primary)));
     }
 
     private void stopScan() {
@@ -824,39 +819,49 @@ public class MainActivity extends AppCompatActivity {
             btnGroupScan.setText("📡  NAČÍST TAG");
             btnGroupScan.setBackgroundTintList(
                     android.content.res.ColorStateList.valueOf(colorRes(R.color.step_pending)));
-        } else {
-            btnScan.setText("📡  SKENOVAT TAG");
-            btnScan.setBackgroundTintList(
-                    android.content.res.ColorStateList.valueOf(colorRes(R.color.primary)));
+        } else if (mScanContext == SCAN_CTX_LUPA) {
+            resetScanButton(btnScanLupa);
+        } else if (mScanContext == SCAN_CTX_LUPA_CSV) {
+            resetScanButton(btnScanCsv);
         }
         setStatus("● Připojeno — Chainway C5", colorRes(R.color.success));
     }
 
-    // ── Tag found — Tab 0 context ─────────────────────────────────────────
+    // ── Tag found — Lupa (chip info) ──────────────────────────────────────
 
-    private void onTagFound(String epc, String tid) {
+    private void onLupaTagFound(UHFTAGInfo tag) {
+        stopScan();
+        String epcStr = tag.getEPC() != null ? tag.getEPC() : "";
+        String tidStr = tag.getTid() != null ? tag.getTid() : "";
+        mLastTid = tidStr;
+        tvScanEpc.setText(epcStr.isEmpty() ? "— žádné EPC —" : epcStr);
+        tvScanTid.setText(tidStr.isEmpty() ? "— žádné TID —" : tidStr);
+
+        displayChipInfoPlaceholder("Načítám data z čipu…");
+
+        new Thread(() -> {
+            java.util.LinkedHashMap<String, String> info = collectChipInfo(tag, epcStr, tidStr);
+            mHandler.post(() -> displayChipInfo(info));
+        }).start();
+    }
+
+    // ── Tag found — Lupa .CSV ─────────────────────────────────────────────
+
+    private void onCsvTagFound(String epc, String tid) {
         stopScan();
         String epcStr = epc != null ? epc : "";
         String tidStr = tid != null ? tid : "";
         mLastTid = tidStr;
         tvScanEpc.setText(epcStr.isEmpty() ? "— žádné EPC —" : epcStr);
         tvScanTid.setText(tidStr.isEmpty() ? "— žádné TID —" : tidStr);
-        if (mRecordMode) {
-            savePair(epcStr, tidStr);
+
+        tvReadEpc.setText(epcStr.isEmpty() ? "—" : formatHexWithDashes(epcStr));
+        tvReadTid.setText(tidStr.isEmpty() ? "—" : formatHexWithDashes(tidStr));
+
+        if (!tidStr.isEmpty() && !mLupaCsvData.isEmpty()) {
+            lookupAndDisplayFromCsv(tidStr);
         } else {
-            tvReadEpc.setText(epcStr.isEmpty() ? "—" : formatHexWithDashes(epcStr));
-            tvReadTid.setText(tidStr.isEmpty() ? "—" : formatHexWithDashes(tidStr));
-            if (mAutoLoadIdRfid && epcStr.length() >= 8) {
-                String last8 = epcStr.substring(epcStr.length() - 8);
-                String stripped = last8.replaceFirst("^0+", "");
-                if (stripped.isEmpty()) stripped = "0";
-                etChipNum.setText(stripped);
-            }
-            if (!tidStr.isEmpty() && !mLupaCsvData.isEmpty()) {
-                lookupAndDisplayFromCsv(tidStr);
-            } else {
-                llLupaGroups.setVisibility(View.GONE);
-            }
+            llLupaGroups.setVisibility(View.GONE);
         }
     }
 
@@ -1094,7 +1099,6 @@ public class MainActivity extends AppCompatActivity {
                 next = incrementMergedIdRfid(g5 + g6);
                 etWrtGroups[4].setText(next.substring(0, 4));
                 etWrtGroups[5].setText(next.substring(4, 8));
-                syncChipNumFromMergedIdRfid(next);
             } else {
                 try { next = String.format("%04X", (Integer.parseInt(val, 16) + 1) & 0xFFFF); }
                 catch (NumberFormatException e) { next = "0001"; }
@@ -1125,11 +1129,6 @@ public class MainActivity extends AppCompatActivity {
         try { n = Long.parseLong(val); } catch (NumberFormatException e) { n = 0; }
         n = (n + 1) % 100_000_000L;
         return String.format("%08d", n);
-    }
-
-    private void syncChipNumFromMergedIdRfid(String merged) {
-        String display = merged.replaceFirst("^0+", "");
-        etChipNum.setText(display.isEmpty() ? "0" : display);
     }
 
     private void loadWrtGroupSettings() {
@@ -1556,11 +1555,9 @@ public class MainActivity extends AppCompatActivity {
             next = incrementMergedIdRfid(g5 + g6);
             etGroups[4].setText(next.substring(0, 4));
             etGroups[5].setText(next.substring(4, 8));
-            syncChipNumFromMergedIdRfid(next);
             return;
         } else if (isGroupPresetMode() && i == 6) {
             next = incrementMergedIdRfid(val);
-            syncChipNumFromMergedIdRfid(next);
         } else if (isGroupPresetMode() && i == 5) {
             int cur;
             try { cur = Integer.parseInt(val); } catch (NumberFormatException e) { cur = 0; }
@@ -1870,144 +1867,178 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) { Log.e(TAG, "saveGroup: " + e.getMessage()); }
     }
 
-    // ── Page 0 record management ──────────────────────────────────────────
+    // ── Chip info (Lupa tab) ──────────────────────────────────────────────
 
-    private void setRecordMode(boolean record) {
-        mRecordMode = record;
-        int active = colorRes(R.color.primary), inactive = colorRes(R.color.step_pending);
-        btnModeRecord.setBackgroundTintList(android.content.res.ColorStateList.valueOf(record ? active : inactive));
-        btnModeRead.setBackgroundTintList(android.content.res.ColorStateList.valueOf(record ? inactive : active));
-        int rv = record ? View.VISIBLE : View.GONE;
-        llStats.setVisibility(rv); llListHeader.setVisibility(rv); svRecords.setVisibility(rv);
-        llReadResult.setVisibility(record ? View.GONE : View.VISIBLE);
-        llLupaFileInput.setVisibility(record ? View.GONE : View.VISIBLE);
-        if (record) llLupaGroups.setVisibility(View.GONE);
+    private void displayChipInfoPlaceholder(String message) {
+        if (llChipInfoContainer == null) return;
+        llChipInfoContainer.removeAllViews();
+        TextView tv = new TextView(this);
+        tv.setText(message);
+        tv.setTextColor(colorRes(R.color.text_muted));
+        tv.setTextSize(14);
+        tv.setGravity(android.view.Gravity.CENTER);
+        tv.setPadding(0, (int) (48 * getResources().getDisplayMetrics().density), 0, 0);
+        llChipInfoContainer.addView(tv);
     }
 
-    private void savePair(String epc, String tid) {
-        String chipNum = etChipNum.getText().toString().trim();
-        String time    = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        boolean complete = !epc.isEmpty() && !tid.isEmpty();
-        boolean isDup = false; ScanRecord dupRecord = null;
-        if (!epc.isEmpty()) for (ScanRecord r : mRecords) if (epc.equals(r.epc)) { isDup = true; dupRecord = r; break; }
-        if (!isDup && !tid.isEmpty()) for (ScanRecord r : mRecords) if (tid.equals(r.tid)) { isDup = true; dupRecord = r; break; }
-        ScanRecord rec = new ScanRecord();
-        rec.seq = mRecords.size() + 1; rec.num = chipNum; rec.epc = epc;
-        rec.tid = tid; rec.time = time; rec.complete = complete; rec.dup = isDup;
-        mRecords.add(rec);
-        try { int n = Integer.parseInt(chipNum); String nx = String.valueOf(n+1); etChipNum.setText(nx); etChipNum.setSelection(nx.length()); } catch (NumberFormatException ignored) {}
-        toast(isDup ? "⚠️ Duplikát" : complete ? "✅ #" + rec.seq + " uložen" : "⚠️ #" + rec.seq + " — chybí data");
-        saveRecords(); renderRecordList(); updateStats();
-    }
+    private void displayChipInfo(java.util.LinkedHashMap<String, String> info) {
+        if (llChipInfoContainer == null) return;
+        llChipInfoContainer.removeAllViews();
+        float density = getResources().getDisplayMetrics().density;
+        int pad = (int) (12 * density);
+        int margin = (int) (8 * density);
 
-    private void deleteRecord(int index) {
-        if (index < 0 || index >= mRecords.size()) return;
-        mRecords.remove(index);
-        for (int i = 0; i < mRecords.size(); i++) mRecords.get(i).seq = i + 1;
-        saveRecords(); renderRecordList(); updateStats();
-    }
+        for (java.util.Map.Entry<String, String> entry : info.entrySet()) {
+            com.google.android.material.card.MaterialCardView card =
+                    new com.google.android.material.card.MaterialCardView(this);
+            LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            cardLp.bottomMargin = margin;
+            card.setLayoutParams(cardLp);
+            card.setCardBackgroundColor(colorRes(R.color.summary_bg));
+            card.setRadius(10 * density);
+            card.setStrokeColor(colorRes(R.color.divider));
+            card.setStrokeWidth((int) density);
+            card.setCardElevation(0);
 
-    private void clearAll() {
-        if (mRecords.isEmpty()) return;
-        new AlertDialog.Builder(this).setTitle("Smazat záznamy?")
-                .setMessage("Opravdu smazat všech " + mRecords.size() + " záznamů?")
-                .setPositiveButton("Smazat", (d, w) -> { mRecords.clear(); saveRecords(); renderRecordList(); updateStats(); })
-                .setNegativeButton("Zrušit", null).show();
-    }
+            LinearLayout inner = new LinearLayout(this);
+            inner.setOrientation(LinearLayout.VERTICAL);
+            inner.setPadding(pad, pad, pad, pad);
 
-    private void renderRecordList() {
-        while (llRecords.getChildCount() > 1) llRecords.removeViewAt(1);
-        if (mRecords.isEmpty()) { llEmptyState.setVisibility(View.VISIBLE); return; }
-        llEmptyState.setVisibility(View.GONE);
-        LayoutInflater inf = LayoutInflater.from(this);
-        for (int i = mRecords.size() - 1; i >= 0; i--) {
-            ScanRecord r = mRecords.get(i);
-            View row = inf.inflate(R.layout.item_scan_record, llRecords, false);
-            ((TextView) row.findViewById(R.id.tvItemSeq)).setText(String.valueOf(r.seq));
-            ((TextView) row.findViewById(R.id.tvItemNum)).setText(r.num.isEmpty() ? "—" : r.num);
-            ((TextView) row.findViewById(R.id.tvItemTime)).setText(r.time);
-            ((TextView) row.findViewById(R.id.tvItemDup)).setText(r.dup ? "⚠ DUP" : "");
-            TextView tvE = row.findViewById(R.id.tvItemEpc);
-            tvE.setText(r.epc.isEmpty() ? "—" : r.epc);
-            tvE.setTextColor(r.epc.isEmpty() ? colorRes(R.color.accent_stroke) : colorRes(R.color.primary));
-            TextView tvT = row.findViewById(R.id.tvItemTid);
-            tvT.setText(r.tid.isEmpty() ? "—" : r.tid);
-            tvT.setTextColor(r.tid.isEmpty() ? colorRes(R.color.accent_stroke) : colorRes(R.color.success));
-            row.setBackgroundColor(r.dup ? colorRes(R.color.dup_row_bg) : colorRes(R.color.card));
-            View div = new View(this);
-            div.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
-            div.setBackgroundColor(colorRes(R.color.border));
-            final int oi = i;
-            row.findViewById(R.id.btnItemDel).setOnClickListener(v -> deleteRecord(oi));
-            llRecords.addView(row); llRecords.addView(div);
+            TextView lbl = new TextView(this);
+            lbl.setText(entry.getKey());
+            lbl.setTextColor(colorRes(R.color.text_muted));
+            lbl.setTextSize(9);
+            lbl.setTypeface(null, android.graphics.Typeface.BOLD);
+            lbl.setLetterSpacing(0.08f);
+            inner.addView(lbl);
+
+            TextView val = new TextView(this);
+            val.setText(entry.getValue() != null ? entry.getValue() : "—");
+            val.setTextColor(colorRes(R.color.primary));
+            val.setTextSize(isLongValue(entry.getKey()) ? 13 : 16);
+            val.setTypeface(android.graphics.Typeface.MONOSPACE);
+            val.setPadding(0, (int) (4 * density), 0, 0);
+            if ("TID".equals(entry.getKey()) || entry.getKey().startsWith("Chip")
+                    || "Typ čipu".equals(entry.getKey())) {
+                val.setTextColor(colorRes(R.color.success));
+            }
+            inner.addView(val);
+            card.addView(inner);
+            llChipInfoContainer.addView(card);
         }
-        svRecords.post(() -> svRecords.scrollTo(0, 0));
     }
 
-    private void updateStats() {
-        int ok = 0;
-        for (ScanRecord r : mRecords) if (r.complete) ok++;
-        tvStatPairs.setText(String.valueOf(mRecords.size()));
-        tvStatOk.setText(String.valueOf(ok));
-        tvStatBad.setText(String.valueOf(mRecords.size() - ok));
+    private boolean isLongValue(String key) {
+        return key.contains("USER") || key.contains("RESERVED") || key.contains("EPC bank")
+                || key.contains("password") || key.contains("hex");
     }
 
-    private void saveRecords() {
-        try {
-            JSONArray arr = new JSONArray();
-            for (ScanRecord r : mRecords) {
-                JSONObject o = new JSONObject();
-                o.put("seq",r.seq);o.put("num",r.num);o.put("epc",r.epc);o.put("tid",r.tid);
-                o.put("time",r.time);o.put("complete",r.complete);o.put("dup",r.dup);arr.put(o);
+    private java.util.LinkedHashMap<String, String> collectChipInfo(UHFTAGInfo tag, String epc, String tid) {
+        java.util.LinkedHashMap<String, String> info = new java.util.LinkedHashMap<>();
+        info.put("EPC", epc.isEmpty() ? "—" : formatHexWithDashes(epc));
+        info.put("TID", tid.isEmpty() ? "—" : formatHexWithDashes(tid));
+
+        com.rscja.deviceapi.entity.UHFTAGInfo.ChipInfo chipInfo = tag.getChipInfo();
+        if (chipInfo != null) {
+            String factory = chipInfo.getFactory();
+            String chipType = chipInfo.getChipType();
+            if (factory != null && !factory.isEmpty()) info.put("Výrobce", factory);
+            if (chipType != null && !chipType.isEmpty()) info.put("Typ čipu", chipType);
+        }
+
+        String chipModel = decodeTidChipModel(tid);
+        if (!chipModel.isEmpty()) info.put("Chip (TID)", chipModel);
+
+        String pc = tag.getPc();
+        if (pc != null && !pc.isEmpty()) info.put("PC (Protocol Control)", formatHexWithDashes(pc));
+
+        String rssi = tag.getRssi();
+        if (rssi != null && !rssi.isEmpty()) info.put("RSSI", rssi + " dBm");
+
+        String ant = tag.getAnt();
+        if (ant != null && !ant.isEmpty()) info.put("Anténa", ant);
+
+        if (tag.getCount() > 0) info.put("Počet čtení", String.valueOf(tag.getCount()));
+        if (tag.getPhase() != 0) info.put("Fáze", String.valueOf(tag.getPhase()));
+        if (tag.getRemain() != 0) info.put("Zbývá slov", String.valueOf(tag.getRemain()));
+        if (tag.getFrequencyPoint() > 0) info.put("Frekvence", tag.getFrequencyPoint() + " MHz");
+
+        if (!epc.isEmpty()) {
+            int epcBits = epc.length() * 4;
+            int epcWords = (epc.length() + 3) / 4;
+            info.put("EPC délka", epcBits + " bit (" + epcWords + " slov)");
+        }
+
+        String user = tag.getUser();
+        if (user == null || user.isEmpty()) user = readTagBank(epc, 3, 0, 32);
+        info.put("USER", (user != null && !user.isEmpty()) ? formatHexWithDashes(user) : "—");
+
+        String reserved = tag.getReserved();
+        if (reserved == null || reserved.isEmpty()) reserved = readTagBank(epc, 0, 0, 4);
+        if (reserved != null && !reserved.isEmpty()) {
+            info.put("RESERVED (raw)", formatHexWithDashes(reserved));
+            if (reserved.length() >= 8) {
+                info.put("Kill password", formatHexWithDashes(reserved.substring(0, 8)));
             }
-            getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_RECORDS, arr.toString()).apply();
-        } catch (Exception e) { Log.e(TAG, "saveRec: "+e.getMessage()); }
-    }
-
-    private static final String KEY_RECORDS = "records";
-
-    private void loadRecords() {
-        try {
-            String json = getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_RECORDS, "[]");
-            JSONArray arr = new JSONArray(json); mRecords.clear();
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.getJSONObject(i); ScanRecord r = new ScanRecord();
-                r.seq=o.getInt("seq");r.num=o.getString("num");r.epc=o.getString("epc");
-                r.tid=o.getString("tid");r.time=o.getString("time");
-                r.complete=o.getBoolean("complete");r.dup=o.getBoolean("dup");mRecords.add(r);
+            if (reserved.length() >= 16) {
+                info.put("Access password", formatHexWithDashes(reserved.substring(8, 16)));
             }
-            if (!mRecords.isEmpty()) {
-                try { int n=Integer.parseInt(mRecords.get(mRecords.size()-1).num); String nx=String.valueOf(n+1); etChipNum.setText(nx); etChipNum.setSelection(nx.length()); } catch (NumberFormatException ignored) {}
+        }
+
+        if (!epc.isEmpty() && mReader != null) {
+            int epcWords = Math.max(6, (epc.length() + 3) / 4);
+            String epcBank = readTagBank(epc, 1, 0, epcWords + 2);
+            if (epcBank != null && !epcBank.isEmpty()) {
+                info.put("EPC bank (raw)", formatHexWithDashes(epcBank));
             }
-        } catch (Exception e) { Log.e(TAG, "loadRec: "+e.getMessage()); }
+        }
+
+        return info;
     }
 
-    private void exportCsv() {
-        if (mRecords.isEmpty()) { toast("Žádné záznamy!"); return; }
-        StringBuilder sb = new StringBuilder("\uFEFF"); sb.append("Seq;ID_RFID;EPC;TID;Stav;Cas\n");
-        for (ScanRecord r : mRecords)
-            sb.append(r.seq).append(";").append(escCsv(r.num)).append(";")
-              .append(escCsv(formatHexWithDashes(r.epc))).append(";")
-              .append(escCsv(formatHexWithDashes(r.tid))).append(";")
-              .append(r.complete?"OK":"NEUPLNE").append(";").append(escCsv(r.time)).append("\n");
+    private String readTagBank(String epc, int bank, int ptr, int wordCount) {
+        if (mReader == null || epc == null || epc.isEmpty() || wordCount <= 0) return null;
         try {
-            String stamp=new SimpleDateFormat("yyyyMMdd_HHmm",Locale.getDefault()).format(new Date());
-            File dir=getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
-            if(dir==null)dir=getFilesDir(); if(!dir.exists())dir.mkdirs();
-            File file=new File(dir,"rfid_"+stamp+".csv");
-            try(FileOutputStream fos=new FileOutputStream(file)){fos.write(sb.toString().getBytes("UTF-8"));}
-            toast("✅ CSV: "+file.getName());
-        } catch (Exception e) { toast("Chyba: "+e.getMessage()); }
+            return mReader.readData("00000000", bank, ptr, wordCount, epc, 0, 0, 0);
+        } catch (Exception e) {
+            try {
+                return mReader.readData("00000000", bank, ptr, wordCount);
+            } catch (Exception e2) {
+                Log.w(TAG, "readData bank=" + bank + ": " + e2.getMessage());
+                return null;
+            }
+        }
     }
 
-    private void copyRecords() {
-        if (mRecords.isEmpty()) { toast("Žádné záznamy!"); return; }
-        StringBuilder sb=new StringBuilder("Seq\tID_RFID\tEPC\tTID\tStav\tCas\n");
-        for (ScanRecord r : mRecords)
-            sb.append(r.seq).append("\t").append(r.num).append("\t").append(r.epc).append("\t")
-              .append(r.tid).append("\t").append(r.complete?"OK":"NEUPLNE").append("\t").append(r.time).append("\n");
-        ClipboardManager cm=(ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-        if(cm!=null){cm.setPrimaryClip(ClipData.newPlainText("RFID",sb.toString()));toast("📋 Zkopírováno");}
+    private String decodeTidChipModel(String tid) {
+        if (tid == null || tid.length() < 4) return "";
+        String t = tid.toUpperCase(Locale.ROOT);
+        if (!t.startsWith("E2")) return "Neznámý (TID: " + t.substring(0, Math.min(8, t.length())) + "…)";
+
+        if (t.length() >= 10) {
+            String modelKey = t.substring(4, 10);
+            switch (modelKey) {
+                case "003407": return "Impinj Monza 4D";
+                case "003408": return "Impinj Monza 4E";
+                case "003409": return "Impinj Monza 4QT";
+                case "003412": return "Impinj Monza 5";
+                case "003413": return "Impinj Monza 5";
+                case "003414": return "Impinj Monza 5";
+                case "689400": return "NXP UCODE 7";
+                case "689401": return "NXP UCODE 7m";
+                case "689402": return "NXP UCODE 7xm";
+                case "689403": return "NXP UCODE 7xm-2K";
+                case "689404": return "NXP UCODE 8";
+                case "689405": return "NXP UCODE 8m";
+                case "689406": return "NXP UCODE 8";
+                case "689407": return "NXP UCODE 9";
+                default:
+                    return "EPC Gen2 (model " + modelKey + ")";
+            }
+        }
+        return "EPC Gen2";
     }
 
     // ── Page 3: Zápis hesla / Zamčení ────────────────────────────────────

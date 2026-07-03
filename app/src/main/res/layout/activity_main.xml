@@ -100,7 +100,7 @@
                 android:layout_weight="1"
                 android:min="1"
                 android:max="30"
-                android:progress="20"
+                android:progress="1"
                 android:progressTint="@color/primary"
                 android:thumbTint="@color/primary"/>
 
@@ -108,7 +108,7 @@
                 android:id="@+id/tvOutputPowerValue"
                 android:layout_width="54dp"
                 android:layout_height="wrap_content"
-                android:text="20 dBm"
+                android:text="1 dBm"
                 android:textColor="@color/primary"
                 android:textSize="13sp"
                 android:textStyle="bold"
@@ -116,6 +116,15 @@
                 android:layout_marginStart="8dp"/>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvAppVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Verze —"
+            android:textColor="@color/text_muted"
+            android:textSize="11sp"
+            android:paddingTop="10dp"/>
 
     </LinearLayout>
 
@@ -135,14 +144,19 @@
         app:tabSelectedTextColor="@color/primary"
         app:tabIndicatorColor="@color/primary"
         app:tabIndicatorHeight="3dp"
-        app:tabMode="fixed"
-        app:tabGravity="fill"
+        app:tabMode="scrollable"
+        app:tabGravity="start"
         app:tabTextAppearance="@android:style/TextAppearance.Small">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ČTENÍ"/>
+            android:text="🔍 LUPA"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LUPA .CSV"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -168,143 +182,17 @@
         android:layout_weight="1">
 
         <!-- ══════════════════════════════════════════════════════════════════
-             PAGE 0 — Načítání tagů
+             PAGE 0 — Lupa (info o čipu)
              ══════════════════════════════════════════════════════════════ -->
         <LinearLayout
-            android:id="@+id/pageTag"
+            android:id="@+id/pageLupa"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="visible">
 
-            <!-- ── Chip bar + mode toggle ────────────────────────────────── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@color/bg"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:gravity="center_vertical">
-
-                <!-- ID_RFID bordered input box -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"
-                    android:background="@drawable/chip_bar_bg"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ID_RFID:"
-                        android:textColor="@color/vyhybka_accent"
-                        android:textStyle="bold"
-                        android:textSize="12sp"
-                        android:letterSpacing="0.03"
-                        android:layout_marginEnd="6dp"/>
-
-                    <EditText
-                        android:id="@+id/etChipNum"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="405"
-                        android:textColorHint="@color/text_muted"
-                        android:textColor="@color/vyhybka_accent"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:fontFamily="monospace"
-                        android:inputType="number"
-                        android:background="@null"
-                        android:textAlignment="center"/>
-
-                    <Button
-                        android:id="@+id/btnToggleChipNum"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:text="🚫"
-                        android:textSize="14sp"
-                        android:backgroundTint="@android:color/transparent"
-                        android:padding="0dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"
-                        android:insetLeft="0dp"
-                        android:insetRight="0dp"/>
-
-                </LinearLayout>
-
-                <!-- Mode buttons -->
-                <Button
-                    android:id="@+id/btnModeRecord"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:text="📝"
-                    android:textSize="16sp"
-                    android:backgroundTint="@color/step_pending"
-                    android:layout_marginStart="8dp"
-                    android:padding="0dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"/>
-
-                <Button
-                    android:id="@+id/btnModeRead"
-                    android:layout_width="38dp"
-                    android:layout_height="38dp"
-                    android:text="🔍"
-                    android:textSize="16sp"
-                    android:backgroundTint="@color/primary"
-                    android:layout_marginStart="5dp"
-                    android:padding="0dp"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:insetLeft="0dp"
-                    android:insetRight="0dp"/>
-
-            </LinearLayout>
-
-            <!-- scan preview — hidden, values still updated in code -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tvScanEpc"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="— čekám —"
-                    android:textColor="@color/primary"
-                    android:textSize="13sp"
-                    android:fontFamily="monospace"/>
-
-                <TextView
-                    android:id="@+id/tvScanTid"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="— čekám —"
-                    android:textColor="@color/success"
-                    android:textSize="13sp"
-                    android:fontFamily="monospace"/>
-
-            </LinearLayout>
-
-            <!-- Scan button – no card frame, consistent with other tabs -->
             <Button
-                android:id="@+id/btnScan"
+                android:id="@+id/btnScanLupa"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:layout_marginStart="10dp"
@@ -319,7 +207,61 @@
                 android:insetTop="0dp"
                 android:insetBottom="0dp"/>
 
-            <!-- ── Lupa: CSV vstupní soubor (visible in lupa mode) ──────────── -->
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/llChipInfoContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Přibližte tag ke čtečce a spusťte skenování.\nZobrazí se EPC, TID, USER a další technické údaje."
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.4"
+                        android:paddingTop="24dp"
+                        android:paddingBottom="24dp"/>
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </LinearLayout>
+
+        <!-- ══════════════════════════════════════════════════════════════════
+             PAGE 1 — Lupa .CSV
+             ══════════════════════════════════════════════════════════════ -->
+        <LinearLayout
+            android:id="@+id/pageLupaCsv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btnScanCsv"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="8dp"
+                android:text="📡  SKENOVAT TAG"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_on_primary"
+                android:backgroundTint="@color/primary"
+                android:enabled="false"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"/>
+
             <LinearLayout
                 android:id="@+id/llLupaFileInput"
                 android:layout_width="match_parent"
@@ -332,8 +274,7 @@
                 android:paddingBottom="8dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginTop="6dp"
-                android:visibility="visible">
+                android:layout_marginTop="6dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -393,232 +334,11 @@
 
             </LinearLayout>
 
-            <!-- ── Stats bar (record mode) ───────────────────────────────── -->
-            <LinearLayout
-                android:id="@+id/llStats"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="7dp"
-                android:paddingBottom="2dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@color/card"
-                    android:padding="8dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/tvStatPairs"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/primary"
-                        android:textSize="22sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="PÁRŮ"
-                        android:textColor="@color/text_muted"
-                        android:textSize="9sp"
-                        android:letterSpacing="0.05"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@color/card"
-                    android:padding="8dp"
-                    android:gravity="center"
-                    android:layout_marginStart="4dp">
-
-                    <TextView
-                        android:id="@+id/tvStatOk"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/success"
-                        android:textSize="22sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="KOMPLETNÍ"
-                        android:textColor="@color/text_muted"
-                        android:textSize="9sp"
-                        android:letterSpacing="0.05"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:background="@color/card"
-                    android:padding="8dp"
-                    android:gravity="center"
-                    android:layout_marginStart="4dp">
-
-                    <TextView
-                        android:id="@+id/tvStatBad"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="@color/accent_stroke"
-                        android:textSize="22sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="NEÚPLNÉ"
-                        android:textColor="@color/text_muted"
-                        android:textSize="9sp"
-                        android:letterSpacing="0.05"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ── List header (record mode) ─────────────────────────────── -->
-            <LinearLayout
-                android:id="@+id/llListHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="10dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="3dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ZÁZNAMY"
-                    android:textColor="@color/text_muted"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.07"
-                    android:paddingBottom="4dp"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <Button
-                        android:id="@+id/btnCopyRecords"
-                        android:layout_width="0dp"
-                        android:layout_height="34dp"
-                        android:layout_weight="1"
-                        android:text="📋 Kopírovat"
-                        android:textSize="11sp"
-                        android:textColor="@color/text"
-                        android:backgroundTint="@color/border"
-                        android:layout_marginEnd="4dp"
-                        android:padding="0dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"/>
-
-                    <Button
-                        android:id="@+id/btnExportCsv"
-                        android:layout_width="0dp"
-                        android:layout_height="34dp"
-                        android:layout_weight="1"
-                        android:text="📊 CSV"
-                        android:textSize="11sp"
-                        android:textColor="@color/white"
-                        android:backgroundTint="@color/primary"
-                        android:layout_marginEnd="4dp"
-                        android:padding="0dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"/>
-
-                    <Button
-                        android:id="@+id/btnClearAll"
-                        android:layout_width="0dp"
-                        android:layout_height="34dp"
-                        android:layout_weight="1"
-                        android:text="🗑 Smazat"
-                        android:textSize="11sp"
-                        android:textColor="@color/error_runtime"
-                        android:backgroundTint="@color/accent_container"
-                        android:padding="0dp"
-                        android:insetTop="0dp"
-                        android:insetBottom="0dp"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ── Records scroll list (record mode) ─────────────────────── -->
-            <ScrollView
-                android:id="@+id/svRecords"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:background="@color/bg"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:id="@+id/llRecords"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- Empty state -->
-                    <LinearLayout
-                        android:id="@+id/llEmptyState"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:padding="24dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="📡"
-                            android:textSize="28sp"
-                            android:layout_marginBottom="8dp"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Žádné záznamy.\nZadejte ID_RFID a skenujte."
-                            android:textColor="@color/text_muted"
-                            android:textSize="12sp"
-                            android:gravity="center"
-                            android:lineSpacingMultiplier="1.4"/>
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </ScrollView>
-
-            <!-- ── Read mode result (visible by default — lupa is default mode) -->
             <ScrollView
                 android:id="@+id/llReadResult"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:visibility="visible">
+                android:layout_weight="1">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -703,7 +423,6 @@
 
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- ── CSV lookup groups (hidden until match found) ──── -->
                     <LinearLayout
                         android:id="@+id/llLupaGroups"
                         android:layout_width="match_parent"
@@ -735,8 +454,31 @@
 
         </LinearLayout>
 
+        <!-- hidden scan preview — values updated from code -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvScanEpc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="— čekám —"/>
+
+            <TextView
+                android:id="@+id/tvScanTid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="— čekám —"/>
+
+        </LinearLayout>
+
         <!-- ══════════════════════════════════════════════════════════════════
-             PAGE 1 — Zápis EPC
+             PAGE 2 — Zápis EPC
              ══════════════════════════════════════════════════════════════ -->
         <ScrollView
             android:id="@+id/pageWriteEpc"
