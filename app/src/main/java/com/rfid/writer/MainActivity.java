@@ -777,32 +777,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startInventory() {
-        mReader.setInventoryCallback(new IUHFInventoryCallback() {
-            @Override
-            public void callback(UHFTAGInfo tag) {
-                if (tag == null) return;
-                mHandler.post(() -> {
-                    if (mScanContext == SCAN_CTX_GROUP) {
-                        onGroupTagFound(tag.getEPC(), tag.getTid());
-                    } else if (mScanContext == SCAN_CTX_LUPA) {
-                        onLupaTagFound(tag);
-                    } else {
-                        onCsvTagFound(tag.getEPC(), tag.getTid());
+        final int ctx = mScanContext;
+        new Thread(() -> {
+            try {
+                mReader.setInventoryCallback(new IUHFInventoryCallback() {
+                    @Override
+                    public void callback(UHFTAGInfo tag) {
+                        if (tag == null) return;
+                        mHandler.post(() -> {
+                            if (mScanContext == SCAN_CTX_GROUP) {
+                                onGroupTagFound(tag.getEPC(), tag.getTid());
+                            } else if (mScanContext == SCAN_CTX_LUPA) {
+                                onLupaTagFound(tag);
+                            } else {
+                                onCsvTagFound(tag.getEPC(), tag.getTid());
+                            }
+                        });
                     }
                 });
-            }
-        });
-        if (mScanContext == SCAN_CTX_LUPA) {
-            try {
-                mReader.setEPCAndTIDUserMode(0, 32);
-            } catch (Exception e) {
-                Log.w(TAG, "setEPCAndTIDUserMode: " + e.getMessage());
+                // USER bank is read after scan via readTagBank() in collectChipInfo().
+                // setEPCAndTIDUserMode() breaks inventory on Chainway C5.
                 mReader.setEPCAndTIDMode();
+                boolean started = mReader.startInventoryTag();
+                if (!started) {
+                    mHandler.post(() -> onInventoryStartFailed(ctx));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "startInventory: " + e.getMessage());
+                mHandler.post(() -> onInventoryStartFailed(ctx));
             }
+        }).start();
+    }
+
+    private void onInventoryStartFailed(int ctx) {
+        if (!mInventorying) return;
+        mInventorying = false;
+        if (ctx == SCAN_CTX_GROUP) {
+            btnGroupScan.setText("📡  NAČÍST TAG");
+            btnGroupScan.setBackgroundTintList(
+                    android.content.res.ColorStateList.valueOf(colorRes(R.color.step_pending)));
+        } else if (ctx == SCAN_CTX_LUPA) {
+            resetScanButton(btnScanLupa);
         } else {
-            mReader.setEPCAndTIDMode();
+            resetScanButton(btnScanCsv);
         }
-        mReader.startInventoryTag();
+        setStatus("● Skenování selhalo", colorRes(R.color.err));
+        toast("Nepodařilo se spustit skenování");
     }
 
     private void resetScanButton(Button btn) {
