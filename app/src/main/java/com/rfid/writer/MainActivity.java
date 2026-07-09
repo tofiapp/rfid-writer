@@ -1941,7 +1941,7 @@ public class MainActivity extends AppCompatActivity {
             val.setTypeface(android.graphics.Typeface.MONOSPACE);
             val.setPadding(0, (int) (4 * density), 0, 0);
             if ("TID".equals(entry.getKey()) || entry.getKey().startsWith("Chip")
-                    || "Typ čipu".equals(entry.getKey())) {
+                    || "Typ čipu".equals(entry.getKey()) || "Výrobce".equals(entry.getKey())) {
                 val.setTextColor(colorRes(R.color.success));
             }
             inner.addView(val);
@@ -1960,16 +1960,31 @@ public class MainActivity extends AppCompatActivity {
         info.put("EPC", epc.isEmpty() ? "—" : formatHexWithDashes(epc));
         info.put("TID", tid.isEmpty() ? "—" : formatHexWithDashes(tid));
 
+        String manufacturer = decodeTidManufacturer(tid);
+        String chipModel = decodeTidChipModel(tid);
+        String memory = decodeTidMemorySize(tid, chipModel);
+
+        if (!manufacturer.isEmpty()) info.put("Výrobce", manufacturer);
+
         com.rscja.deviceapi.entity.UHFTAGInfo.ChipInfo chipInfo = tag.getChipInfo();
         if (chipInfo != null) {
             String factory = chipInfo.getFactory();
             String chipType = chipInfo.getChipType();
-            if (factory != null && !factory.isEmpty()) info.put("Výrobce", factory);
-            if (chipType != null && !chipType.isEmpty()) info.put("Typ čipu", chipType);
+            if (factory != null && !factory.isEmpty()
+                    && (manufacturer.isEmpty() || !manufacturerMatches(manufacturer, factory))) {
+                info.put("Výrobce (SDK)", factory);
+            }
+            if (chipModel.isEmpty() && chipType != null && !chipType.isEmpty()) {
+                info.put("Typ čipu", chipType);
+            }
         }
 
-        String chipModel = decodeTidChipModel(tid);
-        if (!chipModel.isEmpty()) info.put("Chip (TID)", chipModel);
+        if (!chipModel.isEmpty()) info.put("Typ čipu", chipModel);
+        if (!memory.isEmpty()) info.put("Paměť EPC", memory);
+
+        if (!tid.isEmpty() && tid.toUpperCase(Locale.ROOT).startsWith("E2")) {
+            info.put("Protokol", "EPC Gen2 (ISO 18000-6C)");
+        }
 
         String pc = tag.getPc();
         if (pc != null && !pc.isEmpty()) info.put("PC (Protocol Control)", formatHexWithDashes(pc));
@@ -2032,10 +2047,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean manufacturerMatches(String tidBased, String sdk) {
+        if (sdk == null || sdk.isEmpty()) return true;
+        String a = tidBased.toLowerCase(Locale.ROOT);
+        String b = sdk.toLowerCase(Locale.ROOT);
+        return a.equals(b) || a.contains(b) || b.contains(a);
+    }
+
+    /** ISO/IEC 15963 Tag Mask Manufacturer ID decoded from TID bytes 1–2. */
+    private String decodeTidManufacturer(String tid) {
+        if (tid == null || tid.length() < 6) return "";
+        String t = tid.toUpperCase(Locale.ROOT);
+        if (!t.startsWith("E2")) return "";
+        String mdid = t.substring(2, 6);
+        switch (mdid) {
+            case "0034": return "Impinj";
+            case "8068": return "NXP Semiconductors";
+            case "0016": return "NXP Semiconductors";
+            case "8011": return "Alien Technology";
+            case "8014": return "Alien Technology";
+            case "0060": return "Kiloway";
+            case "0041": return "Avery Dennison";
+            case "8020": return "ams AG";
+            case "8069": return "EM Microelectronic";
+            case "0050": return "Quanray Electronics";
+            case "0033": return "Atmel";
+            case "0042": return "Confidex";
+            case "8010": return "Intelleflex";
+            default:
+                return "Neznámý (MDID " + mdid + ")";
+        }
+    }
+
     private String decodeTidChipModel(String tid) {
         if (tid == null || tid.length() < 4) return "";
         String t = tid.toUpperCase(Locale.ROOT);
-        if (!t.startsWith("E2")) return "Neznámý (TID: " + t.substring(0, Math.min(8, t.length())) + "…)";
+        if (!t.startsWith("E2")) {
+            return "Neznámý (TID: " + t.substring(0, Math.min(8, t.length())) + "…)";
+        }
 
         if (t.length() >= 10) {
             String modelKey = t.substring(4, 10);
@@ -2046,6 +2095,10 @@ public class MainActivity extends AppCompatActivity {
                 case "003412": return "Impinj Monza 5";
                 case "003413": return "Impinj Monza 5";
                 case "003414": return "Impinj Monza 5";
+                case "003415": return "Impinj Monza R6";
+                case "003416": return "Impinj Monza R6-P";
+                case "003417": return "Impinj M730";
+                case "003418": return "Impinj M750";
                 case "689400": return "NXP UCODE 7";
                 case "689401": return "NXP UCODE 7m";
                 case "689402": return "NXP UCODE 7xm";
@@ -2054,11 +2107,32 @@ public class MainActivity extends AppCompatActivity {
                 case "689405": return "NXP UCODE 8m";
                 case "689406": return "NXP UCODE 8";
                 case "689407": return "NXP UCODE 9";
+                case "689408": return "NXP UCODE 8 / 9";
+                case "801101": return "Alien Higgs-3";
+                case "801102": return "Alien Higgs-4";
+                case "801103": return "Alien Higgs-EC";
+                case "006000": return "Kiloway KX";
                 default:
                     return "EPC Gen2 (model " + modelKey + ")";
             }
         }
         return "EPC Gen2";
+    }
+
+    private String decodeTidMemorySize(String tid, String chipModel) {
+        if (chipModel == null || chipModel.isEmpty()) return "";
+        if (chipModel.contains("UCODE 7xm-2K")) return "240 bit EPC";
+        if (chipModel.contains("UCODE 8m")) return "128 bit EPC";
+        if (chipModel.contains("UCODE 9")) return "128 bit EPC";
+        if (chipModel.contains("UCODE 8")) return "128 bit EPC";
+        if (chipModel.contains("UCODE 7")) return "128 bit EPC";
+        if (chipModel.contains("Monza 4")) return "128 bit EPC";
+        if (chipModel.contains("Monza 5")) return "128 bit EPC";
+        if (chipModel.contains("Monza R6")) return "128 bit EPC";
+        if (chipModel.contains("M730") || chipModel.contains("M750")) return "128 bit EPC";
+        if (chipModel.contains("Higgs-3")) return "96 bit EPC";
+        if (chipModel.contains("Higgs-4") || chipModel.contains("Higgs-EC")) return "128 bit EPC";
+        return "";
     }
 
     // ── Page 3: Zápis hesla / Zamčení ────────────────────────────────────

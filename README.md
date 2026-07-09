@@ -33,6 +33,11 @@ Nahrajte tyto soubory do složky `app/libs/` ve vašem repozitáři:
 - V nastavení C5 povolte "Instalace z neznámých zdrojů"
 - Otevřete APK a nainstalujte
 
+### Aktualizace (bez odinstalace)
+- Každé nové APK má vyšší `versionCode` — stačí ho nainstalovat přes starší verzi
+- Všechna APK z tohoto repozitáře jsou podepsána stejným klíčem (`keystore/rfid-writer-release.jks`)
+- Pokud jste dříve instalovali APK z jiného zdroje (jiný podpis), je potřeba **jednorázově** odinstalovat starou verzi a nainstalovat znovu; další updaty pak půjdou normálně
+
 ## Použití
 
 1. Otevřete app → čeká na inicializaci SDK

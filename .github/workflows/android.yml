@@ -27,17 +27,6 @@ jobs:
           unzip -q gradle-8.4-bin.zip
           echo "$PWD/gradle-8.4/bin" >> $GITHUB_PATH
 
-      - name: Create debug keystore
-        run: |
-          mkdir -p ~/.android
-          keytool -genkeypair -v \
-            -keystore ~/.android/debug.keystore \
-            -alias androiddebugkey \
-            -keyalg RSA -keysize 2048 \
-            -validity 10000 \
-            -storepass android -keypass android \
-            -dname "CN=Android Debug,O=Android,C=US"
-
       - name: Build APK
         run: gradle assembleRelease --stacktrace
 

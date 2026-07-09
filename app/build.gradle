@@ -10,8 +10,8 @@ android {
         applicationId "com.rfid.writer"
         minSdk 26
         targetSdk 34
-        versionCode 3
-        versionName "1.2.0"
+        versionCode 4
+        versionName "1.2.1"
     }
 
     buildFeatures {
@@ -19,17 +19,26 @@ android {
     }
 
     signingConfigs {
+        release {
+            storeFile file("../keystore/rfid-writer-release.jks")
+            storePassword "rfidwriter"
+            keyAlias "rfidwriter"
+            keyPassword "rfidwriter"
+        }
         debug {
-            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+            storeFile file("../keystore/rfid-writer-release.jks")
+            storePassword "rfidwriter"
+            keyAlias "rfidwriter"
+            keyPassword "rfidwriter"
         }
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
             signingConfig signingConfigs.debug
         }
     }
