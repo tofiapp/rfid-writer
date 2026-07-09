@@ -179,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
     private String  mGroupOutputFile = null;
     private int     mGroupRecordCount = 0;
     private String  mLastTid         = "";
+    private int     mLupaScanSeq     = 0;
+    private final Object mReaderLock = new Object();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -784,18 +786,28 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void callback(UHFTAGInfo tag) {
                         if (tag == null) return;
+                        // Snapshot strings immediately — SDK reuses UHFTAGInfo across callbacks.
+                        final String epc = normalizeHex(tag.getEPC());
+                        final String tid = normalizeHex(tag.getTid());
+                        final String pc = tag.getPc();
+                        final String rssi = tag.getRssi();
+                        final String ant = tag.getAnt();
+                        final int count = tag.getCount();
+                        final int phase = tag.getPhase();
+                        final int remain = tag.getRemain();
+                        final int frequency = tag.getFrequencyPoint();
                         mHandler.post(() -> {
                             if (mScanContext == SCAN_CTX_GROUP) {
-                                onGroupTagFound(tag.getEPC(), tag.getTid());
+                                onGroupTagFound(epc, tid);
                             } else if (mScanContext == SCAN_CTX_LUPA) {
-                                onLupaTagFound(tag);
+                                onLupaTagFound(epc, tid, pc, rssi, ant, count, phase, remain, frequency);
                             } else {
-                                onCsvTagFound(tag.getEPC(), tag.getTid());
+                                onCsvTagFound(epc, tid);
                             }
                         });
                     }
                 });
-                // USER bank is read after scan via readTagBank() in collectChipInfo().
+                // Banks are read after scan via readTagBankFiltered() in loadChipInfoFromTag().
                 // setEPCAndTIDUserMode() breaks inventory on Chainway C5.
                 mReader.setEPCAndTIDMode();
                 boolean started = mReader.startInventoryTag();
@@ -849,10 +861,10 @@ public class MainActivity extends AppCompatActivity {
 
     // ── Tag found — Lupa (chip info) ──────────────────────────────────────
 
-    private void onLupaTagFound(UHFTAGInfo tag) {
+    private void onLupaTagFound(String epcStr, String tidStr, String pc, String rssi, String ant,
+                                int count, int phase, int remain, int frequency) {
         stopScan();
-        String epcStr = tag.getEPC() != null ? tag.getEPC() : "";
-        String tidStr = tag.getTid() != null ? tag.getTid() : "";
+        final int scanSeq = ++mLupaScanSeq;
         mLastTid = tidStr;
         tvScanEpc.setText(epcStr.isEmpty() ? "— žádné EPC —" : epcStr);
         tvScanTid.setText(tidStr.isEmpty() ? "— žádné TID —" : tidStr);
@@ -860,8 +872,13 @@ public class MainActivity extends AppCompatActivity {
         displayChipInfoPlaceholder("Načítám data z čipu…");
 
         new Thread(() -> {
-            java.util.LinkedHashMap<String, String> info = collectChipInfo(tag, epcStr, tidStr);
-            mHandler.post(() -> displayChipInfo(info));
+            java.util.LinkedHashMap<String, String> info = loadChipInfoFromTag(
+                    scanSeq, epcStr, tidStr, pc, rssi, ant, count, phase, remain, frequency);
+            if (info == null) return;
+            mHandler.post(() -> {
+                if (scanSeq != mLupaScanSeq) return;
+                displayChipInfo(info);
+            });
         }).start();
     }
 
@@ -1955,7 +1972,38 @@ public class MainActivity extends AppCompatActivity {
                 || key.contains("password") || key.contains("hex");
     }
 
-    private java.util.LinkedHashMap<String, String> collectChipInfo(UHFTAGInfo tag, String epc, String tid) {
+    private java.util.LinkedHashMap<String, String> loadChipInfoFromTag(
+            int scanSeq, String epc, String tidFromInventory, String pc, String rssi, String ant,
+            int count, int phase, int remain, int frequency) {
+        if (scanSeq != mLupaScanSeq) return null;
+
+        synchronized (mReaderLock) {
+            if (mReader != null) {
+                try {
+                    mReader.stopInventory();
+                } catch (Exception e) {
+                    Log.w(TAG, "stopInventory before chip read: " + e.getMessage());
+                }
+            }
+
+            if (scanSeq != mLupaScanSeq) return null;
+
+            // Read TID bank directly from the selected tag — inventory TID can be stale/reused by SDK.
+            String tid = tidFromInventory;
+            if (!epc.isEmpty()) {
+                String tidBank = readTagBankFiltered(epc, 2, 0, 8);
+                if (tidBank != null && !tidBank.isEmpty()) {
+                    tid = tidBank;
+                }
+            }
+
+            return collectChipInfo(epc, tid, pc, rssi, ant, count, phase, remain, frequency);
+        }
+    }
+
+    private java.util.LinkedHashMap<String, String> collectChipInfo(
+            String epc, String tid, String pc, String rssi, String ant,
+            int count, int phase, int remain, int frequency) {
         java.util.LinkedHashMap<String, String> info = new java.util.LinkedHashMap<>();
         info.put("EPC", epc.isEmpty() ? "—" : formatHexWithDashes(epc));
         info.put("TID", tid.isEmpty() ? "—" : formatHexWithDashes(tid));
@@ -1965,20 +2013,6 @@ public class MainActivity extends AppCompatActivity {
         String memory = decodeTidMemorySize(tid, chipModel);
 
         if (!manufacturer.isEmpty()) info.put("Výrobce", manufacturer);
-
-        com.rscja.deviceapi.entity.UHFTAGInfo.ChipInfo chipInfo = tag.getChipInfo();
-        if (chipInfo != null) {
-            String factory = chipInfo.getFactory();
-            String chipType = chipInfo.getChipType();
-            if (factory != null && !factory.isEmpty()
-                    && (manufacturer.isEmpty() || !manufacturerMatches(manufacturer, factory))) {
-                info.put("Výrobce (SDK)", factory);
-            }
-            if (chipModel.isEmpty() && chipType != null && !chipType.isEmpty()) {
-                info.put("Typ čipu", chipType);
-            }
-        }
-
         if (!chipModel.isEmpty()) info.put("Typ čipu", chipModel);
         if (!memory.isEmpty()) info.put("Paměť EPC", memory);
 
@@ -1986,19 +2020,21 @@ public class MainActivity extends AppCompatActivity {
             info.put("Protokol", "EPC Gen2 (ISO 18000-6C)");
         }
 
-        String pc = tag.getPc();
-        if (pc != null && !pc.isEmpty()) info.put("PC (Protocol Control)", formatHexWithDashes(pc));
+        if (pc != null && !pc.isEmpty()) {
+            info.put("PC (Protocol Control)", formatHexWithDashes(pc));
+        } else if (!epc.isEmpty()) {
+            String epcBankHead = readTagBankFiltered(epc, 1, 0, 1);
+            if (epcBankHead != null && !epcBankHead.isEmpty()) {
+                info.put("PC (Protocol Control)", formatHexWithDashes(epcBankHead));
+            }
+        }
 
-        String rssi = tag.getRssi();
         if (rssi != null && !rssi.isEmpty()) info.put("RSSI", rssi + " dBm");
-
-        String ant = tag.getAnt();
         if (ant != null && !ant.isEmpty()) info.put("Anténa", ant);
-
-        if (tag.getCount() > 0) info.put("Počet čtení", String.valueOf(tag.getCount()));
-        if (tag.getPhase() != 0) info.put("Fáze", String.valueOf(tag.getPhase()));
-        if (tag.getRemain() != 0) info.put("Zbývá slov", String.valueOf(tag.getRemain()));
-        if (tag.getFrequencyPoint() > 0) info.put("Frekvence", tag.getFrequencyPoint() + " MHz");
+        if (count > 0) info.put("Počet čtení", String.valueOf(count));
+        if (phase != 0) info.put("Fáze", String.valueOf(phase));
+        if (remain != 0) info.put("Zbývá slov", String.valueOf(remain));
+        if (frequency > 0) info.put("Frekvence", frequency + " MHz");
 
         if (!epc.isEmpty()) {
             int epcBits = epc.length() * 4;
@@ -2006,12 +2042,10 @@ public class MainActivity extends AppCompatActivity {
             info.put("EPC délka", epcBits + " bit (" + epcWords + " slov)");
         }
 
-        String user = tag.getUser();
-        if (user == null || user.isEmpty()) user = readTagBank(epc, 3, 0, 32);
+        String user = !epc.isEmpty() ? readTagBankFiltered(epc, 3, 0, 32) : null;
         info.put("USER", (user != null && !user.isEmpty()) ? formatHexWithDashes(user) : "—");
 
-        String reserved = tag.getReserved();
-        if (reserved == null || reserved.isEmpty()) reserved = readTagBank(epc, 0, 0, 4);
+        String reserved = !epc.isEmpty() ? readTagBankFiltered(epc, 0, 0, 4) : null;
         if (reserved != null && !reserved.isEmpty()) {
             info.put("RESERVED (raw)", formatHexWithDashes(reserved));
             if (reserved.length() >= 8) {
@@ -2024,7 +2058,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!epc.isEmpty() && mReader != null) {
             int epcWords = Math.max(6, (epc.length() + 3) / 4);
-            String epcBank = readTagBank(epc, 1, 0, epcWords + 2);
+            String epcBank = readTagBankFiltered(epc, 1, 0, epcWords + 2);
             if (epcBank != null && !epcBank.isEmpty()) {
                 info.put("EPC bank (raw)", formatHexWithDashes(epcBank));
             }
@@ -2033,28 +2067,21 @@ public class MainActivity extends AppCompatActivity {
         return info;
     }
 
-    private String readTagBank(String epc, int bank, int ptr, int wordCount) {
+    private String readTagBankFiltered(String epc, int bank, int ptr, int wordCount) {
         if (mReader == null || epc == null || epc.isEmpty() || wordCount <= 0) return null;
         try {
-            return mReader.readData("00000000", bank, ptr, wordCount, epc, 0, 0, 0);
+            String data = mReader.readData("00000000", bank, ptr, wordCount, epc, 0, 0, 0);
+            return normalizeHex(data);
         } catch (Exception e) {
-            try {
-                return mReader.readData("00000000", bank, ptr, wordCount);
-            } catch (Exception e2) {
-                Log.w(TAG, "readData bank=" + bank + ": " + e2.getMessage());
-                return null;
-            }
+            Log.w(TAG, "readData bank=" + bank + " epc=" + epc + ": " + e.getMessage());
+            return null;
         }
     }
 
-    private boolean manufacturerMatches(String tidBased, String sdk) {
-        if (sdk == null || sdk.isEmpty()) return true;
-        String a = tidBased.toLowerCase(Locale.ROOT);
-        String b = sdk.toLowerCase(Locale.ROOT);
-        return a.equals(b) || a.contains(b) || b.contains(a);
+    private String normalizeHex(String hex) {
+        if (hex == null) return "";
+        return hex.replace("-", "").replace(" ", "").toUpperCase(Locale.ROOT);
     }
-
-    /** ISO/IEC 15963 Tag Mask Manufacturer ID decoded from TID bytes 1–2. */
     private String decodeTidManufacturer(String tid) {
         if (tid == null || tid.length() < 6) return "";
         String t = tid.toUpperCase(Locale.ROOT);
