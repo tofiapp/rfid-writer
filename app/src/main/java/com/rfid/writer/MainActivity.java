@@ -797,7 +797,7 @@ public class MainActivity extends AppCompatActivity {
                         final int count = tag.getCount();
                         final int phase = tag.getPhase();
                         final int remain = tag.getRemain();
-                        final int frequency = tag.getFrequencyPoint();
+                        final float frequency = tag.getFrequencyPoint();
                         mHandler.post(() -> {
                             if (mScanContext == SCAN_CTX_GROUP) {
                                 onGroupTagFound(epc, tid);
@@ -864,7 +864,7 @@ public class MainActivity extends AppCompatActivity {
     // ── Tag found — Lupa (chip info) ──────────────────────────────────────
 
     private void onLupaTagFound(String epcStr, String tidStr, String pc, String rssi, String ant,
-                                int count, int phase, int remain, int frequency) {
+                                int count, int phase, int remain, float frequency) {
         long now = System.currentTimeMillis();
         if (!epcStr.isEmpty() && epcStr.equals(mLastLupaEpc) && tidStr.equals(mLastTid)
                 && (now - mLastLupaScanMs) < 400) {
@@ -1992,7 +1992,7 @@ public class MainActivity extends AppCompatActivity {
 
     private java.util.LinkedHashMap<String, String> loadChipInfoFromTag(
             int scanSeq, String epc, String tidFromInventory, String pc, String rssi, String ant,
-            int count, int phase, int remain, int frequency) {
+            int count, int phase, int remain, float frequency) {
         if (scanSeq != mLupaScanSeq) return null;
 
         synchronized (mReaderLock) {
@@ -2020,7 +2020,7 @@ public class MainActivity extends AppCompatActivity {
 
     private java.util.LinkedHashMap<String, String> collectChipInfo(
             String epc, String tid, String pc, String rssi, String ant,
-            int count, int phase, int remain, int frequency, boolean readBanks) {
+            int count, int phase, int remain, float frequency, boolean readBanks) {
         java.util.LinkedHashMap<String, String> info = new java.util.LinkedHashMap<>();
         info.put("EPC", epc.isEmpty() ? "—" : formatHexWithDashes(epc));
         info.put("TID", tid.isEmpty() ? "—" : formatHexWithDashes(tid));
@@ -2051,7 +2051,11 @@ public class MainActivity extends AppCompatActivity {
         if (count > 0) info.put("Počet čtení", String.valueOf(count));
         if (phase != 0) info.put("Fáze", String.valueOf(phase));
         if (remain != 0) info.put("Zbývá slov", String.valueOf(remain));
-        if (frequency > 0) info.put("Frekvence", frequency + " MHz");
+        if (frequency > 0) {
+            String freqStr = (frequency == Math.floor(frequency))
+                    ? String.valueOf((int) frequency) : String.valueOf(frequency);
+            info.put("Frekvence", freqStr + " MHz");
+        }
 
         if (!epc.isEmpty()) {
             int epcBits = epc.length() * 4;
