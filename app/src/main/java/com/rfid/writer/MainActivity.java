@@ -180,6 +180,8 @@ public class MainActivity extends AppCompatActivity {
     private int     mGroupRecordCount = 0;
     private String  mLastTid         = "";
     private int     mLupaScanSeq     = 0;
+    private String  mLastLupaEpc     = "";
+    private long    mLastLupaScanMs  = 0;
     private final Object mReaderLock = new Object();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -863,22 +865,38 @@ public class MainActivity extends AppCompatActivity {
 
     private void onLupaTagFound(String epcStr, String tidStr, String pc, String rssi, String ant,
                                 int count, int phase, int remain, int frequency) {
+        long now = System.currentTimeMillis();
+        if (!epcStr.isEmpty() && epcStr.equals(mLastLupaEpc) && tidStr.equals(mLastTid)
+                && (now - mLastLupaScanMs) < 400) {
+            return;
+        }
+        mLastLupaEpc = epcStr;
+        mLastLupaScanMs = now;
+
         stopScan();
         final int scanSeq = ++mLupaScanSeq;
         mLastTid = tidStr;
         tvScanEpc.setText(epcStr.isEmpty() ? "— žádné EPC —" : epcStr);
         tvScanTid.setText(tidStr.isEmpty() ? "— žádné TID —" : tidStr);
 
-        displayChipInfoPlaceholder("Načítám data z čipu…");
+        displayChipInfo(collectChipInfo(
+                epcStr, tidStr, pc, rssi, ant, count, phase, remain, frequency, false));
 
         new Thread(() -> {
-            java.util.LinkedHashMap<String, String> info = loadChipInfoFromTag(
-                    scanSeq, epcStr, tidStr, pc, rssi, ant, count, phase, remain, frequency);
-            if (info == null) return;
-            mHandler.post(() -> {
-                if (scanSeq != mLupaScanSeq) return;
-                displayChipInfo(info);
-            });
+            try {
+                java.util.LinkedHashMap<String, String> info = loadChipInfoFromTag(
+                        scanSeq, epcStr, tidStr, pc, rssi, ant, count, phase, remain, frequency);
+                mHandler.post(() -> {
+                    if (scanSeq != mLupaScanSeq) return;
+                    if (info != null) displayChipInfo(info);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "loadChipInfoFromTag: " + e.getMessage(), e);
+                mHandler.post(() -> {
+                    if (scanSeq != mLupaScanSeq) return;
+                    toast("Nepodařilo se načíst detaily z čipu");
+                });
+            }
         }).start();
     }
 
@@ -1985,25 +2003,24 @@ public class MainActivity extends AppCompatActivity {
                     Log.w(TAG, "stopInventory before chip read: " + e.getMessage());
                 }
             }
-
-            if (scanSeq != mLupaScanSeq) return null;
-
-            // Read TID bank directly from the selected tag — inventory TID can be stale/reused by SDK.
-            String tid = tidFromInventory;
-            if (!epc.isEmpty()) {
-                String tidBank = readTagBankFiltered(epc, 2, 0, 8);
-                if (tidBank != null && !tidBank.isEmpty()) {
-                    tid = tidBank;
-                }
-            }
-
-            return collectChipInfo(epc, tid, pc, rssi, ant, count, phase, remain, frequency);
         }
+
+        if (scanSeq != mLupaScanSeq) return null;
+
+        String tid = tidFromInventory;
+        if (!epc.isEmpty()) {
+            String tidBank = readTagBankFiltered(epc, 2, 0, 6);
+            if (tidBank != null && !tidBank.isEmpty()) {
+                tid = trimTidBank(tidBank);
+            }
+        }
+
+        return collectChipInfo(epc, tid, pc, rssi, ant, count, phase, remain, frequency, true);
     }
 
     private java.util.LinkedHashMap<String, String> collectChipInfo(
             String epc, String tid, String pc, String rssi, String ant,
-            int count, int phase, int remain, int frequency) {
+            int count, int phase, int remain, int frequency, boolean readBanks) {
         java.util.LinkedHashMap<String, String> info = new java.util.LinkedHashMap<>();
         info.put("EPC", epc.isEmpty() ? "—" : formatHexWithDashes(epc));
         info.put("TID", tid.isEmpty() ? "—" : formatHexWithDashes(tid));
@@ -2022,7 +2039,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (pc != null && !pc.isEmpty()) {
             info.put("PC (Protocol Control)", formatHexWithDashes(pc));
-        } else if (!epc.isEmpty()) {
+        } else if (readBanks && !epc.isEmpty()) {
             String epcBankHead = readTagBankFiltered(epc, 1, 0, 1);
             if (epcBankHead != null && !epcBankHead.isEmpty()) {
                 info.put("PC (Protocol Control)", formatHexWithDashes(epcBankHead));
@@ -2042,40 +2059,60 @@ public class MainActivity extends AppCompatActivity {
             info.put("EPC délka", epcBits + " bit (" + epcWords + " slov)");
         }
 
-        String user = !epc.isEmpty() ? readTagBankFiltered(epc, 3, 0, 32) : null;
-        info.put("USER", (user != null && !user.isEmpty()) ? formatHexWithDashes(user) : "—");
+        if (readBanks && !epc.isEmpty()) {
+            String user = readTagBankFiltered(epc, 3, 0, 32);
+            info.put("USER", (user != null && !user.isEmpty()) ? formatHexWithDashes(user) : "—");
 
-        String reserved = !epc.isEmpty() ? readTagBankFiltered(epc, 0, 0, 4) : null;
-        if (reserved != null && !reserved.isEmpty()) {
-            info.put("RESERVED (raw)", formatHexWithDashes(reserved));
-            if (reserved.length() >= 8) {
-                info.put("Kill password", formatHexWithDashes(reserved.substring(0, 8)));
+            String reserved = readTagBankFiltered(epc, 0, 0, 4);
+            if (reserved != null && !reserved.isEmpty()) {
+                info.put("RESERVED (raw)", formatHexWithDashes(reserved));
+                if (reserved.length() >= 8) {
+                    info.put("Kill password", formatHexWithDashes(reserved.substring(0, 8)));
+                }
+                if (reserved.length() >= 16) {
+                    info.put("Access password", formatHexWithDashes(reserved.substring(8, 16)));
+                }
             }
-            if (reserved.length() >= 16) {
-                info.put("Access password", formatHexWithDashes(reserved.substring(8, 16)));
-            }
-        }
 
-        if (!epc.isEmpty() && mReader != null) {
-            int epcWords = Math.max(6, (epc.length() + 3) / 4);
-            String epcBank = readTagBankFiltered(epc, 1, 0, epcWords + 2);
-            if (epcBank != null && !epcBank.isEmpty()) {
-                info.put("EPC bank (raw)", formatHexWithDashes(epcBank));
+            if (mReader != null) {
+                int epcWords = Math.max(6, (epc.length() + 3) / 4);
+                String epcBank = readTagBankFiltered(epc, 1, 0, epcWords + 2);
+                if (epcBank != null && !epcBank.isEmpty()) {
+                    info.put("EPC bank (raw)", formatHexWithDashes(epcBank));
+                }
             }
         }
 
         return info;
     }
 
+    private String trimTidBank(String tidBank) {
+        String t = normalizeHex(tidBank);
+        if (t.length() <= 24) return t;
+        int end = t.length();
+        while (end > 16 && end >= 2 && t.charAt(end - 1) == '0' && t.charAt(end - 2) == '0') {
+            end -= 2;
+        }
+        return t.substring(0, end);
+    }
+
     private String readTagBankFiltered(String epc, int bank, int ptr, int wordCount) {
         if (mReader == null || epc == null || epc.isEmpty() || wordCount <= 0) return null;
-        try {
-            String data = mReader.readData("00000000", bank, ptr, wordCount, epc, 0, 0, 0);
-            return normalizeHex(data);
-        } catch (Exception e) {
-            Log.w(TAG, "readData bank=" + bank + " epc=" + epc + ": " + e.getMessage());
-            return null;
+        synchronized (mReaderLock) {
+            try {
+                String data = mReader.readData("00000000", bank, ptr, wordCount, epc, 0, 0, 0);
+                if (data != null && !data.isEmpty()) return normalizeHex(data);
+            } catch (Exception e) {
+                Log.w(TAG, "readData filtered bank=" + bank + " epc=" + epc + ": " + e.getMessage());
+            }
+            try {
+                String data = mReader.readData("00000000", bank, ptr, wordCount);
+                if (data != null && !data.isEmpty()) return normalizeHex(data);
+            } catch (Exception e) {
+                Log.w(TAG, "readData bank=" + bank + ": " + e.getMessage());
+            }
         }
+        return null;
     }
 
     private String normalizeHex(String hex) {
